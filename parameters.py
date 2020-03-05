@@ -6,8 +6,8 @@ from math import pi, pow, sin, cos
 
 # Stationary flight condition
 
-hp0    = 1      	      # pressure altitude in the stationary flight condition [m]
-V0     = 1            # true airspeed in the stationary flight condition [m/sec]
+hp0    = 1      	  # pressure altitude in the stationary flight condition [m]
+V0     = 1            # true airspeed in the stationary flight condition [m/s]
 alpha0 = 1            # angle of attack in the stationary flight condition [rad]
 th0    = 1            # pitch angle in the stationary flight condition [rad]
 
