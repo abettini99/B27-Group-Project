@@ -1,11 +1,20 @@
+"""
+Institution:    TU Delft
+Authors:        B27
+Date:           06-03-2020
+
+Dynamic Analysis of Citation II
+"""
+
+## =========== Library Imports          ===========
 from scipy.io import loadmat
 import pandas as pd
 import numpy as np
 
-# import parameters for Citation II from parameters.py
-from parameters import *
+## =========== Parameter Imports        ===========
+from parameters import *                # import parameters for Citation II from parameters.py
 
-
+## =========== Function Definitions     ===========
 def importdata(filename):
     """
         This function imports the data from the flight tests
@@ -25,9 +34,11 @@ def importdata(filename):
 
     return data
 
+## =========== Main File                ===========
 # Import flight test data from .mat-file
 data = importdata('referencedata.mat')
-
+#print("\n")
+#print(data)
 
 # Declaration of matrices and column vectors
 A = np.zeros((8,8))     # Declaration of matrix A with dimensions [8 x 8] for system of equations
@@ -102,7 +113,7 @@ Ba[3,0] = k6 * (Clda * KXZ + Cnda * KX2)
 Ba[3,1] = k6 * (Cldr * KXZ + Cndr * KX2)
 
 # Population of matrix A with matrices As and Aa
-A[0:4, 0:4] = As
-A[4:8, 4:8] = Aa
-B[0:4, 0:2] = Bs
-B[4:8, 2:8] = Ba
+A[0:3, 0:3] = As
+A[4:7, 4:7] = Aa
+B[0:3, 0:1] = Bs
+B[4:7, 2:3] = Ba
