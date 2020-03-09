@@ -38,7 +38,7 @@ def importdata(filename):
 # Import flight test data from .mat-file
 data = importdata('referencedata.mat')
 #print("\n")
-#print(data)
+# print(data)
 
 # Declaration of matrices and column vectors
 A = np.zeros((8,8))     # Declaration of matrix A with dimensions [8 x 8] for system of equations
