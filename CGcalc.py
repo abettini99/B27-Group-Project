@@ -1,29 +1,34 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from main import data
 
 df = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
-
+time_flight = data['time']
+ff_le = data['lh_engine_FMF']
+ff_re = data['rh_engine_FMF']
 def integralfuel(j):
-    dt = 0.1
-    f1 = 3
-    f2 = 1
-    I = (f2-f1)* (dt)/2. +f1*(dt)
-    return I
+    dt = time_flight[j+1] -time_flight[j]
+    f1 = ff_le[j]/3600
+    f2 = ff_le[j+1]/3600
+    f3 = ff_re[j]/3600
+    f4 = ff_re[j+1]/3600
+    I1 = (f2-f1)* (dt)/2. +f1*(dt)
+    I2 = (f4-f3)* (dt)/2. +f3*(dt)
+    return I1+I2
 
-def integral_time(time):
+def totalfuelused(time):
     j = 0    
-    dt = 0.1
-    integral_dt = 0
-    while  j< time :
+    
+    totalfuelused = 0
+    while  time_flight[j]< time :
         
         integral_dt = integralfuel(j)
-        integral_time = integral_time + integral_dt
-        j = j + dt
-        integralfuel = 0
+        totalfuelused = totalfuelused + integral_dt
+        j = j + 1
+        integral_dt = 0
     
-    return integral_time
+    return totalfuelused
 
 
 def interpolatefuel(fuel):
