@@ -111,9 +111,10 @@ Ba[2,1] = k6 * (Cldr * KZ2 + Cndr * KXZ)
 
 Ba[3,0] = k6 * (Clda * KXZ + Cnda * KX2)
 Ba[3,1] = k6 * (Cldr * KXZ + Cndr * KX2)
-
+'''
 # Population of matrix A with matrices As and Aa
 A[0:3, 0:3] = As
 A[4:7, 4:7] = Aa
 B[0:3, 0:1] = Bs
 B[4:7, 2:3] = Ba
+'''
