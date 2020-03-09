@@ -38,7 +38,7 @@ def importdata(filename):
 # Import flight test data from .mat-file
 data = importdata('referencedata.mat')
 #print("\n")
-#print(data)
+# print(data)
 
 # Declaration of matrices and column vectors
 A = np.zeros((8,8))     # Declaration of matrix A with dimensions [8 x 8] for system of equations
@@ -111,10 +111,9 @@ Ba[2,1] = k6 * (Cldr * KZ2 + Cndr * KXZ)
 
 Ba[3,0] = k6 * (Clda * KXZ + Cnda * KX2)
 Ba[3,1] = k6 * (Cldr * KXZ + Cndr * KX2)
-'''
+
 # Population of matrix A with matrices As and Aa
-A[0:3, 0:3] = As
-A[4:7, 4:7] = Aa
-B[0:3, 0:1] = Bs
-B[4:7, 2:3] = Ba
-'''
+A[0:4, 0:4] = As
+A[4:8, 4:8] = Aa
+B[0:4, 0:2] = Bs
+B[4:8, 2:4] = Ba

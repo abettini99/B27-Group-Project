@@ -38,7 +38,7 @@ def interpolatefuel(fuel):
             momentcg = df.iat[i,1] - ((df.iat[i,1] - df.iat[i-1,1])/100 )* (df.iat[i,0] - fuel)
             break
     
-    cg  = momentcg*100/fuel
-    return cg
+    
+    return momentcg
 
 
