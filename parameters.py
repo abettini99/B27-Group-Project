@@ -12,7 +12,9 @@ alpha0 = 1            # angle of attack in the stationary flight condition [rad]
 th0    = 1            # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
-m      = 1            # mass [kg]
+std_aircraft_mass = 60500 # newtons [N]
+payload_mass = 80*6 * 9.81 # newtons [N]
+m      = std_aircraft_mass + payload_mass            # newtons [N]
 
 # aerodynamic properties
 e      = 0.8            # Oswald factor [ ]
