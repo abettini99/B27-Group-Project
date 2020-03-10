@@ -10,12 +10,18 @@ fuel_moment = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 
 #-------------functions-------------------------
 
-def CGshift(Mi, CGi, Mf, moment_change):
-    CG = (Mi*CGi + moment_change)/Mf
-    
-    return CG
+#def CGshift(Mi, CGi, Mf, moment_change):
+#    CG = (Mi*CGi + moment_change)/Mf
+#    
+#    return CG
 
-def CG_MAC(CG_datum):
+def CGshift1(Mi, CGi, m, d):
+    return (Mi*CGi+ m*d)/(Mi+m)
+
+def CGshift2(M, CGi, mom_change):
+    return CGi + mom_change/M
+
+def CG_MAC(CG_datum,LEMAC, MAC ):
     CG = (CG_datum - LEMAC)/MAC *100
     return CG
 
@@ -27,7 +33,7 @@ def interpolatefuel(fuel, fuel_moment):
             break
     return momentcg
 
-def TrapArea(j):
+def TrapArea(j, time, ff_le, ff_re):
     dt = time[j+1] -time[j]
     f1 = ff_le[j]/3600
     f2 = ff_le[j+1]/3600
@@ -36,6 +42,14 @@ def TrapArea(j):
     I1 = (f2-f1)* (dt)/2. +f1*(dt)
     I2 = (f4-f3)* (dt)/2. +f3*(dt)
     return I1+I2
+
+def fuelUsed(time, ff_le, ff_re):
+    fuelUsed = {}
+    integral = 0
+    for t in time[0:48320]:
+        integral += TrapArea(time[time == t].index[0], time, ff_le, ff_re)
+        fuelUsed[t] = integral
+    return fuelUsed
 
 def CG_time(t, fuel_i, ZFM, CG_ZFM, fuelUsed):
     fuel_mass = fuel_i - fuelUsed[t]
@@ -81,11 +95,7 @@ RM = ZFM + Initial_fuel
 CG_RM = CGshift(ZFM, CG_ZFM, RM, mom_fuel)
 
 #---------Array of fuel used with time
-fuelUsed = {}
-integral = 0
-for t in time[0:48320]:
-    integral += TrapArea(time[time == t].index[0])
-    fuelUsed[t] = integral
+
     
 #----------
 
@@ -94,8 +104,9 @@ for t in time[0:48320]:
 #---Plotting----
 cgg = []
 m = []
+fuel_used =  fuelUsed(time, ff_le, ff_re)
 for t in time[:48320]:
-    cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM, fuelUsed)
+    cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
     cgg.append(cg)
     m.append(mass)
 plt.figure()
