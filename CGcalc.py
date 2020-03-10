@@ -7,7 +7,7 @@ df = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 time_flight = data['time']
 ff_le = data['lh_engine_FMF']
 ff_re = data['rh_engine_FMF']
-def integralfuel(j):
+def TrapArea(j):
     dt = time_flight[j+1] -time_flight[j]
     f1 = ff_le[j]/3600
     f2 = ff_le[j+1]/3600
@@ -23,12 +23,19 @@ def totalfuelused(time):
     totalfuelused = 0
     while  time_flight[j]< time :
         
-        integral_dt = integralfuel(j)
+        integral_dt = TrapArea(j)
         totalfuelused = totalfuelused + integral_dt
         j = j + 1
         integral_dt = 0
     
     return totalfuelused
+
+
+fuelUsed = {}
+integral = 0
+for t in time_flight[0:48320]:
+    integral += TrapArea(time_flight[time_flight == t].index[0])
+    fuelUsed[t] = integral
 
 
 def interpolatefuel(fuel):
