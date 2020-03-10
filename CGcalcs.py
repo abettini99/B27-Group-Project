@@ -15,8 +15,8 @@ fuel_moment = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 #    
 #    return CG
 
-def CGshift1(Mi, CGi, m, d):
-    return (Mi*CGi+ m*d)/(Mi+m)
+def CGshift1(Mi, CGi, Mf, mom_change):
+    return (Mi*CGi+ mom_change)/(Mf)
 
 def CGshift2(M, CGi, mom_change):
     return CGi + mom_change/M
@@ -55,7 +55,7 @@ def CG_time(t, fuel_i, ZFM, CG_ZFM, fuelUsed):
     fuel_mass = fuel_i - fuelUsed[t]
     fuel_mom = interpolatefuel(fuel_mass, fuel_moment)
     tot_mass = ZFM+ fuel_mass
-    CG = CGshift(ZFM, CG_ZFM, tot_mass, fuel_mom)
+    CG = CGshift1(ZFM, CG_ZFM, tot_mass, fuel_mom)
     
     return CG, tot_mass
 #-------------------------------
@@ -81,7 +81,7 @@ mom_PL  = sum([x_seats[i]*M_seats[i] for i in range(len(x_seats))]) + sum([x_bag
 
 #ZFW CG:
 ZFM = BEM+M_PL
-CG_ZFM = CGshift(BEM, CG_BEM, ZFM, mom_PL) 
+CG_ZFM = CGshift1(BEM, CG_BEM, ZFM, mom_PL) 
 
 #calculate ramp weight CG:
 #--Using interpolated fuel-moment chart
@@ -92,7 +92,7 @@ mom_fuel = interpolatefuel(Initial_fuel, fuel_moment)
 
 RM = ZFM + Initial_fuel
 
-CG_RM = CGshift(ZFM, CG_ZFM, RM, mom_fuel)
+CG_RM = CGshift1(ZFM, CG_ZFM, RM, mom_fuel)
 
 #---------Array of fuel used with time
 
