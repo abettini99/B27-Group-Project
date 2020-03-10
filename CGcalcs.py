@@ -26,7 +26,7 @@ def CG_MAC(CG_datum,LEMAC, MAC ):
     return CG
 
 def interpolatefuel(fuel, fuel_moment):
-    
+      
     for i in range(len(fuel_moment)):
         if fuel<= fuel_moment.iat[i,0]:
             momentcg = fuel_moment.iat[i,1] - ((fuel_moment.iat[i,1] - fuel_moment.iat[i-1,1])/100 )* (fuel_moment.iat[i,0] - fuel)
