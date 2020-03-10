@@ -26,7 +26,7 @@ def CG_MAC(CG_datum,LEMAC, MAC ):
     return CG
 
 def interpolatefuel(fuel, fuel_moment):
-    
+      
     for i in range(len(fuel_moment)):
         if fuel<= fuel_moment.iat[i,0]:
             momentcg = fuel_moment.iat[i,1] - ((fuel_moment.iat[i,1] - fuel_moment.iat[i-1,1])/100 )* (fuel_moment.iat[i,0] - fuel)
@@ -39,8 +39,8 @@ def TrapArea(j, time, ff_le, ff_re):
     f2 = ff_le[j+1]/3600
     f3 = ff_re[j]/3600
     f4 = ff_re[j+1]/3600
-    I1 = (f2-f1)* (dt)/2. +f1*(dt)
-    I2 = (f4-f3)* (dt)/2. +f3*(dt)
+    I1 = ((f2-f1)/dt)* (time[j+1]**2 - time[j]**2)/2. +f1* (time[j+1] -time[j] )
+    I2 = ((f4-f3)/dt)* (time[j+1]**2 - time[j]**2)/2. +f3* (time[j+1] -time[j] )
     return I1+I2
 
 def fuelUsed(time, ff_le, ff_re):
