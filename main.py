@@ -34,11 +34,46 @@ def importdata(filename):
 
     return data
 
-## =========== Main File                ===========
+def manouvre(flightmanouvre):
+    """
+        This function slices the dataframe into a smaller dataframe for each flight manouvre with the corresponding start and stop time
+        :filename: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
+        :return: sliced dataframe with each variable in one column
+    """
+
+    global data # declare imported .mat-data in dataframe format as global variable
+    if flightmanouvre == "phugoid":
+        time_start = 20
+        time_stop = 50
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if type = "shortperiodoscillation":
+        time_start = 20
+        time_stop = 50
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if type = "heavilydampedmotion":
+        time_start = 20
+        time_stop = 50
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if type = "spiral":
+        time_start = 20
+        time_stop = 50
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if type = "dutchroll":
+        time_start = 20
+        time_stop = 50
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+
+## ============== Main File ==============
 # Import flight test data from .mat-file
 data = importdata('referencedata.mat')
 #print("\n")
-# print(data)
+print(data)
+print(manouvre("phugoid"))
 
 # Declaration of matrices and column vectors
 A = np.zeros((8,8))         # Declaration of matrix A with dimensions [8 x 8] for system of equations
