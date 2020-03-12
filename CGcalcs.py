@@ -10,13 +10,9 @@ fuel_moment = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 
 #-------------functions-------------------------
 
-#def CGshift(Mi, CGi, Mf, moment_change):
-#    CG = (Mi*CGi + moment_change)/Mf
-#    
-#    return CG
-
 def CGshift1(Mi, CGi, Mf, mom_change):
     return (Mi*CGi+ mom_change)/(Mf)
+
 
 def CGshift2(M, CGi, mom_change):
     return CGi + mom_change/M
@@ -94,28 +90,25 @@ RM = ZFM + Initial_fuel
 
 CG_RM = CGshift1(ZFM, CG_ZFM, RM, mom_fuel)
 
-#---------Array of fuel used with time
-
-    
-#----------
-
 
 
 #---Plotting----
-cgg = []
-m = []
-fuel_used =  fuelUsed(time, ff_le, ff_re)
-for t in time[:48320]:
-    cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
-    cgg.append(cg)
-    m.append(mass)
-plt.figure()
-plt.plot(time[:48320], m)
 
-plt.figure()
-plt.plot(time[:48320],cgg)
-
-plt.show()
+if __name__ == '__main__':
+    cgg = []
+    m = []
+    fuel_used =  fuelUsed(time, ff_le, ff_re)
+    for t in time[:48320]:
+        cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
+        cgg.append(cg)
+        m.append(mass)
+    plt.figure()
+    plt.plot(time[:48320], m)
+    
+    plt.figure()
+    plt.plot(time[:48320],cgg)
+    
+    plt.show()
 
 
 
