@@ -35,15 +35,15 @@ def TrapArea(j, time, ff_le, ff_re):
     f2 = ff_le[j+1]/3600
     f3 = ff_re[j]/3600
     f4 = ff_re[j+1]/3600
-    I1 = ((f2-f1)/dt)* (time[j+1]**2 - time[j]**2)/2. +f1* (time[j+1] -time[j] )
-    I2 = ((f4-f3)/dt)* (time[j+1]**2 - time[j]**2)/2. +f3* (time[j+1] -time[j] )
+    I1 = (f1+f2)*dt/2
+    I2 = (f3+f4)*dt/2
     return I1+I2
 
 def fuelUsed(time, ff_le, ff_re):
     fuelUsed = {}
     integral = 0
-    for t in time[0:48320]:
-        integral += TrapArea(time[time == t].index[0], time, ff_le, ff_re)
+    for t in time[:len(time)-1]:
+        integral =integral + TrapArea(time[time == t].index[0], time, ff_le, ff_re)
         fuelUsed[t] = integral
     return fuelUsed
 
@@ -95,18 +95,19 @@ CG_RM = CGshift1(ZFM, CG_ZFM, RM, mom_fuel)
 #---Plotting----
 
 if __name__ == '__main__':
+    
     cgg = []
     m = []
     fuel_used =  fuelUsed(time, ff_le, ff_re)
-    for t in time[:48320]:
+    for t in time[:len(time)-1]:
         cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
         cgg.append(cg)
         m.append(mass)
     plt.figure()
-    plt.plot(time[:48320], m)
+    plt.plot(time[:len(time)-1], m)
     
     plt.figure()
-    plt.plot(time[:48320],cgg)
+    plt.plot(time[:len(time)-1],cgg)
     
     plt.show()
 
