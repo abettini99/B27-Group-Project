@@ -8,16 +8,16 @@ from math import pi, pow, sin, cos, radians
 
 # Convert Feet to metre
 def fttom(length):
-    return 0.3048*length
+	return 0.3048*length
 
 ####
 # VALUES MUST BE CHECKED AGAIN - JUST PRELIMINARY VALUES
 ####
 
-hp0    = fttom(7000)  # pressure altitude in the stationary flight condition [m]
-V0     = 145.444      # true airspeed in the stationary flight condition [m/s]
-alpha0 = radians(13.8)# angle of attack in the stationary flight condition [rad]
-th0    = radians(5)   # pitch angle in the stationary flight condition [rad]
+hp0    = fttom(7000)   # pressure altitude in the stationary flight condition [m]
+V0     = 145.444       # true airspeed in the stationary flight condition [m/s]
+alpha0 = radians(13.8) # angle of attack in the stationary flight condition [rad]
+th0    = radians(5)    # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 std_aircraft_mass = 60500                             # [N]
