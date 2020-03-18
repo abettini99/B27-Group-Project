@@ -1,4 +1,4 @@
-from math import pi, pow, sin, cos
+from math import pi, pow, sin, cos, radians
 
 # Citation 550 - Linear simulation
 
@@ -6,10 +6,18 @@ from math import pi, pow, sin, cos
 
 # Stationary flight condition
 
-hp0    = 1      	  # pressure altitude in the stationary flight condition [m]
-V0     = 1            # true airspeed in the stationary flight condition [m/s]
-alpha0 = 1            # angle of attack in the stationary flight condition [rad]
-th0    = 1            # pitch angle in the stationary flight condition [rad]
+# Convert Feet to metre
+def fttom(length):
+    return 0.3048*length
+
+####
+# VALUES MUST BE CHECKED AGAIN - JUST PRELIMINARY VALUES
+####
+
+hp0    = fttom(7000)  # pressure altitude in the stationary flight condition [m]
+V0     = 145.444      # true airspeed in the stationary flight condition [m/s]
+alpha0 = radians(13.8)# angle of attack in the stationary flight condition [rad]
+th0    = radians(5)   # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 std_aircraft_mass = 60500                             # [N]
@@ -22,7 +30,7 @@ CD0    = 0.04           # Zero lift drag coefficient [ ]
 CLa    = 5.084          # Slope of CL-alpha curve [ ]
 
 # Longitudinal stability
-Cma    = 1            # longitudinal stabilty [ ]
+Cma    = -0.5626     # longitudinal stabilty [ ]
 Cmde   = 1           # elevator effectiveness [ ]
 
 # Aircraft geometry
@@ -77,7 +85,7 @@ CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # Drag coefficient [ ]
 
 CX0    = W * sin(th0) / (0.5 * rho * V0 ** 2 * S)
 CXu    = -0.095
-CXa    = +0.47966		# Positive! (has been erroneously negative since 1993)
+CXa    = +0.47966
 CXadot = +0.08330
 CXq    = -0.28170
 CXde   = -0.03728

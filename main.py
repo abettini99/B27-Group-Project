@@ -9,13 +9,13 @@ Dynamic Analysis of Citation II
 # ==============================================================================================
 # Import Libraries
 # ==============================================================================================
-from scipy.io import loadmat        # loadmat imports a .mat file
-from numpy.linalg import inv, eig   # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
-import pandas as pd                 # package to represent arrays in dataframes
-import numpy as np
+import pandas as pd                 # package for improved data analysis through DataFrames, etc...
+import numpy as np                  # fundamental package for scientific computing
 import control.matlab as ml         # import module to emulate functionality of MATLAB
 import control as ctl               # import package for analysis and design of feedback control systems
-import matplotlib.pyplot as plt     # import module to visualise data
+import matplotlib.pyplot as plt     # package to create visualisations
+from scipy.io import loadmat        # loadmat imports a .mat file
+from numpy.linalg import inv, eig   # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 
 # ==============================================================================================
 # Import Parameters
@@ -48,29 +48,49 @@ def manouvre(flightmanouvre):
         :return: sliced dataframe with each variable in one column
     """
     global data                         # declare imported .mat-data in dataframe format as global variable
+    if flightmanouvre == "clcd":
+        time_start  = 900
+        time_stop   = 1600
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "elevatortrim":
+        time_start  = 1700
+        time_stop   = 2100
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "cgshift":
+        time_start  = 2200
+        time_stop   = 2300
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
     if flightmanouvre == "phugoid":
-        time_start  = 20
-        time_stop   = 50
+        time_start  = 2600
+        time_stop   = 2760
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "shortperiodoscillation":
-        time_start  = 20
-        time_stop   = 50
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-    if flightmanouvre == "heavilydampedmotion":
-        time_start  = 20
-        time_stop   = 50
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-    if flightmanouvre == "spiral":
-        time_start  = 20
-        time_stop   = 50
+        time_start  = 2700
+        time_stop   = 2880
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchroll":
-        time_start  = 20
-        time_stop   = 50
+        time_start  = 2800
+        time_stop   = 3000
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "dutchrollYD":
+        time_start  = 2900
+        time_stop   = 3060
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "aperroll":
+        time_start  = 3000
+        time_stop   = 3240
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "spiral":
+        time_start  = 3200
+        time_stop   = 3480
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -95,15 +115,11 @@ Ba      = np.zeros((4,4))         # Declaration of matrix Ba with dimensions [4 
 Cs      = np.zeros((4,2))         # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
 Ca      = np.zeros((4,2))         # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
 
-# FOLLOWING VARIABLES ARE NOT DEFINED IN PARAMETERS.PY
-V       = 1
-CXdt    = 1
-CZdt    = 1
-Cmdt    = 1
-
 # ==============================================================================================
 # Population of symmetric EOM matrices with variables for state-space representation
 # ==============================================================================================
+V       = 1     # [m/s] magnitude of airspeed vector
+
 As[0,0] = - 2 * muc * c / V
 
 As[1,1] = (CZadot - 2 * muc) * c / V
@@ -130,13 +146,10 @@ Bs[3,1] = -Cma
 Bs[3,3] = -Cmq
 
 Cs[0,0] = -CXde
-Cs[0,1] = -CXdt
 
 Cs[1,0] = -CZde
-Cs[1,1] = -CZdt
 
 Cs[3,0] = -Cmde
-Cs[3,1] = -Cmdt
 
 # ==============================================================================================
 # Population of asymmetric EOM matrices with variables for state-space representation
@@ -199,7 +212,7 @@ D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
 sys = ml.ss(A, B, C, D)         # create state-space system
-dt  = np.arange(0, 100, 0.1)    # create time vector with 0.1s step size
+dt  = np.arange(0, 1000, 0.1)   # create time vector with 0.1s step size
 
 # ==============================================================================================
 # Eigenvalue Analysis of matrix A
@@ -207,6 +220,10 @@ dt  = np.arange(0, 100, 0.1)    # create time vector with 0.1s step size
 ev = eig(A)         # compute eigenvalues and eigenvectors of square matrix A
 evals = ev[0]       # eigenvalues of matrix A
 evecs = ev[1]       # eigenvectors of matrix A
+
+print('=================== EIGENVALUES OF MATRIX A ===================')
+print(evals)
+print('===============================================================')
 
 # ==============================================================================================
 # Calculates responses to state-space system
@@ -305,28 +322,28 @@ for df in (step_de, impulse_de): #, initial_de, initial_dt):
     ax1[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
     ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-input2 = r'\delta_t'
-fig2, ax2 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_dt, impulse_dt): #, initial_dt):
-    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-    ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
-    ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
-    ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
-    ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
+# input2 = r'\delta_t'
+# fig2, ax2 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+# for df in (step_dt, impulse_dt): #, initial_dt):
+#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+#     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
+#     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
+#     ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
+#     ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
 
-    # Add legends to each subplot
-    ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-    ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-    ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-    ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-    ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-    ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-    ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-    ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-    ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-    ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-    ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-    ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+#     # Add legends to each subplot
+#     ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+#     ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+#     ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+#     ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+#     ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+#     ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+#     ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+#     ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+#     ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+#     ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+#     ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+#     ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 input3 = r'\delta_a'
 fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
@@ -376,11 +393,11 @@ for df in (step_da, impulse_da): #, initial_da):
 
 # Save figures for each input variable
 fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
-fig2.savefig('images/response_dt.png', dpi=300, bbox_inches='tight')
+# fig2.savefig('images/response_dt.png', dpi=300, bbox_inches='tight')
 fig3.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
 fig4.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
-# plt.show()
+plt.show()
 
 
 
