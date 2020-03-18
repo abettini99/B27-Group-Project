@@ -248,11 +248,15 @@ initial_dt = pd.concat(initial_dt, axis=1)
 initial_da = pd.concat(initial_da, axis=1)
 initial_dr = pd.concat(initial_dr, axis=1)
 
-forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
-# X0 = np.
-for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
-    t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
-    # print(y)
+# ==============================================================================================
+# ==============================================================================================
+# FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
+# ==============================================================================================
+# ==============================================================================================
+# forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
+# X0 = np.zeros((4,2000))
+# for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
+    # t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
     # df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
     # df.append(df2)                                              # append DataFrame to individual list
 
@@ -261,6 +265,9 @@ for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over a
 # forced_dt = pd.concat(forced_dt, axis=1)
 # forced_da = pd.concat(forced_da, axis=1)
 # forced_dr = pd.concat(forced_dr, axis=1)
+# ==============================================================================================
+# FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
+# ==============================================================================================
 
 # print(outputs, step_dr)
 # # for i in range(0, 1):
@@ -279,8 +286,6 @@ for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over a
 # # print(temp)
 # # plt.plot(t, temp)
 # # plt.show()
-
-rint(outputs[i])
 
 # # print(step_de)
 # # print(step_de)
