@@ -12,9 +12,9 @@ alpha0 = 1            # angle of attack in the stationary flight condition [rad]
 th0    = 1            # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
-std_aircraft_mass = 60500 # newtons [N]
-payload_mass = 80*6 * 9.81 # newtons [N]
-m      = std_aircraft_mass + payload_mass            # newtons [N]
+std_aircraft_mass = 60500                             # [N]
+payload_mass      = 80*6 * 9.81                       # [N]
+m                 = std_aircraft_mass + payload_mass  # [N]
 
 # aerodynamic properties
 e      = 0.8            # Oswald factor [ ]
@@ -23,7 +23,7 @@ CLa    = 5.084          # Slope of CL-alpha curve [ ]
 
 # Longitudinal stability
 Cma    = 1            # longitudinal stabilty [ ]
-Cmde   = 1            # elevator effectiveness [ ]
+Cmde   = 1           # elevator effectiveness [ ]
 
 # Aircraft geometry
 
@@ -76,7 +76,7 @@ CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # Drag coefficient [ ]
 # Stabiblity derivatives
 
 CX0    = W * sin(th0) / (0.5 * rho * V0 ** 2 * S)
-CXu    = -0.02792
+CXu    = -0.095
 CXa    = +0.47966		# Positive! (has been erroneously negative since 1993)
 CXadot = +0.08330
 CXq    = -0.28170
