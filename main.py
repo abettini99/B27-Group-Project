@@ -49,15 +49,9 @@ def manouvre(flightmanouvre):
     """
     global data                         # declare imported .mat-data in dataframe format as global variable
     if flightmanouvre == "phugoid":
-<<<<<<< HEAD
         time_start  = 20
         time_stop   = 50
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-=======
-        time_start = 2000
-        time_stop = 3000
-        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
->>>>>>> origin/master
         return data
     if flightmanouvre == "shortperiodoscillation":
         time_start  = 20
@@ -276,6 +270,17 @@ for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over a
 # #     print(outputs[i])
 # #     outputs[i] = outputs[i].append(df, ignore_index = True)
 # #     print(outputs[i])
+
+# # print(step_de)
+# # print(step_de)
+# # print(step_dt)
+# # temp, t = ml.step(sys, dt, X0, input=3)
+
+# # print(temp)
+# # plt.plot(t, temp)
+# # plt.show()
+
+rint(outputs[i])
 
 # # print(step_de)
 # # print(step_de)
