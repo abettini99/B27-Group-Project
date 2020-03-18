@@ -49,9 +49,15 @@ def manouvre(flightmanouvre):
     """
     global data                         # declare imported .mat-data in dataframe format as global variable
     if flightmanouvre == "phugoid":
+<<<<<<< HEAD
         time_start  = 20
         time_stop   = 50
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+=======
+        time_start = 2000
+        time_stop = 3000
+        data = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+>>>>>>> origin/master
         return data
     if flightmanouvre == "shortperiodoscillation":
         time_start  = 20
