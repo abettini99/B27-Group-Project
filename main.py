@@ -9,13 +9,13 @@ Dynamic Analysis of Citation II
 # ==============================================================================================
 # Import Libraries
 # ==============================================================================================
-from scipy.io import loadmat    # loadmat imports a .mat file
-from numpy.linalg import inv    # inv computes the inverse of a matrix
-import pandas as pd             # package to represent arrays in dataframes
+from scipy.io import loadmat        # loadmat imports a .mat file
+from numpy.linalg import inv, eig   # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
+import pandas as pd                 # package to represent arrays in dataframes
 import numpy as np
-import control.matlab as ml     # import module to emulate functionality of MATLAB
-import control as ctl           # import package for analysis and design of feedback control systems
-import matplotlib.pyplot as plt # import module to visualise data
+import control.matlab as ml         # import module to emulate functionality of MATLAB
+import control as ctl               # import package for analysis and design of feedback control systems
+import matplotlib.pyplot as plt     # import module to visualise data
 
 # ==============================================================================================
 # Import Parameters
@@ -199,12 +199,19 @@ D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
 sys = ml.ss(A, B, C, D)         # create state-space system
-dt  = np.arange(0, 200, 0.1)    # create time vector with 0.1s step size
+dt  = np.arange(0, 100, 0.1)    # create time vector with 0.1s step size
+
+# ==============================================================================================
+# Eigenvalue Analysis of matrix A
+# ==============================================================================================
+ev = eig(A)         # compute eigenvalues and eigenvectors of square matrix A
+evals = ev[0]       # eigenvalues of matrix A
+evecs = ev[1]       # eigenvectors of matrix A
 
 # ==============================================================================================
 # Calculates responses to state-space system
 # ==============================================================================================
-columns = ['u_hat', 'alpha', 'theta', 'qcV', 'beta', 'phi', 'pb2V', 'rb2V']     # names of invidiual columns for DataFrame
+columns = [r'\hat{u}_s', r'\alpha_s', r'\theta_s', r'\frac{qc}{V}_s', r'\beta_s', r'\phi_s', r'\frac{pb}{2V}_s', r'\frac{rb}{2V}_s']     # names of invidiual columns for DataFrame
 step_de, step_dt, step_da, step_dr = [], [], [], []             # initialise lists for step reponse for all four inputs
 X0  = np.zeros((8,1))                                           # initial condition for step response
 i   = 0                                                         # running variable for different inputs [de, dt, da, dr]
@@ -220,6 +227,7 @@ step_dt = pd.concat(step_dt, axis=1)
 step_da = pd.concat(step_da, axis=1)
 step_dr = pd.concat(step_dr, axis=1)
 
+columns = [r'\hat{u}_{im}', r'\alpha_{im}', r'\theta_{im}', r'\frac{qc}{V}_{im}', r'\beta_{im}', r'\phi_{im}', r'\frac{pb}{2V}_{im}', r'\frac{rb}{2V}_{im}']     # names of invidiual columns for DataFrame
 impulse_de, impulse_dt, impulse_da, impulse_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
 i = 0                                                           # running variable for different inputs [de, dt, da, dr]
 for df in (impulse_de, impulse_dt, impulse_da, impulse_dr):     # iterate over all four lists
@@ -234,6 +242,7 @@ impulse_dt = pd.concat(impulse_dt, axis=1)
 impulse_da = pd.concat(impulse_da, axis=1)
 impulse_dr = pd.concat(impulse_dr, axis=1)
 
+columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
 initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
 i = 0                                                           # running variable for different inputs [de, dt, da, dr]
 for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
@@ -247,6 +256,7 @@ initial_de = pd.concat(initial_de, axis=1)
 initial_dt = pd.concat(initial_dt, axis=1)
 initial_da = pd.concat(initial_da, axis=1)
 initial_dr = pd.concat(initial_dr, axis=1)
+
 
 # ==============================================================================================
 # ==============================================================================================
@@ -269,30 +279,110 @@ initial_dr = pd.concat(initial_dr, axis=1)
 # FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
 # ==============================================================================================
 
-# print(outputs, step_dr)
-# # for i in range(0, 1):
-# #     y, t = ml.step(sys, dt, X0, input=i)
-# #     df = pd.DataFrame(y, columns=columns)
-# #     # print(df)
-# #     print(outputs[i])
-# #     outputs[i] = outputs[i].append(df, ignore_index = True)
-# #     print(outputs[i])
+# ==============================================================================================
+# Plot step, impulse, initial response of state-space system
+# ==============================================================================================
+input1    = r'\delta_e'
+fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+for df in (step_de, impulse_de): #, initial_de, initial_dt):
+    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+    ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
+    ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
+    ax1[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input1))     # plot third column in bottom left plot
+    ax1[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input1))     # plot fourth column in bottom right plot
 
-# # print(step_de)
-# # print(step_de)
-# # print(step_dt)
-# # temp, t = ml.step(sys, dt, X0, input=3)
+    # Add legends to each subplot
+    ax1[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+    ax1[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+    ax1[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+    ax1[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+    ax1[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+    ax1[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+    ax1[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+    ax1[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+    ax1[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+    ax1[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+    ax1[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+    ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-# # print(temp)
-# # plt.plot(t, temp)
-# # plt.show()
+input2 = r'\delta_t'
+fig2, ax2 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+for df in (step_dt, impulse_dt): #, initial_dt):
+    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+    ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
+    ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
+    ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
+    ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
 
-# # print(step_de)
-# # print(step_de)
-# # print(step_dt)
-# # temp, t = ml.step(sys, dt, X0, input=3)
+    # Add legends to each subplot
+    ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+    ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+    ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+    ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+    ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+    ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+    ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+    ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+    ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+    ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+    ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+    ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-# # print(temp)
-# # plt.plot(t, temp)
-# # plt.show()
+input3 = r'\delta_a'
+fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
+for df in (step_da, impulse_da): #, initial_da):
+    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+    ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
+    ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
+    ax3[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input3))     # plot third column in bottom left plot
+    ax3[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input3))     # plot fourth column in bottom right plot
+
+    # Add legends to each subplot
+    ax3[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+    ax3[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+    ax3[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+    ax3[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+    ax3[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+    ax3[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+    ax3[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+    ax3[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+    ax3[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+    ax3[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+    ax3[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+    ax3[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+
+input4 = r'\delta_r'
+fig4, ax4 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
+for df in (step_da, impulse_da): #, initial_da):
+    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+    ax4[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input4))     # plot first column in top left plot
+    ax4[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input4))     # plot second column in top right plot
+    ax4[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input4))     # plot third column in bottom left plot
+    ax4[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input4))     # plot fourth column in bottom right plot
+
+    # Add legends to each subplot
+    ax4[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+    ax4[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+    ax4[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+    ax4[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+    ax4[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+    ax4[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+    ax4[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+    ax4[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+    ax4[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+    ax4[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+    ax4[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+    ax4[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+
+# Save figures for each input variable
+fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
+fig2.savefig('images/response_dt.png', dpi=300, bbox_inches='tight')
+fig3.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
+fig4.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
+
+# plt.show()
+
+
+
+
 
