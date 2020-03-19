@@ -116,11 +116,11 @@ cgshift = manouvre('cgshift')           # sliced data for the 2 cg-shift measure
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
 data = manouvre('phugoid')                  # sliced data array for phugoid motion
-data = manouvre('shortperiodoscillation')   # sliced data array short period oscillation motion
-data = manouvre('dutchroll')                # sliced data array for dutch roll motion
-data = manouvre('dutchrollYD')              # sliced data array for yawed dutch roll motion
-data = manouvre('aperroll')                 # sliced data array for aperiodic roll motion
-data = manouvre('spiral')                   # sliced data array for spiral motion
+# data = manouvre('shortperiodoscillation')   # sliced data array short period oscillation motion
+# data = manouvre('dutchroll')                # sliced data array for dutch roll motion
+# data = manouvre('dutchrollYD')              # sliced data array for yawed dutch roll motion
+# data = manouvre('aperroll')                 # sliced data array for aperiodic roll motion
+# data = manouvre('spiral')                   # sliced data array for spiral motion
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
