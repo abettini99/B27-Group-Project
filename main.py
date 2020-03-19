@@ -66,13 +66,13 @@ def manouvre(flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2640 - 10
-        time_stop   = 2760
+        time_start  = 2670
+        time_stop   = 2820
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
-        time_start  = 2760 - 10
+        time_start  = 2670 - 10
         time_stop   = 2880
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
@@ -103,23 +103,23 @@ def manouvre(flightmanouvre):
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-data    = importdata('referencedata.mat')    # initialise flight data from matlab file
-clcd    = manouvre('clcd')                   # sliced data for the 6 CL-CD measurement series
+# data    = importdata('referencedata.mat')   # initialise flight data from matlab file
+# clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
 # cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-data = importdata('referencedata.mat')        # initialise flight data from matlab file
-data = manouvre('phugoid')                    # sliced data array for phugoid motion
-# data = manouvre('shortperiod')               # sliced data array short period oscillation motion
-# data = manouvre('dutchroll')                 # sliced data array for dutch roll motion
-# data = manouvre('dutchrollYD')               # sliced data array for yawed dutch roll motion
-# data = manouvre('aperroll')                  # sliced data array for aperiodic roll motion
-# data = manouvre('spiral')                    # sliced data array for spiral motion
+data = importdata('referencedata.mat')  # initialise flight data from matlab file
+# manouvre('phugoid')                     # sliced data array for phugoid motion
+# manouvre('shortperiod')                 # sliced data array short period oscillation motion
+manouvre('dutchroll')                   # sliced data array for dutch roll motion
+# manouvre('dutchrollYD')                 # sliced data array for yawed dutch roll motion
+# manouvre('aperroll')                    # sliced data array for aperiodic roll motion
+# manouvre('spiral')                      # sliced data array for spiral motion
 
-##### TEMPORARY PLOTTING FOR QUESTIONS - WILL BE DELETED ONCE QUESTION IS ANSWERED ON BRIGHTSPACE
+# #### TEMPORARY PLOTTING FOR QUESTIONS - WILL BE DELETED ONCE QUESTION IS ANSWERED ON BRIGHTSPACE
 # plt.scatter(data.time, data.Dadc1_tas, c = 'k', s=1)
 # plt.xlabel('Time [s]')
 # plt.ylabel('$V_{TAS}$ [m/s]')
@@ -340,7 +340,7 @@ C = np.identity(8)
 D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
-sys = ml.ss(A, B, C, D)         # create state-space system
+sys = ml.ss(A, B, C, D)        # create state-space system
 dt  = np.arange(0, 30, 0.1)   # create time vector with 0.1s step size
 
 # ==============================================================================================
@@ -354,9 +354,9 @@ print('=================== EIGENVALUES OF MATRIX A ===================')
 print(evals)
 print('===============================================================')
 
-# ==============================================================================================
-# Calculates responses to state-space system
-# ==============================================================================================
+# # ==============================================================================================
+# # Calculates responses to state-space system
+# # ==============================================================================================
 columns = [r'\hat{u}_s', r'\alpha_s', r'\theta_s', r'\frac{qc}{V}_s', r'\beta_s', r'\phi_s', r'\frac{pb}{2V}_s', r'\frac{rb}{2V}_s']     # names of invidiual columns for DataFrame
 step_de, step_dt, step_da, step_dr = [], [], [], []             # initialise lists for step reponse for all four inputs
 X0  = np.zeros((8,1))                                           # initial condition for step response
@@ -369,7 +369,7 @@ for df in (step_de, step_dt, step_da, step_dr):                 # iterate over a
 
 # concatenate list into panda dataframe along axis 1
 step_de = pd.concat(step_de, axis=1)
-step_dt = pd.concat(step_dt, axis=1)
+# step_dt = pd.concat(step_dt, axis=1)
 step_da = pd.concat(step_da, axis=1)
 step_dr = pd.concat(step_dr, axis=1)
 
@@ -384,7 +384,7 @@ for df in (impulse_de, impulse_dt, impulse_da, impulse_dr):     # iterate over a
 
 # concatenate list into panda dataframe along axis 1
 impulse_de = pd.concat(impulse_de, axis=1)
-impulse_dt = pd.concat(impulse_dt, axis=1)
+# impulse_dt = pd.concat(impulse_dt, axis=1)
 impulse_da = pd.concat(impulse_da, axis=1)
 impulse_dr = pd.concat(impulse_dr, axis=1)
 
@@ -399,7 +399,7 @@ for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over a
 
 # concatenate list into panda dataframe along axis 1
 initial_de = pd.concat(initial_de, axis=1)
-initial_dt = pd.concat(initial_dt, axis=1)
+# initial_dt = pd.concat(initial_dt, axis=1)
 initial_da = pd.concat(initial_da, axis=1)
 initial_dr = pd.concat(initial_dr, axis=1)
 
@@ -502,7 +502,3 @@ fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
 fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
 # plt.show()
-
-
-
-
