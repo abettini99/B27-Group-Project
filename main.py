@@ -147,6 +147,10 @@ e      = 0.8                # [-] Oswald factor
 CD0    = 0.04               # [-] Zero lift drag coefficient
 CLa    = 5.084              # [-] Slope of CL-alpha curve
 
+# MUST BE FILLED IN BASED ON SECOND MEASUREMENT SERIES - CURRENTLY SET FURTHER DOWN FROM REFERENCE VALUES
+# Cma    = -0.5626            # [-] longitudinal stabilty
+# Cmde   = CZde * lh / c      # [-] elevator effectiveness - second equation after (7-26) in FD reader
+
 S      = 30.00              # [m^2] wing area
 Sh     = 0.2 * S            # [m^2] stabiliser area
 Sh_S   = Sh / S             # [-]
