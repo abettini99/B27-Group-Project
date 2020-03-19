@@ -68,8 +68,6 @@ def manouvre(flightmanouvre):
     if flightmanouvre == "phugoid":
         time_start  = 2640 - 10
         time_stop   = 2760
-        # time_start    = 2500
-        # time_stop     = 3000
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
