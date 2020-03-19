@@ -160,13 +160,13 @@ Ah     = bh ** 2 / Sh       # [-] stabilser aspect ratio
 Vh_V   = 1                  # [-]
 ih     = -2 * pi / 180      # [rad] stabiliser angle of incidence
 
-rho0   = 1.2250          # [kg/m^3] air density at sea level
-LAMBDA = -0.0065         # [K/m] temperature gradient in ISA
-Temp0  = 288.15          # [K] temperature at sea level in ISA
-R      = 287.05          # [m^2/s^2 K] specific gas constant
-g      = 9.81            # [m/s^2] gravitational acceleration
+rho0   = 1.2250             # [kg/m^3] air density at sea level
+LAMBDA = -0.0065            # [K/m] temperature gradient in ISA
+Temp0  = 288.15             # [K] temperature at sea level in ISA
+R      = 287.05             # [m^2/s^2 K] specific gas constant
+g      = 9.81               # [m/s^2] gravitational acceleration
 rho    = rho0 * pow( ((1+(LAMBDA * hp0 / Temp0))), (-((g / (LAMBDA*R)) + 1))) # [kg/m^3] density at altitude h
-W      = m * g           # [N] aircraft weight
+W      = m * g              # [N] aircraft weight
 
 muc    = m / (rho * S * c)
 mub    = m / (rho * S * b)
