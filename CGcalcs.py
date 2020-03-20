@@ -66,10 +66,10 @@ CG_BEM = 291.647954 #inches
 
 #--Payload weight using passenger/payload data
 x_seats = [131,131,214,214,251,251,288,288,170]
-M_seats = [180,180,170,187,190,180,178,180,190]
+M_seats = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462,74*2.20462,79*2.20462,103*2.20462,80*2.20462]
 
 x_bag = [74, 321, 338]
-M_bag = [50, 70, 65]
+M_bag = [0, 0, 0]
 
 M_PL = sum(M_seats) + sum(M_bag)
 
@@ -82,7 +82,7 @@ CG_ZFM = CGshift1(BEM, CG_BEM, ZFM, mom_PL)
 #calculate ramp weight CG:
 #--Using interpolated fuel-moment chart
 
-Initial_fuel = 2000 #[lbs]
+Initial_fuel = 4100 #[lbs]
 
 mom_fuel = interpolatefuel(Initial_fuel, fuel_moment)
 
