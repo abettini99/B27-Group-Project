@@ -106,7 +106,7 @@ def manouvre(flightmanouvre):
 # data    = importdata('referencedata.mat')   # initialise flight data from matlab file
 # clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
-# cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
+cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
