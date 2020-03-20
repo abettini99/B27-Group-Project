@@ -113,8 +113,8 @@ def manouvre(flightmanouvre):
 # ==============================================================================================
 data = importdata('referencedata.mat')  # initialise flight data from matlab file
 # manouvre('phugoid')                     # sliced data array for phugoid motion
-# manouvre('shortperiod')                 # sliced data array short period oscillation motion
-manouvre('dutchroll')                   # sliced data array for dutch roll motion
+manouvre('shortperiod')                 # sliced data array short period oscillation motion
+# manouvre('dutchroll')                   # sliced data array for dutch roll motion
 # manouvre('dutchrollYD')                 # sliced data array for yawed dutch roll motion
 # manouvre('aperroll')                    # sliced data array for aperiodic roll motion
 # manouvre('spiral')                      # sliced data array for spiral motion
