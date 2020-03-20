@@ -9,7 +9,7 @@ Dynamic Analysis of Citation II
 # ==============================================================================================
 # Import Libraries
 # ==============================================================================================
-from math import pi, pow, sin, cos, radians
+from math import pi, pow, sin, cos, radians # provides access to the mathematical functions defined by the C standard
 import pandas as pd                         # package for improved data analysis through DataFrames, etc...
 import numpy as np                          # fundamental package for scientific computing
 import control.matlab as ml                 # import module to emulate functionality of MATLAB
@@ -40,39 +40,39 @@ def importdata(filename):
 def manouvre(flightmanouvre):
     """
         This function slices the dataframe into a smaller dataframe for each flight manouvre with the corresponding start and stop time
-        :filename: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
+        :flightmanouvre: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
         :return: sliced dataframe with each variable in one column
     """
     global data                         # declare imported .mat-data in dataframe format as global variable
     if flightmanouvre == "clcd":
-        time_start  = 992 - 10
+        time_start  = 992
         time_stop   = 1740
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         data        = data[data.measurement_running != 0]
         return data
 
     if flightmanouvre == "elevatortrim":
-        time_start  = 1800 - 10
+        time_start  = 1800
         time_stop   = 2340
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         data        = data[data.measurement_running != 0]
         return data
 
     if flightmanouvre == "cgshift":
-        time_start  = 2340 - 10
+        time_start  = 2340
         time_stop   = 2640
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         data        = data[data.measurement_running != 0]
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2670
+        time_start  = 2675
         time_stop   = 2820
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
-        time_start  = 2670 - 10
+        time_start  = 2820 - 10
         time_stop   = 2880
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
@@ -95,51 +95,55 @@ def manouvre(flightmanouvre):
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3240 - 30
+        time_start  = 3240 - 10
         time_stop   = 3480
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
+def ktstoms(velocity):
+    """
+        Function converts velocity given in knots [kts] to metre per second [m/s]
+        :velocity: input velocity in knots
+        :return: velocity converted to metre per second
+    """
+    return velocity * 0.5144444444
+
+def fttom(altitude):
+    """
+        Function converts altitude given in feet [ft] to metre [m]
+        :velocity: input altitude in [ft]
+        :return: outputs altitude in [m]
+    """
+    return altitude * 0.3048
+
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-data    = importdata('referencedata.mat')   # initialise flight data from matlab file
+# data    = importdata('referencedata.mat')   # initialise flight data from matlab file
 # clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
-cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
+# cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
 data = importdata('referencedata.mat')  # initialise flight data from matlab file
+
+print(data.Ahrs1_Pitch.iloc[0])
 # manouvre('phugoid')                     # sliced data array for phugoid motion
-manouvre('shortperiod')                 # sliced data array short period oscillation motion
-# manouvre('dutchroll')                   # sliced data array for dutch roll motion
+# manouvre('shortperiod')                 # sliced data array short period oscillation motion
+manouvre('dutchroll')                   # sliced data array for dutch roll motion
 # manouvre('dutchrollYD')                 # sliced data array for yawed dutch roll motion
 # manouvre('aperroll')                    # sliced data array for aperiodic roll motion
 # manouvre('spiral')                      # sliced data array for spiral motion
 
-# #### TEMPORARY PLOTTING FOR QUESTIONS - WILL BE DELETED ONCE QUESTION IS ANSWERED ON BRIGHTSPACE
-# plt.scatter(data.time, data.Dadc1_tas, c = 'k', s=1)
-# plt.xlabel('Time [s]')
-# plt.ylabel('$V_{TAS}$ [m/s]')
-# plt.axvline(x = 2640, ymin=0, ymax=1.2, c='r')
-# plt.text(2640, 200, 'Phu. start', ha='center', va='center',rotation='vertical', backgroundcolor='white')
-# plt.axvline(x = 2670, ymin=0, ymax=1.2, c='r', linestyle='--')
-# plt.text(2670, 150, 'Phu. assumed start', ha='center', va='center',rotation='vertical', backgroundcolor='white')
-# plt.axvline(x = 2760, ymin=0, ymax=1.2, c='b')
-# plt.text(2760, 150, 'SP. start', ha='center', va='center',rotation='vertical', backgroundcolor='white')
-# plt.axvline(x = 2820, ymin=0, ymax=1.2, c='b', linestyle='--')
-# plt.text(2820, 150, 'SP. assumed start', ha='center', va='center',rotation='vertical', backgroundcolor='white')
-# plt.show()
-
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
 # ==============================================================================================
-hp0    = data.Dadc1_alt.iloc[0:10].mean()   # [m] pressure altitude in the stationary flight condition
-V0     = data.Dadc1_tas.iloc[0:10].mean()   # [m/s] true airspeed in the stationary flight condition
-alpha0 = data.vane_AOA.iloc[0:10].mean()    # [rad] angle of attack in the stationary flight condition
-theta0 = data.Ahrs1_Pitch.iloc[0:10].mean() # [rad] pitch angle in the stationary flight condition
+hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
+V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
+alpha0 = radians(data.vane_AOA.iloc[0:10].mean())    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[0:10].mean()) # [rad] pitch angle in the stationary flight condition
 
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
@@ -175,17 +179,17 @@ W      = m * g              # [N] aircraft weight
 muc    = m / (rho * S * c)
 mub    = m / (rho * S * b)
 KX2    = 0.019
+KY2    = 1.3925
 KZ2    = 0.042
 KXZ    = 0.002
-KY2    = 1.25 * 1.114
 
-Cmac   = 0                          # [-] Moment coefficient about the aerodynamic centre
-CNwa   = CLa                        # [-] Wing normal force slope
-CNha   = 2 * pi * Ah / (Ah + 2)     # [-] Stabiliser normal force slope
-depsda = 4 / (A + 2)                # [-] Downwash gradient
+Cmac   = 0                                      # [-] Moment coefficient about the aerodynamic centre
+CNwa   = CLa                                    # [-] Wing normal force slope
+CNha   = 2 * pi * Ah / (Ah + 2)                 # [-] Stabiliser normal force slope
+depsda = 4 / (A + 2)                            # [-] Downwash gradient
 
-CL = 2 * W / (rho * V0 ** 2 * S)              # [-] Lift coefficient
-CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # [-] Drag coefficient
+CL     = 2 * W / (rho * V0 ** 2 * S)                # [-] Lift coefficient
+CD     = CD0 + (CLa * alpha0) ** 2 / (pi * A * e)   # [-] Drag coefficient
 
 CX0    = W * sin(theta0) / (0.5 * rho * V0 ** 2 * S)
 CXu    = -0.095
@@ -206,7 +210,7 @@ Cmadot = +0.17800
 Cmq    = -8.79415
 
 CYb    = -0.7500
-CYbdot =  0
+CYbdot = +0
 CYp    = -0.0304
 CYr    = +0.8495
 CYda   = -0.0400
@@ -219,7 +223,7 @@ Clda   = -0.23088
 Cldr   = +0.03440
 
 Cnb    =  +0.1348
-Cnbdot =   0
+Cnbdot =  +0
 Cnp    =  -0.0602
 Cnr    =  -0.2061
 Cnda   =  -0.0120
@@ -250,10 +254,10 @@ As[0,0] = - 2 * muc * c / V
 
 As[1,1] = (CZadot - 2 * muc) * c / V
 
-As[2,2] = -V / c
+As[2,2] = -c / V
 
 As[3,1] = Cmadot * c / V
-As[3,3] = 2 * muc * KY2 * c / V
+As[3,3] = -2 * muc * KY2 * c / V
 
 Bs[0,0] = -CXu
 Bs[0,1] = -CXa
@@ -262,7 +266,7 @@ Bs[0,3] = -CXq
 
 Bs[1,0] = -CZu
 Bs[1,1] = -CZa
-Bs[1,2] = -CX0
+Bs[1,2] = CX0
 Bs[1,3] = -(CZq + 2 * muc)
 
 Bs[2,3] = -1
@@ -337,23 +341,30 @@ C = np.identity(8)
 D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
-sys = ml.ss(A, B, C, D)        # create state-space system
-dt  = np.arange(0, 30, 0.1)   # create time vector with 0.1s step size
+sys = ml.ss(A, B, C, D)       # create state-space system
+dt  = np.arange(0, 50, 0.1)   # create time vector with 0.1s step size
 
 # ==============================================================================================
 # Eigenvalue Analysis of matrix A
 # ==============================================================================================
-ev = eig(A)         # compute eigenvalues and eigenvectors of square matrix A
-evals = ev[0]       # eigenvalues of matrix A
-evecs = ev[1]       # eigenvectors of matrix A
+evals, evecs = eig(A)         # compute eigenvalues and eigenvectors of square matrix A
 
 print('=================== EIGENVALUES OF MATRIX A ===================')
 print(evals)
 print('===============================================================')
 
-# # ==============================================================================================
-# # Calculates responses to state-space system
-# # ==============================================================================================
+# # Plot eigenvalues
+# fig, ax = plt.subplots(1)
+# x = [ev.real for ev in evals]
+# y = [ev.imag for ev in evals]
+# ax.scatter(x, y, c='r')
+# ax.set_xlabel('Re($\lambda$)')
+# ax.set_ylabel('Im($\lambda$)')
+# plt.grid()
+
+# ==============================================================================================
+# Calculates responses to state-space system
+# ==============================================================================================
 columns = [r'\hat{u}_s', r'\alpha_s', r'\theta_s', r'\frac{qc}{V}_s', r'\beta_s', r'\phi_s', r'\frac{pb}{2V}_s', r'\frac{rb}{2V}_s']     # names of invidiual columns for DataFrame
 step_de, step_dt, step_da, step_dr = [], [], [], []             # initialise lists for step reponse for all four inputs
 X0  = np.zeros((8,1))                                           # initial condition for step response
@@ -366,7 +377,7 @@ for df in (step_de, step_dt, step_da, step_dr):                 # iterate over a
 
 # concatenate list into panda dataframe along axis 1
 step_de = pd.concat(step_de, axis=1)
-# step_dt = pd.concat(step_dt, axis=1)
+step_dt = pd.concat(step_dt, axis=1)
 step_da = pd.concat(step_da, axis=1)
 step_dr = pd.concat(step_dr, axis=1)
 
@@ -381,24 +392,25 @@ for df in (impulse_de, impulse_dt, impulse_da, impulse_dr):     # iterate over a
 
 # concatenate list into panda dataframe along axis 1
 impulse_de = pd.concat(impulse_de, axis=1)
-# impulse_dt = pd.concat(impulse_dt, axis=1)
+impulse_dt = pd.concat(impulse_dt, axis=1)
 impulse_da = pd.concat(impulse_da, axis=1)
 impulse_dr = pd.concat(impulse_dr, axis=1)
 
-columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
-initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
-i = 0                                                           # running variable for different inputs [de, dt, da, dr]
-for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
-    t, y = ctl.initial_response(sys, dt, X0, input=i)           # calculate initial response
-    df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert initial response to DataFrame
-    df.append(df2)                                              # append DataFrame to individual list
-    i += 1                                                      # change integer to change input variable
+# columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
+# initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
+# X0  = np.zeros((8,1))                                           # initial condition for initial response
+# i = 0                                                           # running variable for different inputs [de, dt, da, dr]
+# for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
+#     t, y = ctl.initial_response(sys, dt, X0, input=i)           # calculate initial response
+#     df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert initial response to DataFrame
+#     df.append(df2)                                              # append DataFrame to individual list
+#     i += 1                                                      # change integer to change input variable
 
-# concatenate list into panda dataframe along axis 1
-initial_de = pd.concat(initial_de, axis=1)
+# # concatenate list into panda dataframe along axis 1
+# initial_de = pd.concat(initial_de, axis=1)
 # initial_dt = pd.concat(initial_dt, axis=1)
-initial_da = pd.concat(initial_da, axis=1)
-initial_dr = pd.concat(initial_dr, axis=1)
+# initial_da = pd.concat(initial_da, axis=1)
+# initial_dr = pd.concat(initial_dr, axis=1)
 
 # ==============================================================================================
 # ==============================================================================================
