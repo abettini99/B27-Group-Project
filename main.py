@@ -103,7 +103,7 @@ def manouvre(flightmanouvre):
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-# data    = importdata('referencedata.mat')   # initialise flight data from matlab file
+data    = importdata('referencedata.mat')   # initialise flight data from matlab file
 # clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
 cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
@@ -148,8 +148,8 @@ CD0    = 0.04               # [-] Zero lift drag coefficient
 CLa    = 5.084              # [-] Slope of CL-alpha curve
 
 # MUST BE FILLED IN BASED ON SECOND MEASUREMENT SERIES - CURRENTLY SET FURTHER DOWN FROM REFERENCE VALUES
-# Cma    = -0.5626            # [-] longitudinal stabilty
-# Cmde   = CZde * lh / c      # [-] elevator effectiveness - second equation after (7-26) in FD reader
+Cma    = -0.582128          # [-] longitudinal stabilty
+Cmde   = -1.21076           # [-] elevator effectiveness - second equation after (7-26) in FD reader
 
 S      = 30.00              # [m^2] wing area
 Sh     = 0.2 * S            # [m^2] stabiliser area
@@ -224,9 +224,6 @@ Cnp    =  -0.0602
 Cnr    =  -0.2061
 Cnda   =  -0.0120
 Cndr   =  -0.0939
-
-Cma    = -0.5626            # [-] longitudinal stabilty
-Cmde   = CZde * lh / c      # [-] elevator effectiveness - second equation after (7-26) in FD reader
 
 # ==============================================================================================
 # Declaration of matrices and column vectors
