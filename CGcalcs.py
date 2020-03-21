@@ -1,7 +1,10 @@
 #from CGcalc import *
 import pandas as pd
+import numpy as np
 from main import data
 import matplotlib.pyplot as plt
+import matplotlib
+
 
 time = data['time']
 ff_le = data['rh_engine_FMF']
@@ -25,7 +28,7 @@ def interpolatefuel(fuel, fuel_moment):
       
     for i in range(len(fuel_moment)):
         if fuel<= fuel_moment.iat[i,0]:
-            momentcg = fuel_moment.iat[i,1] - ((fuel_moment.iat[i,1] - fuel_moment.iat[i-1,1])/100 )* (fuel_moment.iat[i,0] - fuel)
+            momentcg = fuel_moment.iat[i,1] - ((fuel_moment.iat[i,1] - fuel_moment.iat[i-1,1])/(fuel_moment.iat[i,0]-fuel_moment.iat[i-1,0]) )* (fuel_moment.iat[i,0] - fuel)
             break
     return momentcg
 
@@ -49,14 +52,14 @@ def fuelUsed(time, ff_le, ff_re):
 
 def CG_time(t, fuel_i, ZFM, CG_ZFM, fuelUsed):
     fuel_mass = fuel_i - fuelUsed[t]
-    fuel_mom = interpolatefuel(fuel_mass, fuel_moment)
+    fuel_mom = interpolatefuel(fuel_mass, fuel_moment)*100
     tot_mass = ZFM+ fuel_mass
     CG = CGshift1(ZFM, CG_ZFM, tot_mass, fuel_mom)
     
     return CG, tot_mass
 #-------------------------------
-MAC = 2.0569 #[m]
-LEMAC = 6.64083 #[m]
+MAC = 80.98*0.0254 # 2.056892[m]
+LEMAC = 261.56*0.0254 #  205.6892[m]
 
 
 #--Basic empty mass (BEM) taken from weight measurements
@@ -84,7 +87,7 @@ CG_ZFM = CGshift1(BEM, CG_BEM, ZFM, mom_PL)
 
 Initial_fuel = 4100 #[lbs]
 
-mom_fuel = interpolatefuel(Initial_fuel, fuel_moment)
+mom_fuel = interpolatefuel(Initial_fuel, fuel_moment)*100
 
 RM = ZFM + Initial_fuel
 
@@ -103,14 +106,117 @@ if __name__ == '__main__':
         cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
         cgg.append(cg)
         m.append(mass)
-    plt.figure()
-    plt.plot(time[:len(time)-1], m)
+        
+    cgg = np.array(cgg)
     
-    plt.figure()
-    plt.plot(time[:len(time)-1],cgg)
+#    f_mom = []
+#    for i in range(4800, 5009):
+#        f_mom.append(interpolatefuel(i, fuel_moment))
+#    
+#    
+#    plt.figure()
+#    plt.plot(range(4800, 5009), f_mom)
+#    plt.show()
     
-    plt.show()
+    
+#    plt.figure()
+#    plt.plot(time[:len(time)-1], m)
+#    plt.ylabel('Total aircraft mass [kg]')
+#    plt.xlabel('Time [s]')
+#    plt.grid()
+#    
+#    plt.figure()
+#    plt.plot(time[:len(time)-1],CG_MAC(cgg*0.0254, LEMAC, MAC))
+#    plt.ylabel('Centre of mass [% MAC]')
+#    plt.xlabel('Time [s]')
+#    plt.grid()
+#    
+#    plt.show()
+    
+    ######################################################################
+    
+    ## Graphing Parameters
+    texpsize= [26,28,30]
 
+    SMALL_SIZE  = texpsize[0]
+    MEDIUM_SIZE = texpsize[1]
+    BIGGER_SIZE = texpsize[2]
+    
+    plt.style.use('grayscale')
+    plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
+    plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
+    plt.rc('text', usetex=False)
+    matplotlib.rcParams['lines.linewidth']  = 1.5
+    matplotlib.rcParams['figure.facecolor'] = 'white'
+    matplotlib.rcParams['axes.facecolor']   = 'white'
+    matplotlib.rcParams["legend.fancybox"]  = False
+    
+    ## Graph
+    
+    
+#    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+#    ax[0,0].plot(time[:len(time)-1], m)
+#    ax[0,0].set_ylabel(r'Total aircraft mass [kg]')         
+#    ax[0,0].set_xlabel(r'Time [s]')
+#    ax[0,0].set_xlim(0,time[:len(time)-1][len(time)-2])
+#    ax[0,0].grid(True,which="major",color="#999999")
+#    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+#    ax[0,0].minorticks_on()
+#    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+#    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+##    ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+#    fig.savefig("mass-time-plot2.png", bbox_inches='tight')                                    ## Insert save destination
+#    
+#    ## If you want to see the figure, else disable last two lines.
+#    fig.tight_layout()
+#    plt.show()            
+#
+#
+#    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+#    ax[0,0].plot(time[:len(time)-1],CG_MAC(cgg*0.0254, LEMAC, MAC))
+#    ax[0,0].set_ylabel(r'Centre of mass [% MAC]')   
+#    ax[0,0].set_xlabel(r'Time [s]')
+#    ax[0,0].set_xlim(0,time[:len(time)-1][len(time)-2])
+#    ax[0,0].grid(True,which="major",color="#999999")
+#    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+#    ax[0,0].minorticks_on()
+#    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+#    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+##    ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+#    fig.savefig("CoM-time-plot2.png", bbox_inches='tight')                                    ## Insert save destination
+#    
+#    ## If you want to see the figure, else disable last two lines.
+#    fig.tight_layout()
+#    plt.show()       
+    
+    cg_full_fuel =  [CG_MAC(7.146208878242001, LEMAC, MAC)]* (len(time)-1)
+    cg_zfm = [CG_MAC(CG_ZFM*0.0254, LEMAC, MAC)] * (len(time)-1)
+        
+    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+    ax[0,0].plot(time[:len(time)-1],CG_MAC(cgg*0.0254, LEMAC, MAC))
+    ax[0,0].plot(time[:len(time)-1],cg_full_fuel, linewidth = 4, linestyle = 'dashed', color = 'black')
+    ax[0,0].plot(time[:len(time)-1],cg_zfm,  linewidth = 4, linestyle = 'dashed', color = 'black')
+    
+    
+    ax[0,0].set_ylabel(r'Centre of mass [% MAC]')   
+    ax[0,0].set_xlabel(r'Time [s]')
+    ax[0,0].set_xlim(0,time[:len(time)-1][len(time)-2])
+    ax[0,0].grid(True,which="major",color="#999999")
+    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+    ax[0,0].minorticks_on()
+    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+    #    ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+    fig.savefig("CG_range_plot.png", bbox_inches='tight')                                    ## Insert save destination
+    
+    ## If you want to see the figure, else disable last two lines.
+    fig.tight_layout()
+    plt.show()  
 
 
 
