@@ -2,7 +2,6 @@
 Institution:    TU Delft
 Authors:        B27
 Date:           06-03-2020
-
 Dynamic Analysis of Citation II
 """
 
@@ -65,36 +64,36 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2626
-        time_stop   = 2677
+        time_start  = 2675
+        time_stop   = 2820
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
-        time_start  = 2677
-        time_stop   = 2901
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-
-    if flightmanouvre == "aperroll":
-        time_start  = 2901
-        time_stop   = 3023
+        time_start  = 2636
+        time_stop   = 2670
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "dutchroll":
-        time_start  = 3023
-        time_stop   = 3090
+        time_start  = 2880 - 10
+        time_stop   = 3000
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
-        time_start  = 3090
-        time_stop   = 3301
+        time_start  = 3000 - 10
+        time_stop   = 3060
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+
+    if flightmanouvre == "aperroll":
+        time_start  = 3060 - 10
+        time_stop   = 3240
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3301
+        time_start  = 3240 - 10
         time_stop   = 3480
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
@@ -138,8 +137,13 @@ data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-motion = 'phugoid'                      # select eigenmotion - phugoid, shortperiod, dutchroll, dutchrollYD, aperroll, spiral
-data = manouvre(data, motion)           # slice data to correct time stamp
+
+# data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
+# data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
+data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
+# data = manouvre(data, 'dutchrollYD')                 # sliced data array for yawed dutch roll motion
+# data = manouvre(data, 'aperroll')                    # sliced data array for aperiodic roll motion
+# data = manouvre(data, 'spiral')                      # sliced data array for spiral motion
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
@@ -439,80 +443,83 @@ forced_dr = pd.concat(forced_dr, axis=1)
 
 # ==============================================================================================
 # Plot step, impulse, initial and forced response of state-space system
-# Plot experimental data for comparison
 # ==============================================================================================
-input1    = r'\delta_e'
-fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_de, impulse_de, initial_de, forced_de):
-    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-    ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
-    ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
-    ax1[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input1))     # plot third column in bottom left plot
-    ax1[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input1))     # plot fourth column in bottom right plot
+# input1    = r'\delta_e'
+# fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+# for df in (step_de, impulse_de, initial_de, forced_de):
+#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+#     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
+#     ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
+#     ax1[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input1))     # plot third column in bottom left plot
+#     ax1[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input1))     # plot fourth column in bottom right plot
 
-    # Add legends to each subplot
-    ax1[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-    ax1[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-    ax1[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-    ax1[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-    ax1[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-    ax1[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-    ax1[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-    ax1[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-    ax1[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-    ax1[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-    ax1[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-    ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+#     # Add legends to each subplot
+#     ax1[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+#     ax1[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+#     ax1[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+#     ax1[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+#     ax1[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+#     ax1[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+#     ax1[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+#     ax1[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+#     ax1[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+#     ax1[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+#     ax1[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+#     ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-input2    = r'\delta_a'
-fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
-for df in (step_da, impulse_da, initial_da, forced_da):
-    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-    ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
-    ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
-    ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
-    ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
+# input2    = r'\delta_a'
+# fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
+# for df in (step_da, impulse_da, initial_da, forced_da):
+#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+#     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
+#     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
+#     ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
+#     ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
 
-    # Add legends to each subplot
-    ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-    ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-    ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-    ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-    ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-    ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-    ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-    ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-    ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-    ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-    ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-    ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+#     # Add legends to each subplot
+#     ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+#     ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+#     ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+#     ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+#     ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+#     ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+#     ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+#     ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+#     ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+#     ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+#     ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+#     ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-input3    = r'\delta_r'
-fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_dr, impulse_dr, initial_dr, forced_dr):
-    df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-    ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
-    ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
-    ax3[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input3))     # plot third column in bottom left plot
-    ax3[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input3))     # plot fourth column in bottom right plot
+# input3    = r'\delta_r'
+# fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
+# for df in (step_dr, impulse_dr, initial_dr, forced_dr):
+#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
+#     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
+#     ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
+#     ax3[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input3))     # plot third column in bottom left plot
+#     ax3[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input3))     # plot fourth column in bottom right plot
 
-    # Add legends to each subplot
-    ax3[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-    ax3[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-    ax3[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-    ax3[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-    ax3[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-    ax3[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-    ax3[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-    ax3[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-    ax3[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-    ax3[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-    ax3[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-    ax3[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+#     # Add legends to each subplot
+#     ax3[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
+#     ax3[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
+#     ax3[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
+#     ax3[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
+#     ax3[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
+#     ax3[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
+#     ax3[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
+#     ax3[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
+#     ax3[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
+#     ax3[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
+#     ax3[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
+#     ax3[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
-# Save figures for each input variable
-fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
-fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
-fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
+# # Save figures for each input variable
+# fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
+# fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
+# fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
 # plt.show()
+
+data = importdata('flightdata.mat')
+new_data = manouvre(data, 'shortperiod')
+new_data.plot(x='time', y='Ahrs1_Pitch')
