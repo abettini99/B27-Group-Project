@@ -127,8 +127,7 @@ def fttom(altitude):
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-data = importdata('referencedata.mat')  # initialise reference data from matlab file
-# data = importdata('flightdata.mat')     # initialise flight data from matlab file
+data = importdata('flightdata.mat')     # initialise flight data from matlab file
 
 alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
 theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
@@ -439,7 +438,7 @@ initial_dr = pd.concat(initial_dr, axis=1)
 # Plot step, impulse, initial and forced response of state-space system
 # ==============================================================================================
 input1    = r'\delta_e'
-fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+#fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
 for df in (step_de, impulse_de, initial_de): #, forced_de):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
@@ -462,7 +461,7 @@ for df in (step_de, impulse_de, initial_de): #, forced_de):
     ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 input2    = r'\delta_a'
-fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
+#fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
 for df in (step_da, impulse_da, initial_da): #, forced_da):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
@@ -485,7 +484,7 @@ for df in (step_da, impulse_da, initial_da): #, forced_da):
     ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 input3    = r'\delta_r'
-fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
+#fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
 for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
@@ -508,8 +507,14 @@ for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
     ax3[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 # Save figures for each input variable
-fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
-fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
-fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
+#fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
+#fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
+#fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
 # plt.show()
+    
+data = importdata('flightdata.mat')
+newdata = manouvre('shortperiod')
+newdata.plot(x='time', y = 'Ahrs1_Pitch')
+plt.show()
+
