@@ -9,14 +9,14 @@ Dynamic Analysis of Citation II
 # ==============================================================================================
 # Import Libraries
 # ==============================================================================================
-from math import pi, pow, sin, cos, radians # provides access to the mathematical functions defined by the C standard
-import pandas as pd                         # package for improved data analysis through DataFrames, etc...
-import numpy as np                          # fundamental package for scientific computing
-import control.matlab as ml                 # import module to emulate functionality of MATLAB
-import control as ctl                       # import package for analysis and design of feedback control systems
-import matplotlib.pyplot as plt             # package to create visualisations
-from scipy.io import loadmat                # loadmat imports a .mat file
-from numpy.linalg import inv, eig           # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
+from math import pi, pow, sin, cos, radians, degrees    # provides access to the mathematical functions defined by the C standard
+import pandas as pd                                     # package for improved data analysis through DataFrames, etc...
+import numpy as np                                      # fundamental package for scientific computing
+import control.matlab as ml                             # import module to emulate functionality of MATLAB
+import control as ctl                                   # import package for analysis and design of feedback control systems
+import matplotlib.pyplot as plt                         # package to create visualisations
+from scipy.io import loadmat                            # loadmat imports a .mat file
+from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 
 # ==============================================================================================
 # Function Definitions
@@ -37,13 +37,12 @@ def importdata(filename):
         data[key] = values.flatten()     # add new column with variable as key and values; input to dataframe must be 1D such that 2D arrays must be flattened
     return data
 
-def manouvre(flightmanouvre):
+def manouvre(data, flightmanouvre):
     """
         This function slices the dataframe into a smaller dataframe for each flight manouvre with the corresponding start and stop time
         :flightmanouvre: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
         :return: sliced dataframe with each variable in one column
     """
-    global data                         # declare imported .mat-data in dataframe format as global variable
     if flightmanouvre == "clcd":
         time_start  = 992
         time_stop   = 1740
@@ -117,9 +116,21 @@ def fttom(altitude):
     return altitude * 0.3048
 
 # ==============================================================================================
+# Import data from Matlab files and transform coordinate system from body to stability axis
+# ==============================================================================================
+# data = importdata('referencedata.mat')  # initialise reference data from matlab file
+data = importdata('flightdata.mat')     # initialise flight data from matlab file
+
+alpha0 = radians(data.vane_AOA.iloc[9830])    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[9830]) # [rad] pitch angle in the stationary flight condition
+
+# Transform angle of attack and pitch angle from body to stability axis frame
+data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)
+data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
+
+# ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-# data    = importdata('referencedata.mat')   # initialise flight data from matlab file
 # clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
 # cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
@@ -127,23 +138,21 @@ def fttom(altitude):
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-data = importdata('flightdata.mat')     # initialise flight data from matlab file
 
-alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
-theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
-
-# manouvre('phugoid')                     # sliced data array for phugoid motion
-# manouvre('shortperiod')                 # sliced data array short period oscillation motion
-manouvre('dutchroll')                   # sliced data array for dutch roll motion
-# manouvre('dutchrollYD')                 # sliced data array for yawed dutch roll motion
-# manouvre('aperroll')                    # sliced data array for aperiodic roll motion
-# manouvre('spiral')                      # sliced data array for spiral motion
+# data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
+# data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
+data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
+# data = manouvre(data, 'dutchrollYD')                 # sliced data array for yawed dutch roll motion
+# data = manouvre(data, 'aperroll')                    # sliced data array for aperiodic roll motion
+# data = manouvre(data, 'spiral')                      # sliced data array for spiral motion
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
 # ==============================================================================================
 hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
 V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
+alpha0 = radians(data.vane_AOA.iloc[0:10].mean())    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[0:10].mean()) # [rad] pitch angle in the stationary flight condition
 
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
@@ -151,9 +160,8 @@ e      = 0.8                # [-] Oswald factor
 CD0    = 0.04               # [-] Zero lift drag coefficient
 CLa    = 5.084              # [-] Slope of CL-alpha curve
 
-# MUST BE FILLED IN BASED ON SECOND MEASUREMENT SERIES - CURRENTLY SET FURTHER DOWN FROM REFERENCE VALUES
 Cma    = -0.582128          # [-] longitudinal stabilty
-Cmde   = -1.21076           # [-] elevator effectiveness - second equation after (7-26) in FD reader
+Cmde   = -1.21076           # [-] elevator effectiveness
 
 S      = 30.00              # [m^2] wing area
 Sh     = 0.2 * S            # [m^2] stabiliser area
@@ -341,8 +349,9 @@ C = np.identity(8)
 D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
-sys = ml.ss(A, B, C, D)       # create state-space system
-dt  = np.arange(0, 50, 0.1)   # create time vector with 0.1s step size
+sys = ml.ss(A, B, C, D)                         # create state-space system
+tstop = data.time.iloc[-1] - data.time.iloc[0]  # normalise final time value for manouvre
+dt  = np.arange(0, tstop + 0.1, 0.1)                  # create time vector with 0.1s step size
 
 # ==============================================================================================
 # Eigenvalue Analysis of matrix A
@@ -361,6 +370,7 @@ print('===============================================================')
 # ax.set_xlabel('Re($\lambda$)')
 # ax.set_ylabel('Im($\lambda$)')
 # plt.grid()
+# plt.show()
 
 # ==============================================================================================
 # Calculates responses to state-space system
@@ -414,32 +424,32 @@ initial_da = pd.concat(initial_da, axis=1)
 initial_dr = pd.concat(initial_dr, axis=1)
 
 # ==============================================================================================
-# ==============================================================================================
 # FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
 # ==============================================================================================
-# ==============================================================================================
-# forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
-# X0 = np.zeros((4,2000))
-# for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
-#     t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
-#     df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
-#     df.append(df2)                                              # append DataFrame to individual list
+forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
+X0 = np.zeros((4, np.shape(dt)[0]))                             # initialise empty array for initial condition
+X0[0] = data['delta_e']                                         # fill first row with flight test input delta_e
+X0[2] = data['delta_a']                                         # fill first row with flight test input delta_a
+X0[3] = data['delta_r']                                         # fill first row with flight test input delta_r
+for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
+    t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
+    df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
+    df.append(df2)                                              # append DataFrame to individual list
 
 # concatenate list into panda dataframe along axis 1
-# forced_de = pd.concat(forced_de, axis=1)
-# forced_dt = pd.concat(forced_dt, axis=1)
-# forced_da = pd.concat(forced_da, axis=1)
-# forced_dr = pd.concat(forced_dr, axis=1)
-# ==============================================================================================
-# FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
-# ==============================================================================================
+forced_de = pd.concat(forced_de, axis=1)
+forced_dt = pd.concat(forced_dt, axis=1)
+forced_da = pd.concat(forced_da, axis=1)
+forced_dr = pd.concat(forced_dr, axis=1)
 
 # ==============================================================================================
 # Plot step, impulse, initial and forced response of state-space system
 # ==============================================================================================
 input1    = r'\delta_e'
-#fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_de, impulse_de, initial_de): #, forced_de):
+
+fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
+for df in (step_de, impulse_de, initial_de, forced_de):
+
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
     ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
@@ -461,8 +471,9 @@ for df in (step_de, impulse_de, initial_de): #, forced_de):
     ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 input2    = r'\delta_a'
-#fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
-for df in (step_da, impulse_da, initial_da): #, forced_da):
+fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
+for df in (step_da, impulse_da, initial_da, forced_da):
+
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
@@ -484,8 +495,9 @@ for df in (step_da, impulse_da, initial_da): #, forced_da):
     ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
 
 input3    = r'\delta_r'
-#fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
+
+fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
+for df in (step_dr, impulse_dr, initial_dr, forced_dr):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
     ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
@@ -511,10 +523,11 @@ for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
 #fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
 #fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
+
 # plt.show()
     
 data = importdata('flightdata.mat')
 newdata = manouvre('shortperiod')
 newdata.plot(x='time', y = 'Ahrs1_Pitch')
-plt.show()
+
 
