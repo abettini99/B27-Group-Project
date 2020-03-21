@@ -144,6 +144,7 @@ manouvre('dutchroll')                   # sliced data array for dutch roll motio
 # ==============================================================================================
 hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
 V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
+
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
 e      = 0.8                # [-] Oswald factor
@@ -395,21 +396,22 @@ impulse_dt = pd.concat(impulse_dt, axis=1)
 impulse_da = pd.concat(impulse_da, axis=1)
 impulse_dr = pd.concat(impulse_dr, axis=1)
 
-# columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
-# initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
-# X0  = np.zeros((8,1))                                           # initial condition for initial response
-# i = 0                                                           # running variable for different inputs [de, dt, da, dr]
-# for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
-#     t, y = ctl.initial_response(sys, dt, X0, input=i)           # calculate initial response
-#     df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert initial response to DataFrame
-#     df.append(df2)                                              # append DataFrame to individual list
-#     i += 1                                                      # change integer to change input variable
+columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
+initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
+deflectionlist = [data.delta_e.iloc[0], 0, data.delta_a.iloc[0], data.delta_r.iloc[0]]  # list to iterate over the initial deflection for each response
+i = 0                                                           # running variable for different inputs [de, dt, da, dr]
+for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
+    X0[:,] = deflectionlist[i]                                  # populate rows of initial condition with initial deflection
+    t, y = ctl.initial_response(sys, dt, X0, input=i)           # calculate initial response
+    df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert initial response to DataFrame
+    df.append(df2)                                              # append DataFrame to individual list
+    i += 1                                                      # change integer to change input variable
 
-# # concatenate list into panda dataframe along axis 1
-# initial_de = pd.concat(initial_de, axis=1)
-# initial_dt = pd.concat(initial_dt, axis=1)
-# initial_da = pd.concat(initial_da, axis=1)
-# initial_dr = pd.concat(initial_dr, axis=1)
+# concatenate list into panda dataframe along axis 1
+initial_de = pd.concat(initial_de, axis=1)
+initial_dt = pd.concat(initial_dt, axis=1)
+initial_da = pd.concat(initial_da, axis=1)
+initial_dr = pd.concat(initial_dr, axis=1)
 
 # ==============================================================================================
 # ==============================================================================================
@@ -437,7 +439,7 @@ impulse_dr = pd.concat(impulse_dr, axis=1)
 # ==============================================================================================
 input1    = r'\delta_e'
 fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_de, impulse_de): #, initial_de): #, forced_de):
+for df in (step_de, impulse_de, initial_de): #, forced_de):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
     ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
@@ -460,7 +462,7 @@ for df in (step_de, impulse_de): #, initial_de): #, forced_de):
 
 input2    = r'\delta_a'
 fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
-for df in (step_da, impulse_da): #, initial_da): #, forced_da):
+for df in (step_da, impulse_da, initial_da): #, forced_da):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
@@ -483,7 +485,7 @@ for df in (step_da, impulse_da): #, initial_da): #, forced_da):
 
 input3    = r'\delta_r'
 fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_dr, impulse_dr): #, initial_dr, forced_dr):
+for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
     ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
