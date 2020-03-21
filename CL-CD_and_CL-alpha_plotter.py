@@ -7,7 +7,7 @@ Created on Mon Mar  9 15:03:39 2020
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from main import data, m, e, CD0, CLa, A, S, b
+from main import m, e, CD0, AR, S
 
 # TAS = data.Dadc1_tas # true air speed
 # time = data.time
@@ -18,7 +18,7 @@ from main import data, m, e, CD0, CLa, A, S, b
 # Theoretical plot
 def CLCD_plot():
     CL  = np.linspace(0,1.0,100)
-    CD = CD0 + CL**2 / (np.pi * b**2 / S * e)
+    CD = CD0 + CL**2 / (np.pi * AR * e)
     
     plt.figure()
     plt.ylabel("CL")
