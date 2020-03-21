@@ -2,7 +2,6 @@
 Institution:    TU Delft
 Authors:        B27
 Date:           06-03-2020
-
 Dynamic Analysis of Citation II
 """
 
@@ -18,6 +17,7 @@ import matplotlib.pyplot as plt                         # package to create visu
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 
+import matplotlib
 # ==============================================================================================
 # Function Definitions
 # ==============================================================================================
@@ -65,8 +65,8 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2676
-        time_stop   = 2820
+        time_start  = 2675
+        time_stop   = 2810
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -138,13 +138,8 @@ data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-
-# data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
-# data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
-data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
-# data = manouvre(data, 'dutchrollYD')                 # sliced data array for yawed dutch roll motion
-# data = manouvre(data, 'aperroll')                    # sliced data array for aperiodic roll motion
-# data = manouvre(data, 'spiral')                      # sliced data array for spiral motion
+motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
+data = manouvre(data, motion)                          # sliced data array for phugoid motion
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
@@ -191,10 +186,10 @@ KY2    = 1.3925
 KZ2    = 0.042
 KXZ    = 0.002
 
-Cmac   = 0                                      # [-] Moment coefficient about the aerodynamic centre
-CNwa   = CLa                                    # [-] Wing normal force slope
-CNha   = 2 * pi * Ah / (Ah + 2)                 # [-] Stabiliser normal force slope
-depsda = 4 / (AR + 2)                           # [-] Downw sh gradient
+Cmac   = 0                                          # [-] Moment coefficient about the aerodynamic centre
+CNwa   = CLa                                        # [-] Wing normal force slope
+CNha   = 2 * pi * Ah / (Ah + 2)                     # [-] Stabiliser normal force slope
+depsda = 4 / (AR + 2)                               # [-] Downw sh gradient
 
 CL     = 2 * W / (rho * V0 ** 2 * S)                # [-] Lift coefficient
 CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)  # [-] Drag coefficient
@@ -256,7 +251,7 @@ Ca      = np.zeros((4,2))         # Declaration of matrix Ca with dimensions [4 
 # ==============================================================================================
 # Population of symmetric EOM matrices with variables for state-space representation
 # ==============================================================================================
-V       = V0    # [m/s] redefine magnitude of airspeed vector as true airspeed
+V       = V0                      # [m/s] redefine magnitude of airspeed vector as true airspeed
 
 As[0,0] = - 2 * muc * c / V
 
@@ -340,187 +335,263 @@ C_temp[4:8, 2:4] = Ca
 # ==============================================================================================
 # Compute final matrices A and B based equation given in simulation plan
 # ==============================================================================================
-A = np.dot(inv(A_temp), B_temp)
-B = np.dot(inv(A_temp), C_temp)
+As = np.dot(inv(As), Bs)
+Bs = np.dot(inv(As), Cs)
+
+Aa = np.dot(inv(Aa), Ba)
+Ba = np.dot(inv(Aa), Ca)
 
 # Output of state-space representation should be equal to the relevant aircraft states
 # --> matrix C is the identity matrix and D is a zero array
-C = np.identity(8)
-D = np.zeros((8,4))
+C = np.identity(4)
+D = np.zeros((4,2))
 
 # Calculate state-space representation of system for different responses
-sys = ml.ss(A, B, C, D)                         # create state-space system
-tstop = data.time.iloc[-1] - data.time.iloc[0]  # normalise final time value for manouvre
-dt  = np.arange(0, tstop + 0.1, 0.1)                  # create time vector with 0.1s step size
+syss = ml.ss(As, Bs, C, D)                      # create state-space system for symmetric eigenmotions
+sysa = ml.ss(Aa, Ba, C, D)                      # create state-space system for asymmetric eigenmotions
+
+# # ==============================================================================================
+# # Set graphing settings
+# # ==============================================================================================
+# texpsize= [10,12,14]                                # set font sizes for export
+# SMALL_SIZE  = texpsize[0]                           # set small font size
+# MEDIUM_SIZE = texpsize[1]                           # set medium font size
+# BIGGER_SIZE = texpsize[2]                           # set large font size
+
+# plt.style.use('grayscale')
+# plt.rc('font', size=MEDIUM_SIZE, family='serif')    # controls default text sizes
+# plt.rc('axes', titlesize=SMALL_SIZE)                # fontsize of the axes title
+# plt.rc('axes', labelsize=SMALL_SIZE)                # fontsize of the x and y labels
+# plt.rc('xtick', labelsize=SMALL_SIZE)               # fontsize of the tick labels
+# plt.rc('ytick', labelsize=SMALL_SIZE)               # fontsize of the tick labels
+# plt.rc('legend', fontsize=SMALL_SIZE)               # legend fontsize
+# plt.rc('figure', titlesize=BIGGER_SIZE)             # fontsize of the figure title
+# plt.rc('text', usetex=False)
+# matplotlib.rcParams['lines.linewidth']  = 1.5
+# matplotlib.rcParams['figure.facecolor'] = 'white'
+# matplotlib.rcParams['axes.facecolor']   = 'white'
+# matplotlib.rcParams["legend.fancybox"]  = False
 
 # ==============================================================================================
-# Eigenvalue Analysis of matrix A
+# Calculates responses to symmetric eigenmotions from state-space system
 # ==============================================================================================
-evals, evecs = eig(A)         # compute eigenvalues and eigenvectors of square matrix A
+evals, evacs = eig(As)                                                                   # compute eigenvalues and eigenvectors of symmetric matrix As
 
-print('=================== EIGENVALUES OF MATRIX A ===================')
-print(evals)
-print('===============================================================')
+if motion in ['phugoid', 'shortperiod']:
+    print('=================== EIGENVALUES OF MATRIX As ==================')
+    print(evals)
+    print('===============================================================')
 
-# # Plot eigenvalues
-# fig, ax = plt.subplots(1)
-# x = [ev.real for ev in evals]
-# y = [ev.imag for ev in evals]
-# ax.scatter(x, y, c='r')
-# ax.set_xlabel('Re($\lambda$)')
-# ax.set_ylabel('Im($\lambda$)')
-# plt.grid()
-# plt.show()
+    tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
+    dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
-# ==============================================================================================
-# Calculates responses to state-space system
-# ==============================================================================================
-columns = [r'\hat{u}_s', r'\alpha_s', r'\theta_s', r'\frac{qc}{V}_s', r'\beta_s', r'\phi_s', r'\frac{pb}{2V}_s', r'\frac{rb}{2V}_s']     # names of invidiual columns for DataFrame
-step_de, step_dt, step_da, step_dr = [], [], [], []             # initialise lists for step reponse for all four inputs
-X0  = np.zeros((8,1))                                           # initial condition for step response
-i   = 0                                                         # running variable for different inputs [de, dt, da, dr]
-for df in (step_de, step_dt, step_da, step_dr):                 # iterate over all four lists
-    t, y  = ctl.step_response(sys, dt, X0, input=i)             # calculate step response
-    df2   = pd.DataFrame(np.transpose(y), columns=columns)      # convert step response to DataFrame
-    df.append(df2)                                              # append DataFrame to individual list
-    i += 1                                                      # change integer to change input variable
+    units = ['[-]', '[rad]', '[rad]', '[-]']                                             # list with units of columns for plotting
+    u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
+    columns = [r'\hat{u}', r'\alpha', r'\theta', r'\frac{qc}{V}']                        # names of invidiual columns for DataFrame
+    eigenmotion = []                                                                     # initialise empty list
 
-# concatenate list into panda dataframe along axis 1
-step_de = pd.concat(step_de, axis=1)
-step_dt = pd.concat(step_dt, axis=1)
-step_da = pd.concat(step_da, axis=1)
-step_dr = pd.concat(step_dr, axis=1)
+    flightdata = [np.radians(data.vane_AOA), np.radians(data.Ahrs1_Pitch), np.radians(data.Ahrs1_bPitchRate)]
 
-columns = [r'\hat{u}_{im}', r'\alpha_{im}', r'\theta_{im}', r'\frac{qc}{V}_{im}', r'\beta_{im}', r'\phi_{im}', r'\frac{pb}{2V}_{im}', r'\frac{rb}{2V}_{im}']     # names of invidiual columns for DataFrame
-impulse_de, impulse_dt, impulse_da, impulse_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
-i = 0                                                           # running variable for different inputs [de, dt, da, dr]
-for df in (impulse_de, impulse_dt, impulse_da, impulse_dr):     # iterate over all four lists
-    t, y = ctl.impulse_response(sys, dt, X0, input=i)           # calculate impulse response
-    df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert impulse response to DataFrame
-    df.append(df2)                                              # append DataFrame to individual list
-    i += 1                                                      # change integer to change input variable
+    if motion == 'phugoid':
+        t, y, x = ctl.forced_response(syss, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
 
-# concatenate list into panda dataframe along axis 1
-impulse_de = pd.concat(impulse_de, axis=1)
-impulse_dt = pd.concat(impulse_dt, axis=1)
-impulse_da = pd.concat(impulse_da, axis=1)
-impulse_dr = pd.concat(impulse_dr, axis=1)
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
 
-columns = [r'\hat{u}_{in}', r'\alpha_{in}', r'\theta_{in}', r'\frac{qc}{V}_{in}', r'\beta_{in}', r'\phi_{in}', r'\frac{pb}{2V}_{in}', r'\frac{rb}{2V}_{in}']     # names of invidiual columns for DataFrame
-initial_de, initial_dt, initial_da, initial_dr = [], [], [], [] # initialise lists for step reponse for all four inputs
-deflectionlist = [data.delta_e.iloc[0], 0, data.delta_a.iloc[0], data.delta_r.iloc[0]]  # list to iterate over the initial deflection for each response
-i = 0                                                           # running variable for different inputs [de, dt, da, dr]
-for df in (initial_de, initial_dt, initial_da, initial_dr):     # iterate over all four lists
-    X0[:,] = deflectionlist[i]                                  # populate rows of initial condition with initial deflection
-    t, y = ctl.initial_response(sys, dt, X0, input=i)           # calculate initial response
-    df2  = pd.DataFrame(np.transpose(y), columns=columns)       # convert initial response to DataFrame
-    df.append(df2)                                              # append DataFrame to individual list
-    i += 1                                                      # change integer to change input variable
+        ax1[3,0].plot(t, u[0], c='k', label='Experimental Data')                         # plot input variable
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-# concatenate list into panda dataframe along axis 1
-initial_de = pd.concat(initial_de, axis=1)
-initial_dt = pd.concat(initial_dt, axis=1)
-initial_da = pd.concat(initial_da, axis=1)
-initial_dr = pd.concat(initial_dr, axis=1)
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Phugoid')                                                         # set title of figure
+        fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
 
-# ==============================================================================================
-# FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
-# ==============================================================================================
-forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
-X0 = np.zeros((4, np.shape(dt)[0]))                             # initialise empty array for initial condition
-X0[0] = data['delta_e']                                         # fill first row with flight test input delta_e
-X0[2] = data['delta_a']                                         # fill first row with flight test input delta_a
-X0[3] = data['delta_r']                                         # fill first row with flight test input delta_r
-for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
-    t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
-    df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
-    df.append(df2)                                              # append DataFrame to individual list
+    elif motion == 'shortperiod':
+        t, y, x = ctl.forced_response(syss, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
 
-# concatenate list into panda dataframe along axis 1
-forced_de = pd.concat(forced_de, axis=1)
-forced_dt = pd.concat(forced_dt, axis=1)
-forced_da = pd.concat(forced_da, axis=1)
-forced_dr = pd.concat(forced_dr, axis=1)
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C21', label='Numerical Model')    # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Short Period Oscillation')                                        # set title of figure
+        fig1.savefig('images/shortperiod.png', dpi=300, bbox_inches='tight')             # save figure
 
 # ==============================================================================================
-# Plot step, impulse, initial and forced response of state-space system
+# Calculates responses to asymmetric eigenmotions from state-space system
 # ==============================================================================================
-# input1    = r'\delta_e'
-# fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-# for df in (step_de, impulse_de, initial_de, forced_de):
-#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-#     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
-#     ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
-#     ax1[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input1))     # plot third column in bottom left plot
-#     ax1[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input1))     # plot fourth column in bottom right plot
+evals, evacs = eig(Aa)                                                                   # compute eigenvalues and eigenvectors of asymmetric matrix As
 
-#     # Add legends to each subplot
-#     ax1[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-#     ax1[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-#     ax1[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-#     ax1[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-#     ax1[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-#     ax1[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-#     ax1[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-#     ax1[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-#     ax1[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-#     ax1[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-#     ax1[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-#     ax1[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
+    print('=================== EIGENVALUES OF MATRIX Aa ==================')
+    print(evals)
+    print('===============================================================')
 
-# input2    = r'\delta_a'
-# fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
-# for df in (step_da, impulse_da, initial_da, forced_da):
-#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-#     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
-#     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
-#     ax2[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input2))     # plot third column in bottom left plot
-#     ax2[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input2))     # plot fourth column in bottom right plot
+    tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
+    dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
-#     # Add legends to each subplot
-#     ax2[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-#     ax2[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-#     ax2[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-#     ax2[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-#     ax2[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-#     ax2[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-#     ax2[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-#     ax2[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-#     ax2[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-#     ax2[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-#     ax2[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-#     ax2[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+    units = ['[rad]', '[rad]', '[-]', '[-]']                                             # list with units of columns for plotting
+    u = [np.radians(data.delta_a), np.radians(data.delta_r)]                             # [rad] input array given input at each time for [da, dr]
+    columns = [r'\beta', r'\phi', r'\frac{pb}{2V}', r'\frac{rb}{2V}']                    # names of invidiual columns for DataFrame
+    eigenmotion = []                                                                     # initialise empty list
 
-# input3    = r'\delta_r'
-# fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
-# for df in (step_dr, impulse_dr, initial_dr, forced_dr):
-#     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
-#     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
-#     ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
-#     ax3[1,0].plot(t, df.iloc[:,2], label='${}$ for ${}$'.format(df.columns[2], input3))     # plot third column in bottom left plot
-#     ax3[1,1].plot(t, df.iloc[:,3], label='${}$ for ${}$'.format(df.columns[3], input3))     # plot fourth column in bottom right plot
+    flightdata = [np.radians(data.Ahrs1_Roll), np.radians(data.Ahrs1_bRollRate), np.radians(data.Ahrs1_bYawRate)]
 
-#     # Add legends to each subplot
-#     ax3[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,0)
-#     ax3[0,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,0)
-#     ax3[0,0].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (0,0)
-#     ax3[0,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (0,1)
-#     ax3[0,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (0,1)
-#     ax3[0,1].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (0,1)
-#     ax3[1,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,0)
-#     ax3[1,0].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,0)
-#     ax3[1,0].set_ylabel('$y$ [deg]')                                                        # set label of y-axis for subplot (1,0)
-#     ax3[1,1].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                   # set legend for subplot (1,1)
-#     ax3[1,1].set_xlabel('$t$ [s]')                                                          # set label of x-axis for subplot (1,1)
-#     ax3[1,1].set_ylabel('$y$ [-]')                                                          # set label of y-axis for subplot (1,1)
+    if motion == 'aperroll':
+        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
 
-# # Save figures for each input variable
-# fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
-# fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
-# fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Aperiodic Roll')                                                  # set title of figure
+        fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
+
+    if motion == 'dutchroll':
+        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
+
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Dutch Roll without Yaw Damper')                                   # set title of figure
+        fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
+
+    if motion == 'dutchrollYD':
+        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
+
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Dutch Roll with Yaw Damper')                                      # set title of figure
+        fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
+
+    if motion == 'spiral':
+        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                          # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
+
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
+        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        # fig1.suptitle('Spiral')                                                          # set title of figure
+        fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
 # plt.show()
 
 data = importdata('flightdata.mat')
-new_data = manouvre(data, 'spiral')
-new_data.plot(x='time', y='Dadc1_altRate')
+new_data = manouvre(data, 'shortperiod')
+new_data.plot(x='time', y='Ahrs1_Pitch')
