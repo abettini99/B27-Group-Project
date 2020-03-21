@@ -127,7 +127,8 @@ def fttom(altitude):
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-data = importdata('referencedata.mat')  # initialise flight data from matlab file
+data = importdata('referencedata.mat')  # initialise reference data from matlab file
+# data = importdata('flightdata.mat')     # initialise flight data from matlab file
 
 alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
 theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
