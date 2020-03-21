@@ -138,7 +138,7 @@ data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-motion = 'dutchroll'
+motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
 data = manouvre(data, motion)                          # sliced data array for phugoid motion
 
 # ==============================================================================================
@@ -590,4 +590,4 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         # fig1.suptitle('Spiral')                                                          # set title of figure
         fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
-plt.show()
+# plt.show()
