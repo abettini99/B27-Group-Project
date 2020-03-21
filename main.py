@@ -129,7 +129,9 @@ def fttom(altitude):
 # ==============================================================================================
 data = importdata('referencedata.mat')  # initialise flight data from matlab file
 
-print(data.Ahrs1_Pitch.iloc[0])
+alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
+
 # manouvre('phugoid')                     # sliced data array for phugoid motion
 # manouvre('shortperiod')                 # sliced data array short period oscillation motion
 manouvre('dutchroll')                   # sliced data array for dutch roll motion
@@ -142,9 +144,6 @@ manouvre('dutchroll')                   # sliced data array for dutch roll motio
 # ==============================================================================================
 hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
 V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
-alpha0 = radians(data.vane_AOA.iloc[0:10].mean())    # [rad] angle of attack in the stationary flight condition
-theta0 = radians(data.Ahrs1_Pitch.iloc[0:10].mean()) # [rad] pitch angle in the stationary flight condition
-
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
 e      = 0.8                # [-] Oswald factor
