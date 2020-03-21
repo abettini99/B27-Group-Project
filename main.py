@@ -65,36 +65,36 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2675
-        time_stop   = 2820
+        time_start  = 2626
+        time_stop   = 2677
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
-        time_start  = 2820 - 10
-        time_stop   = 2880
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-
-    if flightmanouvre == "dutchroll":
-        time_start  = 2880 - 10
-        time_stop   = 3000
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-    if flightmanouvre == "dutchrollYD":
-        time_start  = 3000 - 10
-        time_stop   = 3060
+        time_start  = 2677
+        time_stop   = 2901
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "aperroll":
-        time_start  = 3060 - 10
-        time_stop   = 3240
+        time_start  = 2901
+        time_stop   = 3023
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+
+    if flightmanouvre == "dutchroll":
+        time_start  = 3023
+        time_stop   = 3090
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+    if flightmanouvre == "dutchrollYD":
+        time_start  = 3090
+        time_stop   = 3301
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3240 - 10
+        time_start  = 3301
         time_stop   = 3480
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
@@ -138,12 +138,8 @@ data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-# data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
-# data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
-data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
-# data = manouvre(data, 'dutchrollYD')                 # sliced data array for yawed dutch roll motion
-# data = manouvre(data, 'aperroll')                    # sliced data array for aperiodic roll motion
-# data = manouvre(data, 'spiral')                      # sliced data array for spiral motion
+motion = 'phugoid'                      # select eigenmotion - phugoid, shortperiod, dutchroll, dutchrollYD, aperroll, spiral
+data = manouvre(data, motion)           # slice data to correct time stamp
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
@@ -443,6 +439,7 @@ forced_dr = pd.concat(forced_dr, axis=1)
 
 # ==============================================================================================
 # Plot step, impulse, initial and forced response of state-space system
+# Plot experimental data for comparison
 # ==============================================================================================
 input1    = r'\delta_e'
 fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
@@ -518,4 +515,4 @@ fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
 fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
 fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
-plt.show()
+# plt.show()
