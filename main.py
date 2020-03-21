@@ -65,7 +65,7 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        time_start  = 2675
+        time_start  = 2676
         time_stop   = 2820
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
@@ -77,25 +77,25 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "dutchroll":
-        time_start  = 2880 - 10
-        time_stop   = 3000
+        time_start  = 3020
+        time_stop   = 3041.5
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
-        time_start  = 3000 - 10
-        time_stop   = 3060
+        time_start  = 3091
+        time_stop   = 3103
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "aperroll":
-        time_start  = 3060 - 10
-        time_stop   = 3240
+        time_start  = 2880
+        time_stop   = 2880 + 150
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3240 - 10
-        time_stop   = 3480
+        time_start  = 3300-10
+        time_stop   = 3507
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -522,5 +522,5 @@ forced_dr = pd.concat(forced_dr, axis=1)
 # plt.show()
 
 data = importdata('flightdata.mat')
-new_data = manouvre(data, 'shortperiod')
-new_data.plot(x='time', y='Ahrs1_Pitch')
+new_data = manouvre(data, 'spiral')
+new_data.plot(x='time', y='Dadc1_altRate')
