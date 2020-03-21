@@ -138,6 +138,7 @@ data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
+
 # data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
 # data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
 data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
