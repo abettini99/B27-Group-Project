@@ -16,8 +16,7 @@ import control as ctl                                   # import package for ana
 import matplotlib.pyplot as plt                         # package to create visualisations
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
-
-import matplotlib
+import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
 # ==============================================================================================
 # Function Definitions
 # ==============================================================================================
@@ -116,38 +115,39 @@ def fttom(altitude):
     return altitude * 0.3048
 
 # ==============================================================================================
+# Import data from Matlab files
+# ==============================================================================================
+# data = importdata('referencedata.mat')        # initialise reference data from matlab file
+data = importdata('flightdata.mat')           # initialise flight data from matlab file
+
+# ==============================================================================================
+# Stationary measurements
+# ==============================================================================================
+clcd    = manouvre(data, 'clcd')                       # sliced data for the 6 CL-CD measurement series
+etrim   = manouvre(data, 'elevatortrim')               # sliced data for the 7 e-trim measurement series
+cgshift = manouvre(data, 'cgshift')                    # sliced data for the 2 cg-shift measurement series
+
+# ==============================================================================================
+# Eigenmotion analysis - uncomment required eigenmotion array
+# ==============================================================================================
+motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
+data   = manouvre(data, motion)                          # sliced data array for phugoid motion
+
+# ==============================================================================================
 # Import data from Matlab files and transform coordinate system from body to stability axis
 # ==============================================================================================
-# data = importdata('referencedata.mat')  # initialise reference data from matlab file
-data = importdata('flightdata.mat')     # initialise flight data from matlab file
-
-alpha0 = radians(data.vane_AOA.iloc[9830])    # [rad] angle of attack in the stationary flight condition
-theta0 = radians(data.Ahrs1_Pitch.iloc[9830]) # [rad] pitch angle in the stationary flight condition
+alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
 
 # Transform angle of attack and pitch angle from body to stability axis frame
 data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)
 data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 
 # ==============================================================================================
-# Stationary measurements
-# ==============================================================================================
-# clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
-# etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
-# cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
-
-# ==============================================================================================
-# Eigenmotion analysis - uncomment required eigenmotion array
-# ==============================================================================================
-motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
-data = manouvre(data, motion)                          # sliced data array for phugoid motion
-
-# ==============================================================================================
 # Parameter definition; copied from Cit_par.py
 # ==============================================================================================
-hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
-V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
-alpha0 = radians(data.vane_AOA.iloc[0:10].mean())    # [rad] angle of attack in the stationary flight condition
-theta0 = radians(data.Ahrs1_Pitch.iloc[0:10].mean()) # [rad] pitch angle in the stationary flight condition
+hp0    = fttom(data.Dadc1_alt.iloc[0])     # [m] pressure altitude in the stationary flight condition
+V0     = ktstoms(data.Dadc1_tas.iloc[0])   # [m/s] true airspeed in the stationary flight condition
 
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
@@ -206,7 +206,7 @@ CZu    = -0.37616
 CZa    = -5.74340
 CZadot = -0.00350
 CZq    = -5.66290
-CZde   = -0.6961
+CZde   = -0.69612
 
 Cmu    = +0.06990
 Cmadot = +0.17800
@@ -251,32 +251,30 @@ Ca      = np.zeros((4,2))         # Declaration of matrix Ca with dimensions [4 
 # ==============================================================================================
 # Population of symmetric EOM matrices with variables for state-space representation
 # ==============================================================================================
-V       = V0                      # [m/s] redefine magnitude of airspeed vector as true airspeed
+As[0,0] = - 2 * muc * c / V0**2
 
-As[0,0] = - 2 * muc * c / V
+As[1,1] = (CZadot - 2 * muc) * c / V0
 
-As[1,1] = (CZadot - 2 * muc) * c / V
+As[2,2] = -c / V0
 
-As[2,2] = -c / V
+As[3,1] = Cmadot * c / V0
+As[3,3] = -2 * muc * KY2 * (c / V0)**2
 
-As[3,1] = Cmadot * c / V
-As[3,3] = -2 * muc * KY2 * c / V
-
-Bs[0,0] = -CXu
+Bs[0,0] = -CXu / V0
 Bs[0,1] = -CXa
 Bs[0,2] = -CZ0
-Bs[0,3] = -CXq
+Bs[0,3] = -CXq * c / V0
 
-Bs[1,0] = -CZu
+Bs[1,0] = -CZu / V0
 Bs[1,1] = -CZa
-Bs[1,2] = CX0
-Bs[1,3] = -(CZq + 2 * muc)
+Bs[1,2] = +CX0
+Bs[1,3] = -(CZq + 2 * muc) * c / V0
 
-Bs[2,3] = -1
+Bs[2,3] = -c / V0
 
-Bs[3,0] = -Cmu
+Bs[3,0] = -Cmu / V0
 Bs[3,1] = -Cma
-Bs[3,3] = -Cmq
+Bs[3,3] = -Cmq * c / V0
 
 Cs[0,0] = -CXde
 
@@ -287,31 +285,31 @@ Cs[3,0] = -Cmde
 # ==============================================================================================
 # Population of asymmetric EOM matrices with variables for state-space representation
 # ==============================================================================================
-Aa[0,0] = (CYbdot - 2 * mub) * b / V
+Aa[0,0] = (CYbdot - 2 * mub) * b / V0
 
-Aa[1,1] = -0.5 * b / V
+Aa[1,1] = -0.5 * b / V0
 
-Aa[2,2] = -4 * mub * KX2 * b / V
-Aa[2,3] = 4 * mub * KXZ * b / V
+Aa[2,2] = -4 * mub * KX2 * b**2 / (2* V0**2)
+Aa[2,3] = 4 * mub * KXZ * b**2 / (2* V0**2)
 
-Aa[3,0] = Cnbdot * b / V
-Aa[3,2] = 4 * mub * KXZ * b / V
-Aa[3,3] = -4 * mub * KZ2 * b / V
+Aa[3,0] = Cnbdot * b / V0
+Aa[3,2] = 4 * mub * KXZ * b**2 / (2* V0**2)
+Aa[3,3] = -4 * mub * KZ2 * b**2 / (2* V0**2)
 
 Ba[0,0] = -CYb
 Ba[0,1] = -CL
-Ba[0,2] = -CYp
-Ba[0,3] = -(CYr - 4 * mub)
+Ba[0,2] = -CYp * b / (2* V0)
+Ba[0,3] = -(CYr - 4 * mub) * b / (2* V0)
 
-Ba[1,2] = -1
+Ba[1,2] = -b / (2* V0)
 
 Ba[2,0] = -Clb
-Ba[2,2] = -Clp
-Ba[2,3] = -Clr
+Ba[2,2] = -Clp * b / (2* V0)
+Ba[2,3] = -Clr * b / (2* V0)
 
 Ba[3,0] = -Cnb
-Ba[3,2] = -Cnp
-Ba[3,3] = -Cnr
+Ba[3,2] = -Cnp * b / (2* V0)
+Ba[3,3] = -Cnr * b / (2* V0)
 
 Ca[0,0] = -CYda
 Ca[0,1] = -CYdr
@@ -323,7 +321,7 @@ Ca[3,0] = -Cnda
 Ca[3,1] = -Cndr
 
 # ==============================================================================================
-# Population of matrix A with matrices As and Aa
+# Population of matrices As and Aa
 # ==============================================================================================
 A_temp[0:4, 0:4] = As
 A_temp[4:8, 4:8] = Aa
@@ -332,9 +330,6 @@ B_temp[4:8, 4:8] = Ba
 C_temp[0:4, 0:2] = Cs
 C_temp[4:8, 2:4] = Ca
 
-# ==============================================================================================
-# Compute final matrices A and B based equation given in simulation plan
-# ==============================================================================================
 As = np.dot(inv(As), Bs)
 Bs = np.dot(inv(As), Cs)
 
@@ -346,38 +341,12 @@ Ba = np.dot(inv(Aa), Ca)
 C = np.identity(4)
 D = np.zeros((4,2))
 
-# Calculate state-space representation of system for different responses
-syss = ml.ss(As, Bs, C, D)                      # create state-space system for symmetric eigenmotions
-sysa = ml.ss(Aa, Ba, C, D)                      # create state-space system for asymmetric eigenmotions
-
-# # ==============================================================================================
-# # Set graphing settings
-# # ==============================================================================================
-# texpsize= [10,12,14]                                # set font sizes for export
-# SMALL_SIZE  = texpsize[0]                           # set small font size
-# MEDIUM_SIZE = texpsize[1]                           # set medium font size
-# BIGGER_SIZE = texpsize[2]                           # set large font size
-
-# plt.style.use('grayscale')
-# plt.rc('font', size=MEDIUM_SIZE, family='serif')    # controls default text sizes
-# plt.rc('axes', titlesize=SMALL_SIZE)                # fontsize of the axes title
-# plt.rc('axes', labelsize=SMALL_SIZE)                # fontsize of the x and y labels
-# plt.rc('xtick', labelsize=SMALL_SIZE)               # fontsize of the tick labels
-# plt.rc('ytick', labelsize=SMALL_SIZE)               # fontsize of the tick labels
-# plt.rc('legend', fontsize=SMALL_SIZE)               # legend fontsize
-# plt.rc('figure', titlesize=BIGGER_SIZE)             # fontsize of the figure title
-# plt.rc('text', usetex=False)
-# matplotlib.rcParams['lines.linewidth']  = 1.5
-# matplotlib.rcParams['figure.facecolor'] = 'white'
-# matplotlib.rcParams['axes.facecolor']   = 'white'
-# matplotlib.rcParams["legend.fancybox"]  = False
-
 # ==============================================================================================
 # Calculates responses to symmetric eigenmotions from state-space system
 # ==============================================================================================
-evals, evacs = eig(As)                                                                   # compute eigenvalues and eigenvectors of symmetric matrix As
-
 if motion in ['phugoid', 'shortperiod']:
+    syss = ctl.StateSpace(As, Bs, C, D)                                                  # create state-space system for symmetric eigenmotions
+    evals, evacs = eig(As)                                                               # compute eigenvalues and eigenvectors
     print('=================== EIGENVALUES OF MATRIX As ==================')
     print(evals)
     print('===============================================================')
@@ -385,19 +354,19 @@ if motion in ['phugoid', 'shortperiod']:
     tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
     dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
-    units = ['[-]', '[rad]', '[rad]', '[-]']                                             # list with units of columns for plotting
+    units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
     u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
-    columns = [r'\hat{u}', r'\alpha', r'\theta', r'\frac{qc}{V}']                        # names of invidiual columns for DataFrame
+    columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
     eigenmotion = []                                                                     # initialise empty list
 
     flightdata = [np.radians(data.vane_AOA), np.radians(data.Ahrs1_Pitch), np.radians(data.Ahrs1_bPitchRate)]
 
-    if motion == 'phugoid':
-        t, y, x = ctl.forced_response(syss, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
+    t, y, x = ctl.forced_response(syss, dt, U=u)                                         # calculate forced response
+    df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
+    eigenmotion.append(df2)                                                              # append DataFrame to individual list
+    eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
 
+    if motion == 'phugoid':
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
@@ -409,7 +378,7 @@ if motion in ['phugoid', 'shortperiod']:
             ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
             ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
 
-        ax1[3,0].plot(t, u[0], c='k', label='Experimental Data')                         # plot input variable
+        ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
         ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
         ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
         ax1[3,0].minorticks_on()                                                         # set minor ticks
@@ -422,11 +391,6 @@ if motion in ['phugoid', 'shortperiod']:
         fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
 
     elif motion == 'shortperiod':
-        t, y, x = ctl.forced_response(syss, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
-
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C21', label='Numerical Model')    # plot each variable from output vector
@@ -453,9 +417,9 @@ if motion in ['phugoid', 'shortperiod']:
 # ==============================================================================================
 # Calculates responses to asymmetric eigenmotions from state-space system
 # ==============================================================================================
-evals, evacs = eig(Aa)                                                                   # compute eigenvalues and eigenvectors of asymmetric matrix As
-
 if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
+    sysa = ctl.StateSpace(Aa, Ba, C, D)                                                  # create state-space system for symmetric eigenmotions
+    evals, evacs = eig(As)                                                               # compute eigenvalues and eigenvectors
     print('=================== EIGENVALUES OF MATRIX Aa ==================')
     print(evals)
     print('===============================================================')
@@ -463,19 +427,19 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
     tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
     dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
-    units = ['[rad]', '[rad]', '[-]', '[-]']                                             # list with units of columns for plotting
+    units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                             # list with units of columns for plotting
     u = [np.radians(data.delta_a), np.radians(data.delta_r)]                             # [rad] input array given input at each time for [da, dr]
-    columns = [r'\beta', r'\phi', r'\frac{pb}{2V}', r'\frac{rb}{2V}']                    # names of invidiual columns for DataFrame
+    columns = [r'\beta', r'\phi', r'p', r'r']                    # names of invidiual columns for DataFrame
     eigenmotion = []                                                                     # initialise empty list
 
     flightdata = [np.radians(data.Ahrs1_Roll), np.radians(data.Ahrs1_bRollRate), np.radians(data.Ahrs1_bYawRate)]
 
-    if motion == 'aperroll':
-        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
+    t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
+    df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
+    eigenmotion.append(df2)                                                              # append DataFrame to individual list
+    eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
 
+    if motion == 'aperroll':
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
@@ -501,11 +465,6 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
 
     if motion == 'dutchroll':
-        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
-
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
@@ -531,11 +490,6 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
 
     if motion == 'dutchrollYD':
-        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
-
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
@@ -561,11 +515,6 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
 
     if motion == 'spiral':
-        t, y, x = ctl.forced_response(sysa, dt, U=u)                                     # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                             # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                          # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                     # concatenate list into panda dataframe along axis 1
-
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
         for i in range(0,3):
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
