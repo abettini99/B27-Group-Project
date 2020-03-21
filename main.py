@@ -125,13 +125,12 @@ alpha0 = radians(data.vane_AOA.iloc[9830])    # [rad] angle of attack in the sta
 theta0 = radians(data.Ahrs1_Pitch.iloc[9830]) # [rad] pitch angle in the stationary flight condition
 
 # Transform angle of attack and pitch angle from body to stability axis frame
-data['vane_AOA'] = data['vane_AOA'] - degrees(alpha0)
+data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)
 data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-# data    = importdata('referencedata.mat')   # initialise flight data from matlab file
 # clcd    = manouvre('clcd')                  # sliced data for the 6 CL-CD measurement series
 # etrim   = manouvre('elevatortrim')          # sliced data for the 7 e-trim measurement series
 # cgshift = manouvre('cgshift')               # sliced data for the 2 cg-shift measurement series
@@ -160,9 +159,8 @@ e      = 0.8                # [-] Oswald factor
 CD0    = 0.04               # [-] Zero lift drag coefficient
 CLa    = 5.084              # [-] Slope of CL-alpha curve
 
-# MUST BE FILLED IN BASED ON SECOND MEASUREMENT SERIES - CURRENTLY SET FURTHER DOWN FROM REFERENCE VALUES
 Cma    = -0.582128          # [-] longitudinal stabilty
-Cmde   = -1.21076           # [-] elevator effectiveness - second equation after (7-26) in FD reader
+Cmde   = -1.21076           # [-] elevator effectiveness
 
 S      = 30.00              # [m^2] wing area
 Sh     = 0.2 * S            # [m^2] stabiliser area
@@ -350,8 +348,9 @@ C = np.identity(8)
 D = np.zeros((8,4))
 
 # Calculate state-space representation of system for different responses
-sys = ml.ss(A, B, C, D)       # create state-space system
-dt  = np.arange(0, 50, 0.1)   # create time vector with 0.1s step size
+sys = ml.ss(A, B, C, D)                         # create state-space system
+tstop = data.time.iloc[-1] - data.time.iloc[0]  # normalise final time value for manouvre
+dt  = np.arange(0, tstop + 0.1, 0.1)                  # create time vector with 0.1s step size
 
 # ==============================================================================================
 # Eigenvalue Analysis of matrix A
@@ -424,32 +423,30 @@ initial_da = pd.concat(initial_da, axis=1)
 initial_dr = pd.concat(initial_dr, axis=1)
 
 # ==============================================================================================
-# ==============================================================================================
 # FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
 # ==============================================================================================
-# ==============================================================================================
-# forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
-# X0 = np.zeros((4,2000))
-# for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
-#     t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
-#     df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
-#     df.append(df2)                                              # append DataFrame to individual list
+forced_de, forced_dt, forced_da, forced_dr = [], [], [], []     # initialise lists for step reponse for all four inputs
+X0 = np.zeros((4, np.shape(dt)[0]))                             # initialise empty array for initial condition
+X0[0] = data['delta_e']                                         # fill first row with flight test input delta_e
+X0[2] = data['delta_a']                                         # fill first row with flight test input delta_a
+X0[3] = data['delta_r']                                         # fill first row with flight test input delta_r
+for df in (forced_de, forced_dt, forced_da, forced_dr):         # iterate over all four lists
+    t, y, x = ctl.forced_response(sys, dt, X0)                  # calculate forced response
+    df2 = pd.DataFrame(np.transpose(y), columns=columns)        # convert forced response to DataFrame
+    df.append(df2)                                              # append DataFrame to individual list
 
 # concatenate list into panda dataframe along axis 1
-# forced_de = pd.concat(forced_de, axis=1)
-# forced_dt = pd.concat(forced_dt, axis=1)
-# forced_da = pd.concat(forced_da, axis=1)
-# forced_dr = pd.concat(forced_dr, axis=1)
-# ==============================================================================================
-# FORCED RESPONSE MUST BE FIXED WITH CORRECT INITIAL CONDITION ARRAY X0
-# ==============================================================================================
+forced_de = pd.concat(forced_de, axis=1)
+forced_dt = pd.concat(forced_dt, axis=1)
+forced_da = pd.concat(forced_da, axis=1)
+forced_dr = pd.concat(forced_dr, axis=1)
 
 # ==============================================================================================
 # Plot step, impulse, initial and forced response of state-space system
 # ==============================================================================================
 input1    = r'\delta_e'
 fig1, ax1 = plt.subplots(2,2, squeeze=False, figsize=(16,9))                                # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_de, impulse_de, initial_de): #, forced_de):
+for df in (step_de, impulse_de, initial_de, forced_de):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax1[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input1))     # plot first column in top left plot
     ax1[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input1))     # plot second column in top right plot
@@ -472,7 +469,7 @@ for df in (step_de, impulse_de, initial_de): #, forced_de):
 
 input2    = r'\delta_a'
 fig2, ax2 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 3 with a (2 x 2) plot layout
-for df in (step_da, impulse_da, initial_da): #, forced_da):
+for df in (step_da, impulse_da, initial_da, forced_da):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax2[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input2))     # plot first column in top left plot
     ax2[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input2))     # plot second column in top right plot
@@ -495,7 +492,7 @@ for df in (step_da, impulse_da, initial_da): #, forced_da):
 
 input3    = r'\delta_r'
 fig3, ax3 = plt.subplots(2,2,squeeze=False,figsize=(16,9))                                  # initialise figure 4 with a (2 x 2) plot layout
-for df in (step_dr, impulse_dr, initial_dr): #, forced_dr):
+for df in (step_dr, impulse_dr, initial_dr, forced_dr):
     df = df.loc[:, (df != 0).any(axis=0)]                                                   # remove zero columns for automated plotted
     ax3[0,0].plot(t, df.iloc[:,0], label='${}$ for ${}$'.format(df.columns[0], input3))     # plot first column in top left plot
     ax3[0,1].plot(t, df.iloc[:,1], label='${}$ for ${}$'.format(df.columns[1], input3))     # plot second column in top right plot
@@ -521,4 +518,4 @@ fig1.savefig('images/response_de.png', dpi=300, bbox_inches='tight')
 fig2.savefig('images/response_da.png', dpi=300, bbox_inches='tight')
 fig3.savefig('images/response_dr.png', dpi=300, bbox_inches='tight')
 
-# plt.show()
+plt.show()
