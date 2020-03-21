@@ -163,7 +163,7 @@ c      = 2.0569             # [m] mean aerodynamic cord
 lh_c   = lh / c             # [-]
 b      = 15.911             # [m] wing span
 bh     = 5.791              # [m] stabilser span
-A      = b ** 2 / S         # [-] wing aspect ratio
+AR     = b ** 2 / S         # [-] wing aspect ratio
 Ah     = bh ** 2 / Sh       # [-] stabilser aspect ratio
 Vh_V   = 1                  # [-]
 ih     = -2 * pi / 180      # [rad] stabiliser angle of incidence
@@ -189,7 +189,7 @@ CNha   = 2 * pi * Ah / (Ah + 2)                 # [-] Stabiliser normal force sl
 depsda = 4 / (A + 2)                            # [-] Downwash gradient
 
 CL     = 2 * W / (rho * V0 ** 2 * S)                # [-] Lift coefficient
-CD     = CD0 + (CLa * alpha0) ** 2 / (pi * A * e)   # [-] Drag coefficient
+CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)  # [-] Drag coefficient
 
 CX0    = W * sin(theta0) / (0.5 * rho * V0 ** 2 * S)
 CXu    = -0.095
