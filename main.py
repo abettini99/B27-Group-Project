@@ -9,14 +9,14 @@ Dynamic Analysis of Citation II
 # ==============================================================================================
 # Import Libraries
 # ==============================================================================================
-from math import pi, pow, sin, cos, radians # provides access to the mathematical functions defined by the C standard
-import pandas as pd                         # package for improved data analysis through DataFrames, etc...
-import numpy as np                          # fundamental package for scientific computing
-import control.matlab as ml                 # import module to emulate functionality of MATLAB
-import control as ctl                       # import package for analysis and design of feedback control systems
-import matplotlib.pyplot as plt             # package to create visualisations
-from scipy.io import loadmat                # loadmat imports a .mat file
-from numpy.linalg import inv, eig           # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
+from math import pi, pow, sin, cos, radians, degrees    # provides access to the mathematical functions defined by the C standard
+import pandas as pd                                     # package for improved data analysis through DataFrames, etc...
+import numpy as np                                      # fundamental package for scientific computing
+import control.matlab as ml                             # import module to emulate functionality of MATLAB
+import control as ctl                                   # import package for analysis and design of feedback control systems
+import matplotlib.pyplot as plt                         # package to create visualisations
+from scipy.io import loadmat                            # loadmat imports a .mat file
+from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 
 # ==============================================================================================
 # Function Definitions
@@ -37,13 +37,12 @@ def importdata(filename):
         data[key] = values.flatten()     # add new column with variable as key and values; input to dataframe must be 1D such that 2D arrays must be flattened
     return data
 
-def manouvre(flightmanouvre):
+def manouvre(data, flightmanouvre):
     """
         This function slices the dataframe into a smaller dataframe for each flight manouvre with the corresponding start and stop time
         :flightmanouvre: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
         :return: sliced dataframe with each variable in one column
     """
-    global data                         # declare imported .mat-data in dataframe format as global variable
     if flightmanouvre == "clcd":
         time_start  = 992
         time_stop   = 1740
@@ -117,6 +116,19 @@ def fttom(altitude):
     return altitude * 0.3048
 
 # ==============================================================================================
+# Import data from Matlab files and transform coordinate system from body to stability axis
+# ==============================================================================================
+# data = importdata('referencedata.mat')  # initialise reference data from matlab file
+data = importdata('flightdata.mat')     # initialise flight data from matlab file
+
+alpha0 = radians(data.vane_AOA.iloc[9830])    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[9830]) # [rad] pitch angle in the stationary flight condition
+
+# Transform angle of attack and pitch angle from body to stability axis frame
+data['vane_AOA'] = data['vane_AOA'] - degrees(alpha0)
+data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
+
+# ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
 # data    = importdata('referencedata.mat')   # initialise flight data from matlab file
@@ -127,24 +139,20 @@ def fttom(altitude):
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-data = importdata('referencedata.mat')  # initialise reference data from matlab file
-# data = importdata('flightdata.mat')     # initialise flight data from matlab file
-
-alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
-theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
-
-# manouvre('phugoid')                     # sliced data array for phugoid motion
-# manouvre('shortperiod')                 # sliced data array short period oscillation motion
-manouvre('dutchroll')                   # sliced data array for dutch roll motion
-# manouvre('dutchrollYD')                 # sliced data array for yawed dutch roll motion
-# manouvre('aperroll')                    # sliced data array for aperiodic roll motion
-# manouvre('spiral')                      # sliced data array for spiral motion
+# data = manouvre(data, 'phugoid')                     # sliced data array for phugoid motion
+# data = manouvre(data, 'shortperiod')                 # sliced data array short period oscillation motion
+data = manouvre(data, 'dutchroll')                   # sliced data array for dutch roll motion
+# data = manouvre(data, 'dutchrollYD')                 # sliced data array for yawed dutch roll motion
+# data = manouvre(data, 'aperroll')                    # sliced data array for aperiodic roll motion
+# data = manouvre(data, 'spiral')                      # sliced data array for spiral motion
 
 # ==============================================================================================
 # Parameter definition; copied from Cit_par.py
 # ==============================================================================================
 hp0    = fttom(data.Dadc1_alt.iloc[0:10].mean())     # [m] pressure altitude in the stationary flight condition
 V0     = ktstoms(data.Dadc1_tas.iloc[0:10].mean())   # [m/s] true airspeed in the stationary flight condition
+alpha0 = radians(data.vane_AOA.iloc[0:10].mean())    # [rad] angle of attack in the stationary flight condition
+theta0 = radians(data.Ahrs1_Pitch.iloc[0:10].mean()) # [rad] pitch angle in the stationary flight condition
 
 m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
 
@@ -362,6 +370,7 @@ print('===============================================================')
 # ax.set_xlabel('Re($\lambda$)')
 # ax.set_ylabel('Im($\lambda$)')
 # plt.grid()
+# plt.show()
 
 # ==============================================================================================
 # Calculates responses to state-space system
