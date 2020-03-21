@@ -97,17 +97,17 @@ CG_RM = CGshift1(ZFM, CG_ZFM, RM, mom_fuel)
 
 #---Plotting----
 
-if __name__ == '__main__':
+
     
-    cgg = []
-    m = []
-    fuel_used =  fuelUsed(time, ff_le, ff_re)
-    for t in time[:len(time)-1]:
-        cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
-        cgg.append(cg)
-        m.append(mass)
-        
-    cgg = np.array(cgg)
+cgg = []
+m = []
+fuel_used =  fuelUsed(time, ff_le, ff_re)
+for t in time[:len(time)-1]:
+    cg, mass = CG_time(t, Initial_fuel, ZFM,CG_ZFM,fuel_used)
+    cgg.append(cg)
+    m.append(mass)
+    
+cgg = np.array(cgg)
     
 #    f_mom = []
 #    for i in range(4800, 5009):
@@ -119,22 +119,8 @@ if __name__ == '__main__':
 #    plt.show()
     
     
-#    plt.figure()
-#    plt.plot(time[:len(time)-1], m)
-#    plt.ylabel('Total aircraft mass [kg]')
-#    plt.xlabel('Time [s]')
-#    plt.grid()
-#    
-#    plt.figure()
-#    plt.plot(time[:len(time)-1],CG_MAC(cgg*0.0254, LEMAC, MAC))
-#    plt.ylabel('Centre of mass [% MAC]')
-#    plt.xlabel('Time [s]')
-#    plt.grid()
-#    
-#    plt.show()
-    
     ######################################################################
-    
+if __name__ == '__main__':
     ## Graphing Parameters
     texpsize= [26,28,30]
 
