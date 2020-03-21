@@ -186,7 +186,7 @@ KXZ    = 0.002
 Cmac   = 0                                      # [-] Moment coefficient about the aerodynamic centre
 CNwa   = CLa                                    # [-] Wing normal force slope
 CNha   = 2 * pi * Ah / (Ah + 2)                 # [-] Stabiliser normal force slope
-depsda = 4 / (A + 2)                            # [-] Downwash gradient
+depsda = 4 / (AR + 2)                           # [-] Downw sh gradient
 
 CL     = 2 * W / (rho * V0 ** 2 * S)                # [-] Lift coefficient
 CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)  # [-] Drag coefficient
