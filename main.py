@@ -220,117 +220,119 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import data from Matlab files
 # ==============================================================================================
-# data = importdata('referencedata.mat')                 # initialise reference data from matlab file
-data = importdata('flightdata.mat')                      # initialise flight data from matlab file
+# data = importdata('referencedata.mat')                                                     # initialise reference data from matlab file
+data = importdata('flightdata.mat')                                                          # initialise flight data from matlab file
 
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-clcd    = manouvre(data, 'clcd')                       # sliced data for the 6 CL-CD measurement series
-etrim   = manouvre(data, 'elevatortrim')               # sliced data for the 7 e-trim measurement series
-cgshift = manouvre(data, 'cgshift')                    # sliced data for the 2 cg-shift measurement series
+clcd    = manouvre(data, 'clcd')                                                             # sliced data for the 6 CL-CD measurement series
+etrim   = manouvre(data, 'elevatortrim')                                                     # sliced data for the 7 e-trim measurement series
+cgshift = manouvre(data, 'cgshift')                                                          # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
-f = open('eigenvalues.txt', 'w+')                                                        # create .txt-file where EV's are written
+f = open('eigenvalues.txt', 'w+')                                                            # create .txt-file where EV's are written
 
 for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
     # ==============================================================================================
     # Import data from Matlab files
     # ==============================================================================================
-    # data = importdata('referencedata.mat')                 # initialise reference data from matlab file
-    data   = importdata('flightdata.mat')                      # initialise flight data from matlab file
-    data   = manouvre(data, motion)                          # sliced data array for phugoid motion
+    # data = importdata('referencedata.mat')                                                   # initialise reference data from matlab file
+    data   = importdata('flightdata.mat')                                                    # initialise flight data from matlab file
+    data   = manouvre(data, motion)                                                          # sliced data array for phugoid motion
 
     # ==============================================================================================
     # Transform coordinate system from body to stability axis frame
     # ==============================================================================================
-    alpha0 = radians(data.vane_AOA.iloc[0])    # [rad] angle of attack in the stationary flight condition
-    theta0 = radians(data.Ahrs1_Pitch.iloc[0]) # [rad] pitch angle in the stationary flight condition
+    alpha0 = radians(data.vane_AOA.iloc[0])                                                  # [rad] angle of attack in the stationary flight condition
+    theta0 = radians(data.Ahrs1_Pitch.iloc[0])                                               # [rad] pitch angle in the stationary flight condition
 
-    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)        # Transform angle of attack from body to stability axis frame
-    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)     # Transform angle of pitch from body to stability axis frame
+    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                 # Transform angle of attack from body to stability axis frame
+    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                              # Transform angle of pitch from body to stability axis frame
 
     # ==============================================================================================
     # centre of gravity calculations
     # ==============================================================================================
     momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 
-    LEMAC   = 261.56*0.0254                           # [m] leading edge position of mean aerodynamic chord
-    BEM     = 9165                                    # [lbs] basic empty mass, taken from weight measurements
-    cgBEM   = 291.647954                              # [in] centre of gravity position of BEM
+    LEMAC   = 261.56*0.0254                                                                  # [m] leading edge position of mean aerodynamic chord
+    BEM     = 9165                                                                           # [lbs] basic empty mass, taken from weight measurements
+    cgBEM   = 291.647954                                                                     # [in] centre of gravity position of BEM
 
-    xseats  = [131,131,214,214,251,251,288,288,170]  # [in] x-position of each seat for passenger / pilot
-    Mseats  = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462,74*2.20462,79*2.20462,103*2.20462,80*2.20462] # [lbs] weight of each passenger on each seat
+    xseats  = [131,131,214,214,251,251,288,288,170]                                          # [in] x-position of each seat for passenger / pilot
+    Mseats  = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462, \
+               74*2.20462,79*2.20462,103*2.20462,80*2.20462]                                 # [lbs] weight of each passenger on each seat
 
-    xbag    = [74, 321, 338]                           # [in]
-    Mbag    = [0, 0, 0]                                # [lbs]
+    xbag    = [74, 321, 338]                                                                 # [in]
+    Mbag    = [0, 0, 0]                                                                      # [lbs]
 
-    mPL     = sum(Mseats) + sum(Mbag)                  # [lbs] payload mass
+    mPL     = sum(Mseats) + sum(Mbag)                                                        # [lbs] payload mass
 
-    momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
+    momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) \
+               + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
 
-    ZFM = BEM + mPL                                    # [lbs] zero fuel mass
-    cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)       # [] centre of gravity position of zero fuel mass
+    ZFM = BEM + mPL                                                                          # [lbs] zero fuel mass
+    cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)                                             # [] centre of gravity position of zero fuel mass
 
-    mf_init = 4100                                     # [lbs] initial fuel mass
+    mf_init = 4100                                                                           # [lbs] initial fuel mass
     momentmf_init = fuelinterpolation(mf_init, momentfuel)*100
 
-    mRW    = ZFM + mf_init                             # [lbs] ramp weight
-    cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)     # [] centre of gravity of ramp weight
+    mRW    = ZFM + mf_init                                                                   # [lbs] ramp weight
+    cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)                                           # [] centre of gravity of ramp weight
 
-    cg     = []                                        # initialise empty list for centre of gravity
-    temp   = np.zeros((len(data.time)-1, 2))           # initialise empty numpy array for time and mass
+    cg     = []                                                                              # initialise empty list for centre of gravity
+    temp   = np.zeros((len(data.time)-1, 2))                                                 # initialise empty numpy array for time and mass
     fused  = fuelused(data.time, data.rh_engine_FMF, data.lh_engine_FMF)
     i = 0
     for t in data.time[:len(data.time) - 1]:
         tempcg, tempm = cgtime(t, mf_init, ZFM, cgZFM, fused, momentfuel)
-        cg.append(tempcg)                              # append invidual cg position to cg list
-        temp[i][0], temp[i][1] = t, lbstokg(tempm)     # population of numpy array with time and mass
+        cg.append(tempcg)                                                                    # append invidual cg position to cg list
+        temp[i][0], temp[i][1] = t, lbstokg(tempm)                                           # population of numpy array with time and mass
         i += 1
 
-    cg     = np.array(cg)                                 # convert list to numpy array
-    m      = pd.DataFrame(temp, columns=['time', 'mass']) # [s, kg] dataframe with specific mass at time t
-
+    cg     = np.array(cg)                                                                    # convert list to numpy array
+    m      = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
+        syss = ctl.StateSpace(As, Bs, C, D)                                                  # create state-space system for symmetric eigenmotions
     # ==============================================================================================
     # Parameter definition; copied from Cit_par.py
     # ==============================================================================================
-    hp0    = fttom(data.Dadc1_alt.iloc[0])     # [m] pressure altitude in the stationary flight condition
-    V0     = ktstoms(data.Dadc1_tas.iloc[0])   # [m/s] true airspeed in the stationary flight condition
+    hp0    = fttom(data.Dadc1_alt.iloc[0])                                                   # [m] pressure altitude in the stationary flight condition
+    V0     = ktstoms(data.Dadc1_tas.iloc[0])                                                 # [m/s] true airspeed in the stationary flight condition
 
-    m      = m.mass.iloc[0]     # [kg] takeoff weight of Cessna Citation II
+    m      = m.mass.iloc[0]                                                                  # [kg] takeoff weight of Cessna Citation II
 
-    e      = 0.5662173213929709 # [-] Oswald factor
-    # e      = 0.8                # [-] Oswald factor reference data
-    CD0    = 0.0255504796766271 # [-] Zero lift drag coefficient
-    # CD0    = 0.04               # [-] Zero lift drag coefficient reference data
-    CLa    = 4.557979876353312  # [1/rad] Slope of CL-alpha curve
-    # CLa    = 5.084              # [1/rad] Slope of CL-alpha curve reference data
+    e      = 0.5662173213929709                                                              # [-] Oswald factor
+    # e      = 0.8                                                                             # [-] Oswald factor reference data
+    CD0    = 0.0255504796766271                                                              # [-] Zero lift drag coefficient
+    # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
+    CLa    = 4.557979876353312                                                               # [1/rad] Slope of CL-alpha curve
+    # CLa    = 5.084                                                                           # [1/rad] Slope of CL-alpha curve reference data
 
-    Cma    = -0.582128          # [-] longitudinal stabilty
-    Cmde   = -1.21076           # [-] elevator effectiveness
+    Cma    = -0.582128                                                                       # [-] longitudinal stabilty
+    Cmde   = -1.21076                                                                        # [-] elevator effectiveness
 
-    S      = 30.00              # [m^2] wing area
-    Sh     = 0.2 * S            # [m^2] stabiliser area
-    Sh_S   = Sh / S             # [-]
-    lh     = 0.71 * 5.968       # [m] tail length
-    c      = 2.0569             # [m] mean aerodynamic cord
-    lh_c   = lh / c             # [-]
-    b      = 15.911             # [m] wing span
-    bh     = 5.791              # [m] stabilser span
-    AR     = b ** 2 / S         # [-] wing aspect ratio
-    Ah     = bh ** 2 / Sh       # [-] stabilser aspect ratio
-    Vh_V   = 1                  # [-]
-    ih     = -2 * pi / 180      # [rad] stabiliser angle of incidence
+    S      = 30.00                                                                           # [m^2] wing area
+    Sh     = 0.2 * S                                                                         # [m^2] stabiliser area
+    Sh_S   = Sh / S                                                                          # [-]
+    lh     = 0.71 * 5.968                                                                    # [m] tail length
+    c      = 2.0569                                                                          # [m] mean aerodynamic cord
+    lh_c   = lh / c                                                                          # [-]
+    b      = 15.911                                                                          # [m] wing span
+    bh     = 5.791                                                                           # [m] stabilser span
+    AR     = b ** 2 / S                                                                      # [-] wing aspect ratio
+    Ah     = bh ** 2 / Sh                                                                    # [-] stabilser aspect ratio
+    Vh_V   = 1                                                                               # [-]
+    ih     = -2 * pi / 180                                                                   # [rad] stabiliser angle of incidence
 
-    rho0   = 1.2250             # [kg/m^3] air density at sea level
-    LAMBDA = -0.0065            # [K/m] temperature gradient in ISA
-    Temp0  = 288.15             # [K] temperature at sea level in ISA
-    R      = 287.05             # [m^2/s^2 K] specific gas constant
-    g      = 9.81               # [m/s^2] gravitational acceleration
-    rho    = rho0 * pow( ((1+(LAMBDA * hp0 / Temp0))), (-((g / (LAMBDA*R)) + 1))) # [kg/m^3] density at altitude h
-    W      = m * g              # [N] aircraft weight
+    rho0   = 1.2250                                                                          # [kg/m^3] air density at sea level
+    LAMBDA = -0.0065                                                                         # [K/m] temperature gradient in ISA
+    Temp0  = 288.15                                                                          # [K] temperature at sea level in ISA
+    R      = 287.05                                                                          # [m^2/s^2 K] specific gas constant
+    g      = 9.81                                                                            # [m/s^2] gravitational acceleration
+    rho    = rho0 * pow( ((1+(LAMBDA * hp0 / Temp0))), (-((g / (LAMBDA*R)) + 1)))            # [kg/m^3] density at altitude h
+    W      = m * g                                                                           # [N] aircraft weight
 
     muc    = m / (rho * S * c)
     mub    = m / (rho * S * b)
@@ -339,13 +341,13 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     KZ2    = 0.042
     KXZ    = 0.002
 
-    Cmac   = 0                                          # [-] Moment coefficient about the aerodynamic centre
-    CNwa   = CLa                                        # [-] Wing normal force slope
-    CNha   = 2 * pi * Ah / (Ah + 2)                     # [-] Stabiliser normal force slope
-    depsda = 4 / (AR + 2)                               # [-] Downw sh gradient
+    Cmac   = 0                                                                               # [-] Moment coefficient about the aerodynamic centre
+    CNwa   = CLa                                                                             # [-] Wing normal force slope
+    CNha   = 2 * pi * Ah / (Ah + 2)                                                          # [-] Stabiliser normal force slope
+    depsda = 4 / (AR + 2)                                                                    # [-] Downw sh gradient
 
-    CL     = 2 * W / (rho * V0 ** 2 * S)                # [-] Lift coefficient
-    CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)  # [-] Drag coefficient
+    CL     = 2 * W / (rho * V0 ** 2 * S)                                                     # [-] Lift coefficient
+    CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)                                       # [-] Drag coefficient
 
     CX0    = W * sin(theta0) / (0.5 * rho * V0 ** 2 * S)
     CXu    = -0.095
@@ -388,18 +390,18 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # ==============================================================================================
     # Declaration of matrices and column vectors
     # ==============================================================================================
-    A       = np.zeros((8,8))         # Declaration of matrix A with dimensions [8 x 8] for system of equations
-    B       = np.zeros((8,8))         # Declaration of matrix B with dimensions [8 x 4] for system of equations
-    C       = np.zeros((8,4))         # Declaration of matrix C with dimensions [8 x 4] for system of equations
-    A_temp  = np.zeros((8,8))         # Declaration of temporary matrix A with dimensions [8 x 8] for system of equations
-    B_temp  = np.zeros((8,8))         # Declaration of temporary matrix B with dimensions [8 x 4] for system of equations
-    C_temp  = np.zeros((8,4))         # Declaration of temporary matrix C with dimensions [8 x 4] for system of equations
-    As      = np.zeros((4,4))         # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
-    Aa      = np.zeros((4,4))         # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
-    Bs      = np.zeros((4,4))         # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
-    Ba      = np.zeros((4,4))         # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
-    Cs      = np.zeros((4,2))         # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
-    Ca      = np.zeros((4,2))         # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
+    A       = np.zeros((8,8))                                                                # Declaration of matrix A with dimensions [8 x 8] for system of equations
+    B       = np.zeros((8,8))                                                                # Declaration of matrix B with dimensions [8 x 4] for system of equations
+    C       = np.zeros((8,4))                                                                # Declaration of matrix C with dimensions [8 x 4] for system of equations
+    A_temp  = np.zeros((8,8))                                                                # Declaration of temporary matrix A with dimensions [8 x 8] for system of equations
+    B_temp  = np.zeros((8,8))                                                                # Declaration of temporary matrix B with dimensions [8 x 4] for system of equations
+    C_temp  = np.zeros((8,4))                                                                # Declaration of temporary matrix C with dimensions [8 x 4] for system of equations
+    As      = np.zeros((4,4))                                                                # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
+    Aa      = np.zeros((4,4))                                                                # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
+    Bs      = np.zeros((4,4))                                                                # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
+    Ba      = np.zeros((4,4))                                                                # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
+    Cs      = np.zeros((4,2))                                                                # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
+    Ca      = np.zeros((4,2))                                                                # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
 
     # ==============================================================================================
     # Population of symmetric EOM matrices with variables for state-space representation
