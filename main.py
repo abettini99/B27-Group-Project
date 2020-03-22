@@ -88,6 +88,8 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "aperroll":
+        time_start  = 2850 #3060 - 10
+        time_stop   = 2901 + 150 #3240
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -520,3 +522,5 @@ forced_dr = pd.concat(forced_dr, axis=1)
 # plt.show()
 
 data = importdata('flightdata.mat')
+new_data = manouvre(data, 'aperroll')
+new_data.plot(x='time', y='Ahrs1_bRollRate')
