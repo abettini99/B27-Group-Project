@@ -76,6 +76,12 @@ def manouvre(data, flightmanouvre):
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
+    if flightmanouvre == "aperroll":
+        time_start  = 2880
+        time_stop   = 2880 + 120
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+
     if flightmanouvre == "dutchroll":
         time_start  = 3020
         time_stop   = 3041.5
@@ -84,12 +90,6 @@ def manouvre(data, flightmanouvre):
     if flightmanouvre == "dutchrollYD":
         time_start  = 3091
         time_stop   = 3103
-        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
-        return data
-
-    if flightmanouvre == "aperroll":
-        time_start  = 2880
-        time_stop   = 2880 + 150
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -403,7 +403,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     Ba      = np.zeros((4,4))                                                                # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
     Cs      = np.zeros((4,2))                                                                # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
     Ca      = np.zeros((4,2))                                                                # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
-
+    A_s     = np.zeros((4,4))                                                                # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
+    A_a     = np.zeros((4,4))                                                                # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
+    B_s     = np.zeros((4,4))                                                                # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
+    B_a     = np.zeros((4,4))                                                                # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
     # ==============================================================================================
     # Population of symmetric EOM matrices with variables for state-space representation
     # ==============================================================================================
@@ -486,11 +489,11 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     C_temp[0:4, 0:2] = Cs
     C_temp[4:8, 2:4] = Ca
 
-    As = np.dot(inv(As), Bs)
-    Bs = np.dot(inv(As), Cs)
+    A_s = np.dot(inv(As), Bs)
+    B_s = np.dot(inv(As), Cs)
 
-    Aa = np.dot(inv(Aa), Ba)
-    Ba = np.dot(inv(Aa), Ca)
+    A_a = np.dot(inv(Aa), Ba)
+    B_a = np.dot(inv(Aa), Ca)
 
     # Output of state-space representation should be equal to the relevant aircraft states
     # --> matrix C is the identity matrix and D is a zero array
@@ -501,8 +504,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['phugoid', 'shortperiod']:
-        syss = ctl.StateSpace(As, Bs, C, D)                                                  # create state-space system for symmetric eigenmotions
-        evals, evacs = eig(As)                                                               # compute eigenvalues and eigenvectors
+        syss = ctl.StateSpace(A_s, B_s, C, D)                                                  # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_s)                                                               # compute eigenvalues and eigenvectors
 
         for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
             f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
@@ -530,6 +533,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
                 ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(xmin=0)                                                    # set xmin at 0
+                ax1[i,0].set_xlim(xmax=120)                                                  # set xmax at tstop
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
                 ax1[i,0].minorticks_on()                                                     # set minor ticks
                 ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
@@ -539,6 +543,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
             ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
             ax1[3,0].set_xlim(xmin=0)                                                        # set xmin at 0
+            ax1[i,0].set_xlim(xmax=120)                                                      # set xmax at tstop
             ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
             ax1[3,0].minorticks_on()                                                         # set minor ticks
             ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
@@ -579,8 +584,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # Calculates responses to asymmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
-        sysa = ctl.StateSpace(Aa, Ba, C, D)                                                  # create state-space system for symmetric eigenmotions
-        evals, evacs = eig(Aa)                                                               # compute eigenvalues and eigenvectors
+        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                  # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_a)                                                               # compute eigenvalues and eigenvectors
 
         for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
             f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
@@ -591,6 +596,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
         units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                     # list with units of columns for plotting
         u = [np.radians(data.delta_a), np.radians(data.delta_r)]                             # [rad] input array given input at each time for [da, dr]
+        u = np.negative(u)                                                                   # [rad] flip input sign; input deflections seems to have wrong sign
         columns = [r'\beta', r'\phi', r'p', r'r']                                            # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list
 
