@@ -231,6 +231,48 @@ etrim   = manouvre(data, 'elevatortrim')                                        
 cgshift = manouvre(data, 'cgshift')                                                          # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
+# centre of gravity calculations
+# ==============================================================================================
+momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
+
+LEMAC   = 261.56*0.0254                                                                  # [m] leading edge position of mean aerodynamic chord
+BEM     = 9165                                                                           # [lbs] basic empty mass, taken from weight measurements
+cgBEM   = 291.647954                                                                     # [in] centre of gravity position of BEM
+
+xseats  = [131,131,214,214,251,251,288,288,170]                                          # [in] x-position of each seat for passenger / pilot
+Mseats  = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462, \
+           74*2.20462,79*2.20462,103*2.20462,80*2.20462]                                 # [lbs] weight of each passenger on each seat
+
+xbag    = [74, 321, 338]                                                                 # [in]
+Mbag    = [0, 0, 0]                                                                      # [lbs]
+
+mPL     = sum(Mseats) + sum(Mbag)                                                        # [lbs] payload mass
+
+momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) \
+           + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
+
+ZFM = BEM + mPL                                                                          # [lbs] zero fuel mass
+cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)                                             # [] centre of gravity position of zero fuel mass
+
+mf_init = 4100                                                                           # [lbs] initial fuel mass
+momentmf_init = fuelinterpolation(mf_init, momentfuel)*100
+
+mRW    = ZFM + mf_init                                                                   # [lbs] ramp weight
+cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)                                           # [] centre of gravity of ramp weight
+
+cg     = []                                                                              # initialise empty list for centre of gravity
+temp   = np.zeros((len(data.time)-1, 2))                                                 # initialise empty numpy array for time and mass
+fused  = fuelused(data.time, data.rh_engine_FMF, data.lh_engine_FMF)
+i = 0
+for t in data.time[:len(data.time) - 1]:
+    tempcg, tempm = cgtime(t, mf_init, ZFM, cgZFM, fused, momentfuel)
+    cg.append(tempcg)                                                                    # append invidual cg position to cg list
+    temp[i][0], temp[i][1] = t, lbstokg(tempm)                                           # population of numpy array with time and mass
+    i += 1
+
+cg     = np.array(cg)                                                                    # convert list to numpy array
+df     = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
+# ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
 f = open('eigenvalues.txt', 'w+')                                                            # create .txt-file where EV's are written
@@ -242,6 +284,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # data = importdata('referencedata.mat')                                                   # initialise reference data from matlab file
     data   = importdata('flightdata.mat')                                                    # initialise flight data from matlab file
     data   = manouvre(data, motion)                                                          # sliced data array for phugoid motion
+    m      = df
+    m      = manouvre(m, motion)
 
     # ==============================================================================================
     # Transform coordinate system from body to stability axis frame
@@ -251,49 +295,6 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                 # Transform angle of attack from body to stability axis frame
     data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                              # Transform angle of pitch from body to stability axis frame
-
-    # ==============================================================================================
-    # centre of gravity calculations
-    # ==============================================================================================
-    momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
-
-    LEMAC   = 261.56*0.0254                                                                  # [m] leading edge position of mean aerodynamic chord
-    BEM     = 9165                                                                           # [lbs] basic empty mass, taken from weight measurements
-    cgBEM   = 291.647954                                                                     # [in] centre of gravity position of BEM
-
-    xseats  = [131,131,214,214,251,251,288,288,170]                                          # [in] x-position of each seat for passenger / pilot
-    Mseats  = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462, \
-               74*2.20462,79*2.20462,103*2.20462,80*2.20462]                                 # [lbs] weight of each passenger on each seat
-
-    xbag    = [74, 321, 338]                                                                 # [in]
-    Mbag    = [0, 0, 0]                                                                      # [lbs]
-
-    mPL     = sum(Mseats) + sum(Mbag)                                                        # [lbs] payload mass
-
-    momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) \
-               + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
-
-    ZFM = BEM + mPL                                                                          # [lbs] zero fuel mass
-    cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)                                             # [] centre of gravity position of zero fuel mass
-
-    mf_init = 4100                                                                           # [lbs] initial fuel mass
-    momentmf_init = fuelinterpolation(mf_init, momentfuel)*100
-
-    mRW    = ZFM + mf_init                                                                   # [lbs] ramp weight
-    cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)                                           # [] centre of gravity of ramp weight
-
-    cg     = []                                                                              # initialise empty list for centre of gravity
-    temp   = np.zeros((len(data.time)-1, 2))                                                 # initialise empty numpy array for time and mass
-    fused  = fuelused(data.time, data.rh_engine_FMF, data.lh_engine_FMF)
-    i = 0
-    for t in data.time[:len(data.time) - 1]:
-        tempcg, tempm = cgtime(t, mf_init, ZFM, cgZFM, fused, momentfuel)
-        cg.append(tempcg)                                                                    # append invidual cg position to cg list
-        temp[i][0], temp[i][1] = t, lbstokg(tempm)                                           # population of numpy array with time and mass
-        i += 1
-
-    cg     = np.array(cg)                                                                    # convert list to numpy array
-    m      = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
 
     # ==============================================================================================
     # Parameter definition; copied from Cit_par.py
@@ -708,4 +709,4 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             # fig1.suptitle('Spiral')                                                          # set title of figure
             fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
-# plt.show()
+# # plt.show()
