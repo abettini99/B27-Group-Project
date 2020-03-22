@@ -2,7 +2,7 @@
 Institution:    TU Delft
 Authors:        B27
 Date:           06-03-2020
-Dynamic Analysis of Citation II
+Dynamic Analysis of Cessna Citation II
 """
 
 # ==============================================================================================
@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt                         # package to create visu
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
+
 # ==============================================================================================
 # Function Definitions
 # ==============================================================================================
@@ -98,11 +99,105 @@ def manouvre(data, flightmanouvre):
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
+def cgshift1(mi, cgi, mf, momentchange):
+    """
+        Function description
+        :mi:
+        :cgi:
+        :mf:
+        :momentchange:
+        :return:
+    """
+    return (mi * cgi+ momentchange) / mf
+
+def cgshift2(m, cgi, momentchange):
+    """
+        Function description
+        :m:
+        :cgi:
+        :momentchange:
+        :return:
+    """
+    return cgi + momentchange / m
+
+def cgmac(cgdatum, lemac, mac):
+    """
+        Function description
+        :cgdatum:
+        :lemac: leading edge position of mean aerodynamic chord
+        :mac: mean aerodynamic chord
+        :return:
+    """
+    return (cgdatum - lemac) / mac * 100
+
+def fuelinterpolation(fuel, fuelmoment):
+    """
+        Function description
+        :fuel:
+        :fuelmoment:
+        :return:
+    """
+    for i in range(len(fuelmoment)):
+        if fuel<= fuelmoment.iat[i,0]:
+            momentcg = fuelmoment.iat[i,1] - ((fuelmoment.iat[i,1] - fuelmoment.iat[i-1,1])/(fuelmoment.iat[i,0]-fuelmoment.iat[i-1,0]) )* (fuelmoment.iat[i,0] - fuel)
+            break
+    return momentcg
+
+def trapezoidal(j, time, ff_le, ff_re):
+    """
+        Function description
+        :j:
+        :time:
+        :ff_le:
+        :ff_re:
+        :return:
+    """
+    dt = time[j+1] -time[j]
+    f1 = ff_le[j] / 3600
+    f2 = ff_le[j+1] / 3600
+    f3 = ff_re[j] / 3600
+    f4 = ff_re[j+1] / 3600
+    I1 = (f1+f2) * dt / 2
+    I2 = (f3+f4) * dt / 2
+    return I1+I2
+
+def fuelused(time, ff_le, ff_re):
+    """
+        Function description
+        :time:
+        :ff_le:
+        :ff_re:
+        :return:
+    """
+    fuelUsed = {}
+    integral = 0
+    for t in time[:len(time)-1]:
+        integral =integral + trapezoidal(time[time == t].index[0], time, ff_le, ff_re)
+        fuelUsed[t] = integral
+    return fuelUsed
+
+def cgtime(t, fuel_i, ZFM, CG_ZFM, fuelused, fuel_moment):
+    """
+        Function description
+        :t:
+        :fuel_i:
+        :ZFM: zero fuel mass [UNIT]
+        :CG_ZFM:
+        :fuelused:
+        :fuel_moment:
+        :return:
+    """
+    fuel_mass = fuel_i - fuelused[t]
+    fuel_mom = fuelinterpolation(fuel_mass, fuel_moment)*100
+    tot_mass = ZFM+ fuel_mass
+    cg = cgshift1(ZFM, CG_ZFM, tot_mass, fuel_mom)
+    return cg, tot_mass
+
 def ktstoms(velocity):
     """
-        Function converts velocity given in knots [kts] to metre per second [m/s]
-        :velocity: input velocity in knots
-        :return: velocity converted to metre per second
+        Function converts velocity given in knots to metre per second
+        :velocity: input velocity [kts]
+        :return: output velocity [m/s]
     """
     return velocity * 0.5144444444
 
@@ -113,6 +208,14 @@ def fttom(altitude):
         :return: outputs altitude in [m]
     """
     return altitude * 0.3048
+
+def lbstokg(mass):
+    """
+        Function converts mass given in pounds [lbs] to kilogram [kg]
+        :velocity: input mass in [lbs]
+        :return: outputs mass in [kg]
+    """
+    return mass * 0.45359237
 
 # ==============================================================================================
 # Import data from Matlab files
@@ -130,7 +233,7 @@ cgshift = manouvre(data, 'cgshift')                    # sliced data for the 2 c
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
+motion = 'shortperiod'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
 data   = manouvre(data, motion)                          # sliced data array for phugoid motion
 
 # ==============================================================================================
@@ -144,12 +247,54 @@ data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)
 data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)
 
 # ==============================================================================================
+# centre of gravity calculations
+# ==============================================================================================
+momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
+
+
+LEMAC = 261.56*0.0254                           # [m] leading edge position of mean aerodynamic chord
+BEM   = 9165                                    # [lbs] basic empty mass, taken from weight measurements
+cgBEM = 291.647954                              # [in] centre of gravity position of BEM
+
+xseats = [131,131,214,214,251,251,288,288,170]  # [in] x-position of each seat for passenger / pilot
+Mseats = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462,74*2.20462,79*2.20462,103*2.20462,80*2.20462] # [lbs] weight of each passenger on each seat
+
+xbag = [74, 321, 338]                           # [in]
+Mbag = [0, 0, 0]                                # [lbs]
+
+mPL = sum(Mseats) + sum(Mbag)                   # [lbs] payload mass
+
+momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
+
+ZFM = BEM + mPL                                 # [lbs] zero fuel mass
+cgZFM = cgshift1(BEM, cgBEM, ZFM, momentPL)     # [] centre of gravity position of zero fuel mass
+
+mf_init = 4100                                  # [lbs] initial fuel mass
+momentmf_init = fuelinterpolation(mf_init, momentfuel)*100
+
+mRW = ZFM + mf_init                             # [lbs] ramp weight
+cgmRW = cgshift1(ZFM, cgZFM, mRW, momentfuel)   # [] centre of gravity of ramp weight
+
+cg = []                                         # initialise empty list for centre of gravity
+temp = np.zeros((len(data.time)-1, 2))          # initialise empty numpy array for time and mass
+fuelused = fuelused(data.time, data.rh_engine_FMF, data.lh_engine_FMF)
+i = 0
+for t in data.time[:len(data.time) - 1]:
+    tempcg, tempm = cgtime(t, mf_init, ZFM, cgZFM, fuelused, momentfuel)
+    cg.append(tempcg)                           # append invidual cg position to cg list
+    temp[i][0], temp[i][1] = t, lbstokg(tempm)  # population of numpy array with time and mass
+    i += 1
+
+cg = np.array(cg)                                # convert list to numpy array
+m = pd.DataFrame(temp, columns=['time', 'mass']) # [s, kg] dataframe with specific mass at time t
+
+# ==============================================================================================
 # Parameter definition; copied from Cit_par.py
 # ==============================================================================================
 hp0    = fttom(data.Dadc1_alt.iloc[0])     # [m] pressure altitude in the stationary flight condition
 V0     = ktstoms(data.Dadc1_tas.iloc[0])   # [m/s] true airspeed in the stationary flight condition
 
-m      = 6805.903           # [kg] takeoff weight of Cessna Citation II
+m      = m.mass.iloc[0]     # [kg] takeoff weight of Cessna Citation II
 
 e      = 0.8                # [-] Oswald factor
 CD0    = 0.04               # [-] Zero lift drag coefficient
@@ -540,7 +685,3 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
 # plt.show()
-
-data = importdata('flightdata.mat')
-new_data = manouvre(data, 'shortperiod')
-new_data.plot(x='time', y='Ahrs1_Pitch')
