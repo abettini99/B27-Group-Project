@@ -685,10 +685,3 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
 # plt.show()
-<<<<<<< HEAD
-=======
-
-data = importdata('flightdata.mat')
-new_data = manouvre(data, 'aperroll')
-new_data.plot(x='time', y='Ahrs1_bRollRate')
->>>>>>> origin/master
