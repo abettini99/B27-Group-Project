@@ -130,7 +130,7 @@ cgshift = manouvre(data, 'cgshift')                    # sliced data for the 2 c
 # ==============================================================================================
 # Eigenmotion analysis - uncomment required eigenmotion array
 # ==============================================================================================
-motion = 'dutchroll'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
+motion = 'spiral'    # set motion - 'phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral'
 data   = manouvre(data, motion)                          # sliced data array for phugoid motion
 
 # ==============================================================================================
@@ -461,8 +461,8 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        # fig1.suptitle('Aperiodic Roll')                                                  # set title of figure
-        fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
+        fig1.suptitle('Aperiodic Roll')                                                  # set title of figure
+        # fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
 
     if motion == 'dutchroll':
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -486,8 +486,8 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        # fig1.suptitle('Dutch Roll without Yaw Damper')                                   # set title of figure
-        fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
+        fig1.suptitle('Dutch Roll without Yaw Damper')                                   # set title of figure
+        # fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
 
     if motion == 'dutchrollYD':
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -511,8 +511,8 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        # fig1.suptitle('Dutch Roll with Yaw Damper')                                      # set title of figure
-        fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
+        fig1.suptitle('Dutch Roll with Yaw Damper')                                      # set title of figure
+        # fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
 
     if motion == 'spiral':
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -536,11 +536,11 @@ if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        # fig1.suptitle('Spiral')                                                          # set title of figure
-        fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
+        fig1.suptitle('Spiral')                                                          # set title of figure
+        # fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
 
-# plt.show()
-
-data = importdata('flightdata.mat')
-new_data = manouvre(data, 'aperroll')
-new_data.plot(x='time', y='Ahrs1_bRollRate')
+plt.show()
+#
+#data = importdata('flightdata.mat')
+#new_data = manouvre(data, 'aperroll')
+#new_data.plot(x='time', y='Ahrs1_bRollRate')
