@@ -27,14 +27,14 @@ def importdata(filename):
         :filename: relative path of the .mat-file from the flight test
         :return: dataframe with each variable in one column
     """
-    mat     = loadmat(filename)          # load data from .mat-file - returns dictionary with variable names as keys and loaded matrices as values
-    mdata   = mat['flightdata']          # access first level variable in .mat-file
-    mdtype  = mdata.dtype                # dtypes of structures are unsized objects
+    mat     = loadmat(filename)                                                           # load data from .mat-file - returns dictionary with variable names as keys and loaded matrices as values
+    mdata   = mat['flightdata']                                                           # access first level variable in .mat-file
+    mdtype  = mdata.dtype                                                                 # dtypes of structures are unsized objects
     ndata   = {n: mdata[n][0,0]['data'][0,0] for n in mdtype.names}                       # redefine data as dictionary with names from dtypes
     data    = pd.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)   # initialise empty dataframe
 
-    for key, values in ndata.items():    # iterate over keys and
-        data[key] = values.flatten()     # add new column with variable as key and values; input to dataframe must be 1D such that 2D arrays must be flattened
+    for key, values in ndata.items():                                                     # iterate over keys and
+        data[key] = values.flatten()                                                      # add new column with variable as key and values; input to dataframe must be 1D such that 2D arrays must be flattened
     return data
 
 def manouvre(data, flightmanouvre):
@@ -391,12 +391,6 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # ==============================================================================================
     # Declaration of matrices and column vectors
     # ==============================================================================================
-    A       = np.zeros((8,8))                                                                # Declaration of matrix A with dimensions [8 x 8] for system of equations
-    B       = np.zeros((8,8))                                                                # Declaration of matrix B with dimensions [8 x 4] for system of equations
-    C       = np.zeros((8,4))                                                                # Declaration of matrix C with dimensions [8 x 4] for system of equations
-    A_temp  = np.zeros((8,8))                                                                # Declaration of temporary matrix A with dimensions [8 x 8] for system of equations
-    B_temp  = np.zeros((8,8))                                                                # Declaration of temporary matrix B with dimensions [8 x 4] for system of equations
-    C_temp  = np.zeros((8,4))                                                                # Declaration of temporary matrix C with dimensions [8 x 4] for system of equations
     As      = np.zeros((4,4))                                                                # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
     Aa      = np.zeros((4,4))                                                                # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
     Bs      = np.zeros((4,4))                                                                # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
@@ -482,13 +476,6 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # ==============================================================================================
     # Population of matrices As and Aa
     # ==============================================================================================
-    A_temp[0:4, 0:4] = As
-    A_temp[4:8, 4:8] = Aa
-    B_temp[0:4, 0:4] = Bs
-    B_temp[4:8, 4:8] = Ba
-    C_temp[0:4, 0:2] = Cs
-    C_temp[4:8, 2:4] = Ca
-
     A_s = np.dot(inv(As), Bs)
     B_s = np.dot(inv(As), Cs)
 
@@ -519,7 +506,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list
 
-        flightdata = [np.radians(data.vane_AOA), np.radians(data.Ahrs1_Pitch), np.radians(data.Ahrs1_bPitchRate)]
+        flightdata = pd.DataFrame({'vane_AoA': np.radians(data.vane_AOA), 'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), 'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
 
         t, y, x = ctl.forced_response(syss, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -531,7 +518,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 120)                                                    # set xmin at 0 and tstop
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -551,13 +538,14 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
-            eigenmotion.to_csv('eigenmotions/phugoid.csv', encoding='utf-8', index=False)    # write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/phugoidNM.csv', encoding='utf-8', index=False)    # write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/phugoidED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
         elif motion == 'shortperiod':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C21', label='Numerical Model')    # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 10)                                                     # set xmin at 0 and tstp
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -577,7 +565,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/shortperiod.png', dpi=300, bbox_inches='tight')             # save figure
-            eigenmotion.to_csv('eigenmotions/shortperiod.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/shortperiodNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/shortperiodED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
     # ==============================================================================================
     # Calculates responses to asymmetric eigenmotions from state-space system
@@ -599,7 +588,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         columns = [r'\beta', r'\phi', r'p', r'r']                                            # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list
 
-        flightdata = [np.radians(data.Ahrs1_Roll), np.radians(data.Ahrs1_bRollRate), np.radians(data.Ahrs1_bYawRate)]
+        flightdata = pd.DataFrame({'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), 'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), 'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
 
         t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -611,7 +600,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')            # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 13)                                                     # set xmin at 0
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -632,13 +621,14 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
-            eigenmotion.to_csv('eigenmotions/aperiodicroll.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/aperiodicrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/aperiodicrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
         if motion == 'dutchroll':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')            # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 20)                                                    # set xmin at 0 and tstop
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -659,13 +649,14 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
-            eigenmotion.to_csv('eigenmotions/dutchroll.csv', encoding='utf-8', index=False)  # write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/dutchrollNM.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/dutchrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
         if motion == 'dutchrollYD':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')            # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 15)                                                     # set xmin at 0
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -686,13 +677,14 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
-            eigenmotion.to_csv('eigenmotions/dutchrollYD.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/dutchrollYDNM.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/dutchrollYDED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
         if motion == 'spiral':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata[i], c='k', label='Experimental Data')            # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')            # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xlim(0, 110)                                                    # set xmin at 0
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -713,6 +705,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
             fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
-            eigenmotion.to_csv('eigenmotions/spiralroll.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            eigenmotion.to_csv('eigenmotions/spiralrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+            flightdata.to_csv('eigenmotions/spiralrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
 # # plt.show()
