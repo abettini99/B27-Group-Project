@@ -322,6 +322,7 @@ def CLalpha_plot_stationary(plot='True'):
     
 CD0, oswald = CLCD_plot_stationary('False')
 CLalpha, y_intercept = CLalpha_plot_stationary('False')
+CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
 
 
 
