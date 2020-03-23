@@ -431,30 +431,30 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # ==============================================================================================
     # Population of symmetric EOM matrices with variables for state-space representation
     # ==============================================================================================
-    As[0,0] = - 2 * muc * c / V0**2
+    As[0,0] = - 2 * muc * c / V0
 
     As[1,1] = (CZadot - 2 * muc) * c / V0
 
     As[2,2] = -c / V0
 
     As[3,1] = Cmadot * c / V0
-    As[3,3] = -2 * muc * KY2 * (c / V0)**2
+    As[3,3] = -2 * muc * KY2 * (c / V0)
 
-    Bs[0,0] = -CXu / V0
+    Bs[0,0] = -CXu
     Bs[0,1] = -CXa
     Bs[0,2] = -CZ0
-    Bs[0,3] = -CXq * c / V0
+    Bs[0,3] = -CXq
 
-    Bs[1,0] = -CZu / V0
+    Bs[1,0] = -CZu
     Bs[1,1] = -CZa
     Bs[1,2] = +CX0
-    Bs[1,3] = -(CZq + 2 * muc) * c / V0
+    Bs[1,3] = -(CZq + 2 * muc)
 
-    Bs[2,3] = -c / V0
+    Bs[2,3] = -c
 
-    Bs[3,0] = -Cmu / V0
+    Bs[3,0] = -Cmu
     Bs[3,1] = -Cma
-    Bs[3,3] = -Cmq * c / V0
+    Bs[3,3] = -Cmq
 
     Cs[0,0] = -CXde
 
@@ -469,27 +469,27 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     Aa[1,1] = -0.5 * b / V0
 
-    Aa[2,2] = -4 * mub * KX2 * b**2 / (2 * V0**2)
-    Aa[2,3] = 4 * mub * KXZ * b**2 / (2 * V0**2)
+    Aa[2,2] = -4 * mub * KX2 * b / (V0)
+    Aa[2,3] = 4 * mub * KXZ * b / (V0)
 
     Aa[3,0] = Cnbdot * b / V0
-    Aa[3,2] = 4 * mub * KXZ * b**2 / (2 * V0**2)
-    Aa[3,3] = -4 * mub * KZ2 * b**2 / (2 * V0**2)
+    Aa[3,2] = 4 * mub * KXZ * b/ (V0)
+    Aa[3,3] = -4 * mub * KZ2 * b / (V0)
 
     Ba[0,0] = -CYb
     Ba[0,1] = -CL
-    Ba[0,2] = -CYp * b / (2 * V0)
-    Ba[0,3] = -(CYr - 4 * mub) * b / (2 * V0)
+    Ba[0,2] = -CYp
+    Ba[0,3] = -(CYr - 4 * mub)
 
-    Ba[1,2] = -b / (2 * V0)
+    Ba[1,2] = -1
 
     Ba[2,0] = -Clb
-    Ba[2,2] = -Clp * b / (2 * V0)
-    Ba[2,3] = -Clr * b / (2 * V0)
+    Ba[2,2] = -Clp
+    Ba[2,3] = -Clr
 
     Ba[3,0] = -Cnb
-    Ba[3,2] = -Cnp * b / (2 * V0)
-    Ba[3,3] = -Cnr * b / (2 * V0)
+    Ba[3,2] = -Cnp
+    Ba[3,3] = -Cnr
 
     Ca[0,0] = -CYda
     Ca[0,1] = -CYdr
