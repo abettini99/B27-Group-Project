@@ -5,8 +5,6 @@ Created on Mon Mar 23 14:29:19 2020
 @author: chang
 """
 
-from main import *
-
 def eigenval_symm():
     
     A = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2**2)
@@ -126,4 +124,7 @@ def eigenval_assym():
     
     return np.roots([A,B,C,D,E])
 
-
+print('eigen values of symmetric motion:',eigenval_symm())
+print('eigen values of phugoid motion:',eigenval_phugoid())
+print('eigen values of shortperiod motion:',eigenval_shortperiod())
+print('eigen values of asymmetric motion:',eigenval_assym())
