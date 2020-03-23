@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt                         # package to create visu
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
-from CLCD_and_CLalpha_plotter import CD0, oswald, CLalpha, y_intercept, CL
+
 
 # ==============================================================================================
 # Function Definitions
@@ -305,11 +305,12 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     m      = m.mass.iloc[0]                                                                  # [kg] takeoff weight of Cessna Citation II
 
-    e      = 0.5662173213929709                                                              # [-] Oswald factor
+    from CLCD_and_CLalpha_plotter import CD0, oswald, CLalpha, y_intercept
+    e      = oswald                                                              # [-] Oswald factor
     # e      = 0.8                                                                             # [-] Oswald factor reference data
-    CD0    = 0.0255504796766271                                                              # [-] Zero lift drag coefficient
+    # CD0    = CD0                                                              # [-] Zero lift drag coefficient
     # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
-    CLa    = 4.557979876353312                                                               # [1/rad] Slope of CL-alpha curve
+    CLa    = CLalpha                                                              # [1/rad] Slope of CL-alpha curve
     # CLa    = 5.084                                                                           # [1/rad] Slope of CL-alpha curve reference data
 
     Cma    = -0.582128                                                                       # [-] longitudinal stabilty
@@ -349,7 +350,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     depsda = 4 / (AR + 2)                                                                    # [-] Downw sh gradient
 
     CL     = 2 * W / (rho * V0 ** 2 * S)                                                     # [-] Lift coefficient
-    CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)                                       # [-] Drag coefficient
+    CD     = CD0 + (CLa * alpha0 + y_intercept) ** 2 / (pi * AR * e)                                       # [-] Drag coefficient
 
     CX0    = W * sin(theta0) / (0.5 * rho * V0 ** 2 * S)
     CXu    = -0.095

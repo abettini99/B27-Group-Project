@@ -8,7 +8,6 @@ import numpy as np
 import scipy as sp
 import pandas as pd
 import matplotlib.pyplot as plt
-from main import e, CD0, AR, S, c
 import matplotlib
 
 # TAS = data.Dadc1_tas # true air speed
@@ -16,14 +15,17 @@ import matplotlib
 # vane_AOA = data.vane_AOA # angle of attack
 # PressureAltitude = data.Dadc1_alt # [feet]
 # Pressure = ((850 - 1013) / 4813 * PressureAltitude + 1013) * 100 # Conversion from PA to P [Pa]
-
-
+b = 15.911
+S = 30.00   
+AR = b**2 / S
+c = 2.0569 
 
 ####### Data for Thrust.exe ########
 # experimental data
+print("Experiemental")
 m = 9165 * 0.453592 + 90 + 102 + 80 + 83 + 94 + 84 + 74 + 79 + 103 + 4100 * 0.453592 # [kg]
 time_config1 = [16*60+32, 18*60+20, 20*60+6, 22*60, 24*60+48, 26*60+24] # [s]
-IAS_config1 = np.array([248, 221, 188, 162, 140, 120]) * 0.514444 # [m/s]
+IAS_config1 = (np.array([248, 221, 188, 162, 140, 120]) - 2) * 0.514444 # [m/s]
 pressure_alt = np.array([7000, 7000, 6980, 7000, 7000, 6980]) * 0.3048 # [m]
 AOA = np.array([1.7, 2.5, 3.7, 5.5, 7.7, 10.6])  
 
@@ -34,9 +36,10 @@ fuelused = np.array([367, 400, 430, 470, 497, 515]) * 0.453592 # [kg]
 TAT_measured = np.array([13.8, 11.8, 9.2, 7.8, 6.8, 5.8])+ 273.15 # [Kelvin]
 
 # Reference
+# print("Reference")
 # m = 9165 * 0.453592 + 95 + 92 + 74 + 66 + 61 + 75 + 78 + 86 + 68 + 4050 * 0.453592 # [kg]
 # time_config1 = np.array([19*60+17, 21*60+37, 23*60+46, 26*60+4, 29*60+47, 32*60])
-# IAS_config1 = np.array([249, 221, 192, 163, 130, 118]) * 0.514444 # [m/s]
+# IAS_config1 = (np.array([249, 221, 192, 163, 130, 118]) - 2) * 0.514444 # [m/s]
 # pressure_alt = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # [m]
 # AOA = np.array([1.7, 2.4, 3.6, 5.4, 8.7, 10.6])
 # fuelflow_left = np.array([798, 673, 561, 463, 443, 474]) * 0.453592/60/60 # [kg/s]
@@ -55,7 +58,7 @@ gamma = 1.4
 
 def p0overp(h_p):
     g0 = 9.80665
-    R = 287
+    R = 287.05
     return 1 / (1 + _lambda * h_p / T_0)**(-1 * g0 /_lambda / R)
 
 def Mach(p0p, IAS):
@@ -69,6 +72,7 @@ T_ISA = T_0 + _lambda * pressure_alt
 TAT_corrected = TAT_measured / (1 + (gamma - 1) / 2 * Mach**2)
 temp_diff = TAT_corrected - T_ISA
 # temp_diff = T_ISA - TAT_corrected
+speedsound = np.sqrt(gamma * 287.05 * TAT_corrected)
 
 data_m = {'h_p': pressure_alt, 'Mach': Mach, 'temp diff': temp_diff, 'fuel flow left': fuelflow_left, 'fuel flow right': fuelflow_right }
 matlab_data = pd.DataFrame(data_m)
@@ -85,8 +89,8 @@ for line in lines:
     Thrust.append(thrust_sum)
 
 Thrust = np.array(Thrust)        
-V_TAS = Mach * 343
-rho = 101325 / p0overp(pressure_alt) / 287 / TAT_corrected
+V_TAS = Mach * speedsound
+rho = 101325 / p0overp(pressure_alt) / 287.05 / TAT_corrected
 Weight = (m - fuelused) * 9.80665
 
 def Reynolds():
@@ -186,7 +190,7 @@ def CLCD_plot_stationary(plot = 'True'):
 def CLalpha_plot_stationary(plot='True'):
     
     CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
-    CL = ( Weight ) * 2 / (rho * V_TAS**2 * S)
+    # CL = ( Weight ) * 2 / (rho * V_TAS**2 * S)
     
     ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
     texpsize= [26,28,30]
