@@ -74,9 +74,9 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "shortperiod":
-        tstep       = 10
-        time_start  = 2640
-        time_stop   = 2640 + tstep
+        tstep       = 15
+        time_start  = 2645
+        time_stop   = 2645 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -553,21 +553,25 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         # Calculate state space system for each eigenmotion
         # ==============================================================================================
-        syss = ctl.StateSpace(A_s, B_s, C, D)                                                # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_s)                                                              # compute eigenvalues and eigenvectors
+        syss = ctl.StateSpace(A_s, B_s, C, D)                                               # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_s)                                                             # compute eigenvalues and eigenvectors
 
-        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
-            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+        for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
 
-        tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
-        dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
+        tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
+        dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
 
-        units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
-        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
+        units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                      # list with units of columns for plotting
+        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                           # [rad] input array given input at each time for [de, dt]
+        x0 = np.array([[ktstoms(data.Dadc1_tas.iloc[0]) - V0],
+                       [np.radians(data.vane_AOA.iloc[0])],
+                       [np.radians(data.Ahrs1_Pitch.iloc[0])],
+                       [np.radians(data.Ahrs1_bPitchRate.iloc[0])]])                        # initial condition for forced response
 
-        columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
-        eigenmotion = []                                                                     # initialise empty list 1
+        columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                  # names of invidiual columns for DataFrame
+        eigenmotion = []                                                                    # initialise empty list 1
 
         flightdata = pd.DataFrame({'time': data.time, \
                                    'vane_AoA': np.radians(data.vane_AOA), \
@@ -577,31 +581,31 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         # Calculate forced response of eigenmotion to delta_i input
         # ==============================================================================================
-        t, y, x = ctl.forced_response(syss, dt, U=u)                                         # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                              # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
+        t, y, x = ctl.forced_response(syss, dt, U=u, X0=x0)                                 # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                             # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
 
         # ==============================================================================================
         # Calculate initial response for eigenmotion with disturbance input
         # ==============================================================================================
-        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                        # names for picture labelling
+        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                       # names for picture labelling
         X0 = np.array([[5.0, 0, 0, 0],
                        [0, 0.05, 0, 0],
                        [0, 0, 0.5, 0],
-                       [0, 0, 0, 0.5]])                                                      # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+                       [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
+        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
         k = 0
         for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-            em.append(df3)                                                                   # append DataFrame to individual list
+            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
+            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
+            em.append(df3)                                                                  # append DataFrame to individual list
             k += 1
 
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
 
         # ==============================================================================================
         # Plot experimental data and numerical model for forced_response
@@ -724,55 +728,59 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         # Calculate state space system for each eigenmotion
         # ==============================================================================================
-        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_a)                                                              # compute eigenvalues and eigenvectors
+        sysa = ctl.StateSpace(A_a, B_a, C, D)                                               # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_a)                                                             # compute eigenvalues and eigenvectors
 
-        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
-            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+        for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
 
-        tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
-        dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
+        tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
+        dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
 
-        units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                     # list with units of columns for plotting
-        u = [np.radians(data.delta_a), np.radians(data.delta_r)]                             # [rad] input array given input at each time for [da, dr]
-        u = np.negative(u)                                                                   # [rad] flip input sign; input deflections seems to have wrong sign
-        X0 = np.array([[0], [0], [0], [0.5]])                                                # initial condition for asymmetric flight
-        columns = [r'\beta', r'\phi', r'p', r'r']                                            # names of invidiual columns for DataFrame
-        eigenmotion = []                                                                     # initialise empty list 1
-        eigenmotion2 = []                                                                    # initialise empty list 2
+        units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                    # list with units of columns for plotting
+        u = [np.radians(data.delta_a), np.radians(data.delta_r)]                            # [rad] input array given input at each time for [da, dr]
+        u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
+        x0 = np.array([[0],
+                       [np.radians(data.Ahrs1_Roll.iloc[0])],
+                       [np.radians(data.Ahrs1_bRollRate.iloc[0])],
+                       [np.radians(data.Ahrs1_bYawRate.iloc[0])]])                          # initial condition for forced response
+
+        columns = [r'\beta', r'\phi', r'p', r'r']                                           # names of invidiual columns for DataFrame
+        eigenmotion = []                                                                    # initialise empty list 1
+        eigenmotion2 = []                                                                   # initialise empty list 2
 
         flightdata = pd.DataFrame({'time': data.time, \
                                    'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
                                    'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), \
                                    'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
 
-        t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                              # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
-        u = np.negative(u)                                                                   # [rad] flip input sign; input deflections seems to have wrong sign
+        t, y, x = ctl.forced_response(sysa, dt, U=u, X0=x0)                                 # calculate forced response
+        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
+        eigenmotion.append(df2)                                                             # append DataFrame to individual list
+        eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
+        u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
 
         # ==============================================================================================
         # Calculate initial response for eigenmotion with disturbance input
         # ==============================================================================================
-        outputnames = ['beta', 'phi', 'p', 'r']                                              # names for picture labelling
+        outputnames = ['beta', 'phi', 'p', 'r']                                             # names for picture labelling
         X0 = np.array([[0.1, 0, 0, 0],
                        [0, 0.1, 0, 0],
                        [0, 0, 0.5, 0],
                        [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
         k = 0
         for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-            em.append(df3)                                                                   # append DataFrame to individual list
+            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
+            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
+            em.append(df3)                                                                  # append DataFrame to individual list
             k += 1
 
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
+        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
 
         # ==============================================================================================
         # Plot experimental data and numerical model for forced_response
