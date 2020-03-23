@@ -871,4 +871,4 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         plt.close('all')    # closes all the figure windows.
         gc.collect()        # clear memory to avoid overload
 
-plt.show()
+# plt.show()
