@@ -186,6 +186,7 @@ def CLCD_plot_stationary(plot = 'True'):
 def CLalpha_plot_stationary(plot='True'):
     
     CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
+    CL = ( Weight ) * 2 / (rho * V_TAS**2 * S)
     
     ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
     texpsize= [26,28,30]
@@ -259,7 +260,7 @@ def CLalpha_plot_stationary(plot='True'):
         plt.show()   
     
     CLalpha_rad = CLalpha * 180 / np.pi
-    return CLalpha_rad
+    return CLalpha_rad, y_intercept
 
 
 # Theoretical plot
@@ -320,7 +321,7 @@ def CLalpha_plot_stationary(plot='True'):
 # CL2CD_plot()
     
 CD0, oswald = CLCD_plot_stationary('False')
-CLalpha = CLalpha_plot_stationary('False')
+CLalpha, y_intercept = CLalpha_plot_stationary('False')
 
 
 

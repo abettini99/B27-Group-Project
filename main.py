@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt                         # package to create visu
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
+from CL-CD_and_CL-alpha_plotter.py import CD0, oswald, CLalpha, y_intercept
 
 # ==============================================================================================
 # Function Definitions
