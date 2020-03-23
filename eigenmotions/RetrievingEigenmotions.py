@@ -60,6 +60,10 @@ datadutchrollYDNM.plot(x = 'time', y = 'p')
 datadutchrollYDED.plot(x = 'time', y = 'Ahrs1_bYawRate')
 datadutchrollYDNM.plot(x = 'time', y = 'r')
 
+
+
+
+
 """
 phugoid: time vs theta
 dutchroll: time vs p & time vs r
