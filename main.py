@@ -748,7 +748,3 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             flightdata.to_csv('eigenmotions/spiralrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
 # plt.show()
-
-
-
-
