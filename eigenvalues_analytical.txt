@@ -4,6 +4,7 @@ symmetric phugoid, lambda3: (-0.00012458144318584208+0.0028055029508108342j)
 symmetric phugoid, lambda4: (-0.00012458144318584208-0.0028055029508108342j) 
 phugoid, lambda1: (-0.00011258491432751561+0.0028091747132422164j) 
 phugoid, lambda2: (-0.00011258491432751561-0.0028091747132422164j) 
+<<<<<<< HEAD
 symmetric shortperiod, lambda1: (-0.020216628283938574+0.03906281557094337j) 
 symmetric shortperiod, lambda2: (-0.020216628283938574-0.03906281557094337j) 
 symmetric shortperiod, lambda3: (0.0001428813305922144+0.0035188936579309714j) 
@@ -17,6 +18,15 @@ asymmetric aperroll, lambda2: -2.753945211380347
 asymmetric aperroll, lambda3: 1.0790192198983553 
 asymmetric aperroll, lambda4: -0.001970848054456234 
 =======
+=======
+symmetric shortperiod, lambda1: (-0.019838505097066302+0.03882609567335001j) 
+symmetric shortperiod, lambda2: (-0.019838505097066302-0.03882609567335001j) 
+symmetric shortperiod, lambda3: (-0.00019018454211934668+0.0036541536693076504j) 
+symmetric shortperiod, lambda4: (-0.00019018454211934668-0.0036541536693076504j) 
+shortperiod, lambda1: -0.07377756263508012 
+shortperiod, lambda2: 0.025885613767193727 
+shortperiod, lambda3: -3.622507638872072e-05 
+>>>>>>> master
 asymmetric aperiodicroll, lambda1: 6.9793381671102175 
 asymmetric aperiodicroll, lambda2: -2.753945211380347 
 asymmetric aperiodicroll, lambda3: 1.0790192198983553 
