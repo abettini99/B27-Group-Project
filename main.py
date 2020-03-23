@@ -294,9 +294,9 @@ data = importdata('flightdata.mat')                                             
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-clcd    = manouvre(data, 'clcd')                                                             # sliced data for the 6 CL-CD measurement series
-etrim   = manouvre(data, 'elevatortrim')                                                     # sliced data for the 7 e-trim measurement series
-cgshift = manouvre(data, 'cgshift')                                                          # sliced data for the 2 cg-shift measurement series
+# clcd    = manouvre(data, 'clcd')                                                             # sliced data for the 6 CL-CD measurement series
+# etrim   = manouvre(data, 'elevatortrim')                                                     # sliced data for the 7 e-trim measurement series
+# cgshift = manouvre(data, 'cgshift')                                                          # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
 # Centre of gravity calculations
