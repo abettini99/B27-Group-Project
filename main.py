@@ -66,6 +66,7 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "phugoid":
 <<<<<<< HEAD
+<<<<<<< HEAD
         # # Reference data
         # tstep       =
         # time_start  =
@@ -75,12 +76,15 @@ def manouvre(data, flightmanouvre):
         tstep       = 120
 =======
 >>>>>>> origin/master
+=======
+>>>>>>> origin/master
         time_start  = 2675
         time_stop   = 2675+120
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
+<<<<<<< HEAD
 <<<<<<< HEAD
         # # Reference data
         # tstep       =
@@ -110,12 +114,21 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "aperroll":
 >>>>>>> origin/master
+=======
+        time_start  = 2640
+        time_stop   = 2640 + 10
+        data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
+        return data
+
+    if flightmanouvre == "aperroll":
+>>>>>>> origin/master
         time_start  = 2899
         time_stop   = 2899 + 13
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "dutchroll":
+<<<<<<< HEAD
 <<<<<<< HEAD
         # # Reference data
         # tstep       =
@@ -126,11 +139,14 @@ def manouvre(data, flightmanouvre):
         tstep        = 25
 =======
 >>>>>>> origin/master
+=======
+>>>>>>> origin/master
         time_start  = 3020
         time_stop   = 3020 + 25
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
+<<<<<<< HEAD
 <<<<<<< HEAD
         # # Reference data
         # tstep       =
@@ -141,12 +157,15 @@ def manouvre(data, flightmanouvre):
         tstep       = 20
 =======
 >>>>>>> origin/master
+=======
+>>>>>>> origin/master
         time_start  = 3090
         time_stop   = 3090 + 20
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
+<<<<<<< HEAD
 <<<<<<< HEAD
         # # Reference data
         # tstep       =
@@ -157,6 +176,10 @@ def manouvre(data, flightmanouvre):
         tstep       = 110
         time_start  = 3290
         time_stop   = 3290 + tstep
+=======
+        time_start  = 3300-10
+        time_stop   = 3507
+>>>>>>> origin/master
 =======
         time_start  = 3300-10
         time_stop   = 3507
@@ -284,6 +307,7 @@ def lbstokg(mass):
 
 # ==============================================================================================
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Set global plotting parameters
 # ==============================================================================================
 texpsize= [18,20,22]
@@ -308,6 +332,8 @@ plt.rc('text', usetex=False)
 # matplotlib.rcParams["legend.fancybox"]  = False
 
 # ==============================================================================================
+=======
+>>>>>>> origin/master
 =======
 >>>>>>> origin/master
 # Import data from Matlab files
@@ -921,6 +947,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
         eigenmotion.append(df2)                                                              # append DataFrame to individual list
         eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
+<<<<<<< HEAD
 
         # X0 = np.array([[0.75, 1, 0, 0],
         #                [0, 0.55, 0, 0],
@@ -939,6 +966,26 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
         # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
 
+=======
+
+        # X0 = np.array([[0.75, 1, 0, 0],
+        #                [0, 0.55, 0, 0],
+        #                [0, 0, 0.25, 0],
+        #                [0, 0, 0, 0.15]])                                                       # initial conditions for symmetric flight
+        # eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []                # initialise empty lists
+        # k = 0
+        # for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+        #     t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
+        #     df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
+        #     em.append(df3)                                                                   # append DataFrame to individual list
+        #     k += 1
+
+        # eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+
+>>>>>>> origin/master
         if motion == 'phugoid':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
@@ -1153,6 +1200,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
             eigenmotion.to_csv('eigenmotions/spiralrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/spiralrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+<<<<<<< HEAD
+>>>>>>> origin/master
+=======
 >>>>>>> origin/master
 
 # plt.show()
