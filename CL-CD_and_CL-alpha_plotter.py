@@ -8,7 +8,7 @@ import numpy as np
 import scipy as sp
 import pandas as pd
 import matplotlib.pyplot as plt
-from main import m, e, CD0, AR, S, c
+from main import e, CD0, AR, S, c
 import matplotlib
 
 # TAS = data.Dadc1_tas # true air speed
@@ -20,7 +20,8 @@ import matplotlib
 
 
 ####### Data for Thrust.exe ########
-# excel data
+# experimental data
+# m = 9165 * 0.453592 + 90 + 102 + 80 + 83 + 94 + 84 + 74 + 79 + 103 + 4100 * 0.453592 # [kg]
 # time_config1 = [16*60+32, 18*60+20, 20*60+6, 22*60, 24*60+48, 26*60+24] # [s]
 # IAS_config1 = np.array([248, 221, 188, 162, 140, 120]) * 0.514444 # [m/s]
 # pressure_alt = np.array([7000, 7000, 6980, 7000, 7000, 6980]) * 0.3048 # [m]
@@ -32,6 +33,8 @@ import matplotlib
 
 # TAT_measured = np.array([13.8, 11.8, 9.2, 7.8, 6.8, 5.8])+ 273.15 # [Kelvin]
 
+# Reference
+m = 9165 * 0.453592 + 95 + 92 + 74 + 66 + 61 + 75 + 78 + 86 + 68 + 4050 * 0.453592 # [kg]
 time_config1 = np.array([19*60+17, 21*60+37, 23*60+46, 26*60+4, 29*60+47, 32*60])
 IAS_config1 = np.array([249, 221, 192, 163, 130, 118]) * 0.514444 # [m/s]
 pressure_alt = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # [m]
@@ -98,7 +101,7 @@ def Reynolds():
 Mach_min, Mach_max = np.min(Mach), np.max(Mach)
 Reynolds_min, Reynolds_max = np.min(Reynolds()), np.max(Reynolds())
 
-def CLCD_plot_stationary():
+def CLCD_plot_stationary(plot = 'True'):
     
     CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
     CD = ( Thrust * np.cos(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
@@ -133,53 +136,54 @@ def CLCD_plot_stationary():
     print('L2 error =', L2_error)
     print('error =', error, '%')
     
-    ## Graphing Parameters
-    SMALL_SIZE  = texpsize[0]
-    MEDIUM_SIZE = texpsize[1]
-    BIGGER_SIZE = texpsize[2]
+    if plot == 'True':
+        ## Graphing Parameters
+        SMALL_SIZE  = texpsize[0]
+        MEDIUM_SIZE = texpsize[1]
+        BIGGER_SIZE = texpsize[2]
+        
+        plt.style.use('grayscale')
+        plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
+        plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
+        plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
+        plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+        plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+        plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
+        plt.rc('text', usetex=False)
+        matplotlib.rcParams['lines.linewidth']  = 1.5
+        matplotlib.rcParams['figure.facecolor'] = 'white'
+        matplotlib.rcParams['axes.facecolor']   = 'white'
+        matplotlib.rcParams["legend.fancybox"]  = False
+        
+        ## Graph
+        fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+        ax[0,0].scatter(x, y, label = 'Experimental data')
+        ax[0,0].plot(func(cl_least, *popt), cl_least , label = r'Least Square regression $C_D = aC_L^2 + b$')
+        # ax[0,0].plot(label='Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
+        # ax[0,0].plot(x, y, label='(%f, %f)$ \n Reynolds (%f, %f)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
+        # ax[0,0].set_title(r"Aircraft configuration: clean")
+        # ax[0,0].plot(x+x, y+y, label="test2", linestyle="dashed")
+        #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
+        ax[0,0].set_ylabel(r"$C_L$")          ## String is treatable as latex code
+        ax[0,0].set_xlabel(r"$C_D$")
+        #ax[0,0].set_xlim(0,x[-1])
+        ax[0,0].grid(True,which="major",color="#999999")
+        ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+        ax[0,0].minorticks_on()
+        ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+        ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+        ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+        # ax[0,0].figtext(.8, .8, 'Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$' %(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
+        # fig.savefig("CL-CD_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+        
+        ## If you want to see the figure, else disable last two lines.
+        fig.tight_layout()
+        plt.show()
     
-    plt.style.use('grayscale')
-    plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
-    plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
-    plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
-    plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
-    plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
-    plt.rc('text', usetex=False)
-    matplotlib.rcParams['lines.linewidth']  = 1.5
-    matplotlib.rcParams['figure.facecolor'] = 'white'
-    matplotlib.rcParams['axes.facecolor']   = 'white'
-    matplotlib.rcParams["legend.fancybox"]  = False
+    return CD0, oswald
     
-    ## Graph
-    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
-    ax[0,0].scatter(x, y, label = 'Experimental data')
-    ax[0,0].plot(func(cl_least, *popt), cl_least , label = r'Least Square regression $C_D = aC_L^2 + b$')
-    # ax[0,0].plot(label='Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
-    # ax[0,0].plot(x, y, label='(%f, %f)$ \n Reynolds (%f, %f)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
-    # ax[0,0].set_title(r"Aircraft configuration: clean")
-    # ax[0,0].plot(x+x, y+y, label="test2", linestyle="dashed")
-    #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
-    ax[0,0].set_ylabel(r"$C_L$")          ## String is treatable as latex code
-    ax[0,0].set_xlabel(r"$C_D$")
-    #ax[0,0].set_xlim(0,x[-1])
-    ax[0,0].grid(True,which="major",color="#999999")
-    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
-    ax[0,0].minorticks_on()
-    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
-    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
-    ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
-    # ax[0,0].figtext(.8, .8, 'Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$' %(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
-    # fig.savefig("CL-CD_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
-    
-    ## If you want to see the figure, else disable last two lines.
-    fig.tight_layout()
-    plt.show()
-    
-    return 0
-    
-def CLalpha_plot_stationary():
+def CLalpha_plot_stationary(plot='True'):
     
     CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
     
@@ -198,7 +202,7 @@ def CLalpha_plot_stationary():
     CLalpha = popt[0]
     y_intercept = popt[1]
     aoa_least= np.linspace(np.min(AOA)-2, np.max(AOA)+0.1, 100)
-    print('a / CLalpha = ', CLalpha)
+    print('a / CLalpha = ', CLalpha * 180 / np.pi)
     print('b = ', y_intercept)
     
     ## Error derivation
@@ -211,49 +215,51 @@ def CLalpha_plot_stationary():
     print('L2 error =', L2_error)
     print('error =', error, '%')
     
-    ## Graphing Parameters
-    SMALL_SIZE  = texpsize[0]
-    MEDIUM_SIZE = texpsize[1]
-    BIGGER_SIZE = texpsize[2]
+    if plot == 'True':
+        ## Graphing Parameters
+        SMALL_SIZE  = texpsize[0]
+        MEDIUM_SIZE = texpsize[1]
+        BIGGER_SIZE = texpsize[2]
+        
+        plt.style.use('grayscale')
+        plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
+        plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
+        plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
+        plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+        plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+        plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
+        plt.rc('text', usetex=False)
+        matplotlib.rcParams['lines.linewidth']  = 1.5
+        matplotlib.rcParams['figure.facecolor'] = 'white'
+        matplotlib.rcParams['axes.facecolor']   = 'white'
+        matplotlib.rcParams["legend.fancybox"]  = False
+        
+        ## Graph
+        fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+        ax[0,0].scatter(x, y, label = 'Experimental data')
+        ax[0,0].plot(aoa_least, func(aoa_least, *popt), label = r'Least Square regression $C_L = a \alpha + b$')
+        # ax[0,0].set_title(r"Aircraft configuration: clean")
+        # ax[0,0].plot(x,x*0.077-0.26, label="test2", linestyle="dashed")
+        # ax[0,0].plot(x,x*0.07955175608200933-0.27201100205949574, label="test2", linestyle="dashed")
+        #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
+        ax[0,0].set_ylabel(r"$C_L$")          ## String is treatable as latex code
+        ax[0,0].set_xlabel(r"$\alpha$ $\,\,[deg]$")
+        #ax[0,0].set_xlim(0,x[-1])
+        ax[0,0].grid(True,which="major",color="#999999")
+        ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+        ax[0,0].minorticks_on()
+        ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+        ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+        ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+        # fig.savefig("CL-alpha_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+        
+        ## If you want to see the figure, else disable last two lines.
+        fig.tight_layout()
+        plt.show()   
     
-    plt.style.use('grayscale')
-    plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
-    plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
-    plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
-    plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
-    plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
-    plt.rc('text', usetex=False)
-    matplotlib.rcParams['lines.linewidth']  = 1.5
-    matplotlib.rcParams['figure.facecolor'] = 'white'
-    matplotlib.rcParams['axes.facecolor']   = 'white'
-    matplotlib.rcParams["legend.fancybox"]  = False
-    
-    ## Graph
-    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
-    ax[0,0].scatter(x, y, label = 'Experimental data')
-    ax[0,0].plot(aoa_least, func(aoa_least, *popt), label = r'Least Square regression $C_L = a \alpha + b$')
-    # ax[0,0].set_title(r"Aircraft configuration: clean")
-    # ax[0,0].plot(x,x*0.077-0.26, label="test2", linestyle="dashed")
-    # ax[0,0].plot(x,x*0.07955175608200933-0.27201100205949574, label="test2", linestyle="dashed")
-    #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
-    ax[0,0].set_ylabel(r"$C_L$")          ## String is treatable as latex code
-    ax[0,0].set_xlabel(r"$\alpha$ $\,\,[deg]$")
-    #ax[0,0].set_xlim(0,x[-1])
-    ax[0,0].grid(True,which="major",color="#999999")
-    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
-    ax[0,0].minorticks_on()
-    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
-    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
-    ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
-    # fig.savefig("CL-alpha_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
-    
-    ## If you want to see the figure, else disable last two lines.
-    fig.tight_layout()
-    plt.show()   
-    
-    return 0
+    CLalpha_rad = CLalpha * 180 / np.pi
+    return CLalpha_rad
 
 
 # Theoretical plot
@@ -309,10 +315,12 @@ def CLalpha_plot_stationary():
 
 #     return 0
 
-CLCD_plot_stationary()
-CLalpha_plot_stationary()
+# CLCD_plot_stationary()
+# CLalpha_plot_stationary()
 # CL2CD_plot()
     
+CD0, oswald = CLCD_plot_stationary('False')
+CLalpha = CLalpha_plot_stationary('False')
 
 
 
