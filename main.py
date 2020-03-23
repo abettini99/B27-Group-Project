@@ -44,6 +44,7 @@ def manouvre(data, flightmanouvre):
         :flightmanouvre: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
         :return: sliced dataframe with each variable in one column
     """
+    global tstep
     if flightmanouvre == "clcd":
         time_start  = 992
         time_stop   = 1740
@@ -66,37 +67,43 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
+        tstep        = 120
         time_start  = 2675
-        time_stop   = 2675+120
+        time_stop   = 2675 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
+        tstep       = 10
         time_start  = 2640
-        time_stop   = 2640 + 10
+        time_stop   = 2640 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "aperiodicroll":
+        tstep       = 13
         time_start  = 2899
-        time_stop   = 2899 + 13
+        time_stop   = 2899 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "dutchroll":
+        tstep        = 25
         time_start  = 3020
-        time_stop   = 3020 + 25
+        time_stop   = 3020 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
+        tstep       = 20
         time_start  = 3090
-        time_stop   = 3090 + 20
+        time_stop   = 3090 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3300-10
-        time_stop   = 3507
+        tstep       = 110
+        time_start  = 3290
+        time_stop   = 3290 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -242,7 +249,6 @@ plt.rc('text', usetex=False)
 # matplotlib.rcParams['axes.facecolor']   = 'white'
 # matplotlib.rcParams["legend.fancybox"]  = False
 
-
 # ==============================================================================================
 # Import data from Matlab files
 # ==============================================================================================
@@ -298,30 +304,31 @@ for t in data.time[:len(data.time) - 1]:
 
 cg     = np.array(cg)                                                                        # convert list to numpy array
 df1    = pd.DataFrame(temp, columns=['time', 'mass'])                                        # [s, kg] dataframe with specific mass at time t
+
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
-f      = open('eigenvalues.txt', 'w+')                                                       # create .txt-file where EV's are written
-f      = open('eigenvalues_analytical.txt', 'w+')                                            # create .txt-file where EV's are written
+f      = open('eigenvalues.txt', 'w+')                                                      # create .txt-file where EV's are written
+f      = open('eigenvalues_analytical.txt', 'w+')                                           # create .txt-file where EV's are written
 
 for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
     # ==============================================================================================
     # Import data from Matlab files
     # ==============================================================================================
-    # data = importdata('referencedata.mat')                                                   # initialise reference data from matlab file
-    data   = importdata('flightdata.mat')                                                    # initialise flight data from matlab file
-    data   = manouvre(data, motion)                                                          # sliced data array for each motion
-    m      = df1                                                                             # reimport mass array from start to beginning of flight
-    m      = manouvre(m, motion)                                                             # sliced mass array for each motion
+    # data = importdata('referencedata.mat')                                                # initialise reference data from matlab file
+    data   = importdata('flightdata.mat')                                                   # initialise flight data from matlab file
+    data   = manouvre(data, motion)                                                         # sliced data array for each motion
+    m      = df1                                                                            # reimport mass array from start to beginning of flight
+    m      = manouvre(m, motion)                                                            # sliced mass array for each motion
 
     # ==============================================================================================
     # Transform coordinate system from body to stability axis frame
     # ==============================================================================================
-    alpha0 = radians(data.vane_AOA.iloc[0])                                                  # [rad] angle of attack in the stationary flight condition
-    theta0 = radians(data.Ahrs1_Pitch.iloc[0])                                               # [rad] pitch angle in the stationary flight condition
+    alpha0 = radians(data.vane_AOA.iloc[0])                                                 # [rad] angle of attack in the stationary flight condition
+    theta0 = radians(data.Ahrs1_Pitch.iloc[0])                                              # [rad] pitch angle in the stationary flight condition
 
-    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                 # Transform angle of attack from body to stability axis frame
-    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                              # Transform angle of pitch from body to stability axis frame
+    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                # Transform angle of attack from body to stability axis frame
+    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                             # Transform angle of pitch from body to stability axis frame
 
     # ==============================================================================================
     # Parameter definition; copied from Cit_par.py
@@ -557,12 +564,15 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
         units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
-        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]\
+        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
 
         columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list 1
 
-        flightdata = pd.DataFrame({'time': data.time, 'vane_AoA': np.radians(data.vane_AOA), 'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), 'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
+        flightdata = pd.DataFrame({'time': data.time, \
+                                   'vane_AoA': np.radians(data.vane_AOA), \
+                                   'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), \
+                                   'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
 
         # ==============================================================================================
         # Calculate forced response of eigenmotion to delta_i input
@@ -601,7 +611,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-            ax1[i,0].set_xlim(0, 120)                                                    # set xmin at 0 and tstop
+            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0 and tstop
             ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
             ax1[i,0].minorticks_on()                                                     # set minor ticks
             ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
@@ -610,7 +620,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
         ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-        ax1[3,0].set_xlim(0, 120)                                                        # set xmin at 0 and tstop
+        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0 and tstop
         ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
         ax1[3,0].minorticks_on()                                                         # set minor ticks
         ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
@@ -732,7 +742,10 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         eigenmotion = []                                                                     # initialise empty list 1
         eigenmotion2 = []                                                                    # initialise empty list 2
 
-        flightdata = pd.DataFrame({'time': data.time, 'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), 'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), 'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
+        flightdata = pd.DataFrame({'time': data.time, \
+                                   'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
+                                   'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), \
+                                   'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
 
         t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -770,7 +783,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
             ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
             ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-            ax1[i,0].set_xlim(0, 13)                                                     # set xmin at 0
+            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0
             ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
             ax1[i,0].minorticks_on()                                                     # set minor ticks
             ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
@@ -780,7 +793,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
         ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
         ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-        ax1[3,0].set_xlim(0, 13)                                                         # set xmin at 0
+        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0
         ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
         ax1[3,0].minorticks_on()                                                         # set minor ticks
         ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid

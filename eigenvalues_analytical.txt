@@ -11,10 +11,10 @@ symmetric shortperiod, lambda4: (0.0001428813305922144-0.0035188936579309714j)
 shortperiod, lambda1: -0.07408865629978564 
 shortperiod, lambda2: 0.025410726952256733 
 shortperiod, lambda3: 0.0006419894995714659 
-asymmetric aperroll, lambda1: 6.9793381671102175 
-asymmetric aperroll, lambda2: -2.753945211380347 
-asymmetric aperroll, lambda3: 1.0790192198983553 
-asymmetric aperroll, lambda4: -0.001970848054456234 
+asymmetric aperiodicroll, lambda1: 6.9793381671102175 
+asymmetric aperiodicroll, lambda2: -2.753945211380347 
+asymmetric aperiodicroll, lambda3: 1.0790192198983553 
+asymmetric aperiodicroll, lambda4: -0.001970848054456234 
 asymmetric dutchroll, lambda1: 7.078431025465481 
 asymmetric dutchroll, lambda2: -2.7844905480472035 
 asymmetric dutchroll, lambda3: 1.0798617587391552 
