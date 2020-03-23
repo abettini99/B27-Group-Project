@@ -271,7 +271,7 @@ for t in data.time[:len(data.time) - 1]:
     i += 1
 
 cg     = np.array(cg)                                                                    # convert list to numpy array
-df     = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
+df1    = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
@@ -284,7 +284,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # data = importdata('referencedata.mat')                                                   # initialise reference data from matlab file
     data   = importdata('flightdata.mat')                                                    # initialise flight data from matlab file
     data   = manouvre(data, motion)                                                          # sliced data array for each motion
-    m      = df                                                                              # reimport mass array from start to beginning of flight
+    m      = df1                                                                             # reimport mass array from start to beginning of flight
     m      = manouvre(m, motion)                                                             # sliced mass array for each motion
 
     # ==============================================================================================
@@ -504,7 +504,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['phugoid', 'shortperiod']:
-        syss = ctl.StateSpace(A_s, B_s, C, D)                                                  # create state-space system for symmetric eigenmotions
+        syss = ctl.StateSpace(A_s, B_s, C, D)                                                 # create state-space system for symmetric eigenmotions
         evals, evecs = eig(A_s)                                                               # compute eigenvalues and eigenvectors
 
     #     for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
@@ -549,9 +549,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-    #         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-    #         # fig1.suptitle('Phugoid')                                                         # set title of figure
-    #         fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
+            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+            fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
+            eigenmotion.to_csv('eigenmotions/phugoid.csv', encoding='utf-8', index=False)    # write eigenmotion to csv-file
 
         elif motion == 'shortperiod':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -575,9 +575,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-    #         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-    #         # fig1.suptitle('Short Period Oscillation')                                        # set title of figure
-    #         fig1.savefig('images/shortperiod.png', dpi=300, bbox_inches='tight')             # save figure
+            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+            fig1.savefig('images/shortperiod.png', dpi=300, bbox_inches='tight')             # save figure
+            eigenmotion.to_csv('eigenmotions/shortperiod.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
     # ==============================================================================================
     # Calculates responses to asymmetric eigenmotions from state-space system
@@ -630,9 +630,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-    #         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-    #         # fig1.suptitle('Aperiodic Roll')                                                  # set title of figure
-    #         fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
+            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+            fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
+            eigenmotion.to_csv('eigenmotions/aperiodicroll.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
         if motion == 'dutchroll':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -657,9 +657,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-    #         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-    #         # fig1.suptitle('Dutch Roll without Yaw Damper')                                   # set title of figure
-    #         fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
+            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+            fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
+            eigenmotion.to_csv('eigenmotions/dutchroll.csv', encoding='utf-8', index=False)  # write eigenmotion to csv-file
 
         if motion == 'dutchrollYD':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -684,9 +684,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-    #         fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-    #         # fig1.suptitle('Dutch Roll with Yaw Damper')                                      # set title of figure
-    #         fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
+            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+            fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
+            eigenmotion.to_csv('eigenmotions/dutchrollYD.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
 
         if motion == 'spiral':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -712,8 +712,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
             fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            # fig1.suptitle('Spiral')                                                        # set title of figure
             fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
+            eigenmotion.to_csv('eigenmotions/spiralroll.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
 # plt.show()
 
