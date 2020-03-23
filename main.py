@@ -68,11 +68,11 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "phugoid":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 120
+        # time_start  = 3237
+        # time_stop   = 3237 + tstep
 
-        # # Flight data
+        # Flight data
         tstep       = 120
         time_start  = 2675
         time_stop   = 2675 + tstep
@@ -81,11 +81,11 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "shortperiod":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 20
+        # time_start  = 3635
+        # time_stop   = 3635 + tstep
 
-        # # Flight data
+        # Flight data
         tstep       = 15
         time_start  = 2645
         time_stop   = 2645 + tstep
@@ -94,11 +94,11 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "aperiodicroll":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 30
+        # time_start  = 3550
+        # time_stop   = 3550 + 30
 
-        # # Flight data
+        # Flight data
         tstep       = 13
         time_start  = 2899
         time_stop   = 2899 + tstep
@@ -107,21 +107,21 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "dutchroll":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 25
+        # time_start  = 3717
+        # time_stop   = 3717 + tstep
 
-        # # Flight data
-        tstep        = 25
+        # Flight data
+        tstep       = 25
         time_start  = 3020
         time_stop   = 3020 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 20
+        # time_start  = 3767
+        # time_stop   = 3767 + tstep
 
         # Flight data
         tstep       = 20
@@ -132,9 +132,9 @@ def manouvre(data, flightmanouvre):
 
     if flightmanouvre == "spiral":
         # # Reference data
-        # tstep       =
-        # time_start  =
-        # time_stop   =
+        # tstep       = 110
+        # time_start  = 3920
+        # time_stop   = 3920 + tstep
 
         # Flight data
         tstep       = 110
