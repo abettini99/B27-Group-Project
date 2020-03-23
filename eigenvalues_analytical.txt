@@ -1,0 +1,29 @@
+symmetric phugoid, lambda1: (-0.02032466258343866+0.03937754341164236j)
+symmetric phugoid, lambda2: (-0.02032466258343866-0.03937754341164236j)
+symmetric phugoid, lambda3: (-0.00012458144318584208+0.0028055029508108342j)
+symmetric phugoid, lambda4: (-0.00012458144318584208-0.0028055029508108342j)
+phugoid, lambda1: (-0.00011258491432751561+0.0028091747132422164j)
+phugoid, lambda2: (-0.00011258491432751561-0.0028091747132422164j)
+symmetric shortperiod, lambda1: (-0.020216628283938574+0.03906281557094337j)
+symmetric shortperiod, lambda2: (-0.020216628283938574-0.03906281557094337j)
+symmetric shortperiod, lambda3: (0.0001428813305922144+0.0035188936579309714j)
+symmetric shortperiod, lambda4: (0.0001428813305922144-0.0035188936579309714j)
+shortperiod, lambda1: -0.07408865629978564
+shortperiod, lambda2: 0.025410726952256733
+shortperiod, lambda3: 0.0006419894995714659
+asymmetric aperroll, lambda1: 6.9793381671102175
+asymmetric aperroll, lambda2: -2.753945211380347
+asymmetric aperroll, lambda3: 1.0790192198983553
+asymmetric aperroll, lambda4: -0.001970848054456234
+asymmetric dutchroll, lambda1: 7.078431025465481
+asymmetric dutchroll, lambda2: -2.7844905480472035
+asymmetric dutchroll, lambda3: 1.0798617587391552
+asymmetric dutchroll, lambda4: -0.0017567702921125646
+asymmetric dutchrollYD, lambda1: 7.093300775384376
+asymmetric dutchrollYD, lambda2: -2.789077855244208
+asymmetric dutchrollYD, lambda3: 1.0800521893133084
+asymmetric dutchrollYD, lambda4: -0.0017759230652821005
+asymmetric spiral, lambda1: 6.633557852065915
+asymmetric spiral, lambda2: -2.647070165772219
+asymmetric spiral, lambda3: 1.0747296153926815
+asymmetric spiral, lambda4: -0.001672598867904842
