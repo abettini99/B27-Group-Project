@@ -221,7 +221,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import data from Matlab files
 # ==============================================================================================
-# data = importdata('referencedata.mat')                                                     # initialise reference data from matlab file
+# data = importdata('referencedata.mat')                                                       # initialise reference data from matlab file
 data = importdata('flightdata.mat')                                                          # initialise flight data from matlab file
 
 # ==============================================================================================
@@ -276,7 +276,7 @@ df1    = pd.DataFrame(temp, columns=['time', 'mass'])                           
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
-f = open('eigenvalues.txt', 'w+')                                                            # create .txt-file where EV's are written
+f      = open('eigenvalues.txt', 'w+')                                                       # create .txt-file where EV's are written
 
 for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
     # ==============================================================================================
@@ -307,9 +307,9 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     e      = 0.5949711666751891                                                              # [-] Oswald factor
     # e      = 0.8                                                                             # [-] Oswald factor reference data
-    CD0    = 0.01976539072252899                                                              # [-] Zero lift drag coefficient
+    CD0    = 0.01976539072252899                                                             # [-] Zero lift drag coefficient
     # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
-    CLa    = 3.8926163611249893                                                               # [1/rad] Slope of CL-alpha curve
+    CLa    = 3.8926163611249893                                                              # [1/rad] Slope of CL-alpha curve
     # CLa    = 5.084                                                                           # [1/rad] Slope of CL-alpha curve reference data
 
     Cma    = -0.582128                                                                       # [-] longitudinal stabilty
@@ -515,23 +515,23 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         eigenmotion.append(df2)                                                              # append DataFrame to individual list
         eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
 
-        # outputnames = ['VTAS', 'alpha', 'theta', 'q']                                        # names for picture labelling
-        # X0 = np.array([[0.75, 0, 0, 0],
-        #                [0, 0.55, 0, 0],
-        #                [0, 0, 0.25, 0],
-        #                [0, 0, 0, 0.15]])                                                       # initial conditions for symmetric flight
-        # eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []                # initialise empty lists
-        # k = 0
-        # for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-        #     df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-        #     em.append(df3)                                                                   # append DataFrame to individual list
-        #     k += 1
+        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                        # names for picture labelling
+        X0 = np.array([[5.0, 0, 0, 0],
+                       [0, 0.05, 0, 0],
+                       [0, 0, 0.5, 0],
+                       [0, 0, 0, 0.5]])                                                      # initial conditions for symmetric flight
+        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+        k = 0
+        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
+            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
+            em.append(df3)                                                                   # append DataFrame to individual list
+            k += 1
 
-        # eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
 
         if motion == 'phugoid':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
@@ -655,23 +655,23 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
         u = np.negative(u)                                                                   # [rad] flip input sign; input deflections seems to have wrong sign
 
-        outputnames = ['beta', 'phi', 'p', 'r']                                              # names for picture labelling
-        X0 = np.array([[0.75, 0, 0, 0],
-                       [0, 0.55, 0, 0],
-                       [0, 0, 0.25, 0],
-                       [0, 0, 0, 0.15]])                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
-        k = 0
-        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-            em.append(df3)                                                                   # append DataFrame to individual list
-            k += 1
+        # outputnames = ['beta', 'phi', 'p', 'r']                                              # names for picture labelling
+        # X0 = np.array([[0.1, 0, 0, 0],
+        #                [0, 0.1, 0, 0],
+        #                [0, 0, 0.5, 0],
+        #                [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
+        # eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+        # k = 0
+        # for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+        #     t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
+        #     df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
+        #     em.append(df3)                                                                   # append DataFrame to individual list
+        #     k += 1
 
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
 
         if motion == 'aperroll':
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
