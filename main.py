@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt                         # package to create visu
 from scipy.io import loadmat                            # loadmat imports a .mat file
 from numpy.linalg import inv, eig                       # inv computes the inverse of a matrix; eig computes eigenvalues of matrix
 import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
-import gc
+import gc                                               # this module provides an interface to the optional garbage collector.
 
 # ==============================================================================================
 # Function Definitions
@@ -44,6 +44,7 @@ def manouvre(data, flightmanouvre):
         :flightmanouvre: name of flightmanouvre (phugoid, shortperiodoscillation, heavilydampedmotion, spiral or dutchroll)
         :return: sliced dataframe with each variable in one column
     """
+    global tstep
     if flightmanouvre == "clcd":
         time_start  = 992
         time_stop   = 1740
@@ -66,37 +67,43 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
+        tstep        = 120
         time_start  = 2675
-        time_stop   = 2675+120
+        time_stop   = 2675 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
+        tstep       = 10
         time_start  = 2640
-        time_stop   = 2640 + 10
+        time_stop   = 2640 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
-    if flightmanouvre == "aperroll":
+    if flightmanouvre == "aperiodicroll":
+        tstep       = 13
         time_start  = 2899
-        time_stop   = 2899 + 13
+        time_stop   = 2899 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "dutchroll":
+        tstep        = 25
         time_start  = 3020
-        time_stop   = 3020 + 25
+        time_stop   = 3020 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
+        tstep       = 20
         time_start  = 3090
-        time_stop   = 3090 + 20
+        time_stop   = 3090 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "spiral":
-        time_start  = 3300-10
-        time_stop   = 3507
+        tstep       = 110
+        time_start  = 3290
+        time_stop   = 3290 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
@@ -242,7 +249,6 @@ plt.rc('text', usetex=False)
 # matplotlib.rcParams['axes.facecolor']   = 'white'
 # matplotlib.rcParams["legend.fancybox"]  = False
 
-
 # ==============================================================================================
 # Import data from Matlab files
 # ==============================================================================================
@@ -257,7 +263,7 @@ etrim   = manouvre(data, 'elevatortrim')                                        
 cgshift = manouvre(data, 'cgshift')                                                          # sliced data for the 2 cg-shift measurement series
 
 # ==============================================================================================
-# centre of gravity calculations
+# Centre of gravity calculations
 # ==============================================================================================
 momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 
@@ -298,30 +304,31 @@ for t in data.time[:len(data.time) - 1]:
 
 cg     = np.array(cg)                                                                        # convert list to numpy array
 df1    = pd.DataFrame(temp, columns=['time', 'mass'])                                        # [s, kg] dataframe with specific mass at time t
+
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
-f      = open('eigenvalues.txt', 'w+')                                                       # create .txt-file where EV's are written
-f      = open('eigenvalues_analytical.txt', 'w+')                                            # create .txt-file where EV's are written
+f      = open('eigenvalues.txt', 'w+')                                                      # create .txt-file where EV's are written
+f      = open('eigenvalues_analytical.txt', 'w+')                                           # create .txt-file where EV's are written
 
-for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
+for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
     # ==============================================================================================
     # Import data from Matlab files
     # ==============================================================================================
-    # data = importdata('referencedata.mat')                                                   # initialise reference data from matlab file
-    data   = importdata('flightdata.mat')                                                    # initialise flight data from matlab file
-    data   = manouvre(data, motion)                                                          # sliced data array for each motion
-    m      = df1                                                                             # reimport mass array from start to beginning of flight
-    m      = manouvre(m, motion)                                                             # sliced mass array for each motion
+    # data = importdata('referencedata.mat')                                                # initialise reference data from matlab file
+    data   = importdata('flightdata.mat')                                                   # initialise flight data from matlab file
+    data   = manouvre(data, motion)                                                         # sliced data array for each motion
+    m      = df1                                                                            # reimport mass array from start to beginning of flight
+    m      = manouvre(m, motion)                                                            # sliced mass array for each motion
 
     # ==============================================================================================
     # Transform coordinate system from body to stability axis frame
     # ==============================================================================================
-    alpha0 = radians(data.vane_AOA.iloc[0])                                                  # [rad] angle of attack in the stationary flight condition
-    theta0 = radians(data.Ahrs1_Pitch.iloc[0])                                               # [rad] pitch angle in the stationary flight condition
+    alpha0 = radians(data.vane_AOA.iloc[0])                                                 # [rad] angle of attack in the stationary flight condition
+    theta0 = radians(data.Ahrs1_Pitch.iloc[0])                                              # [rad] pitch angle in the stationary flight condition
 
-    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                 # Transform angle of attack from body to stability axis frame
-    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                              # Transform angle of pitch from body to stability axis frame
+    data['vane_AOA']    = data['vane_AOA'] - degrees(alpha0)                                # Transform angle of attack from body to stability axis frame
+    data['Ahrs1_Pitch'] = data['Ahrs1_Pitch'] - degrees(theta0)                             # Transform angle of pitch from body to stability axis frame
 
     # ==============================================================================================
     # Parameter definition; copied from Cit_par.py
@@ -562,8 +569,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list 1
 
-
-        flightdata = pd.DataFrame({'time': data.time, 'vane_AoA': np.radians(data.vane_AOA), 'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), 'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
+        flightdata = pd.DataFrame({'time': data.time, \
+                                   'vane_AoA': np.radians(data.vane_AOA), \
+                                   'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), \
+                                   'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
 
         # ==============================================================================================
         # Calculate forced response of eigenmotion to delta_i input
@@ -576,25 +585,79 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         # ==============================================================================================
         # Calculate initial response for eigenmotion with disturbance input
         # ==============================================================================================
-        # outputnames = ['VTAS', 'alpha', 'theta', 'q']                                        # names for picture labelling
-        # X0 = np.array([[5.0, 0, 0, 0],
-        #                [0, 0.05, 0, 0],
-        #                [0, 0, 0.5, 0],
-        #                [0, 0, 0, 0.5]])                                                      # initial conditions for symmetric flight
-        # eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
-        # k = 0
-        # for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-        #     df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-        #     em.append(df3)                                                                   # append DataFrame to individual list
-        #     k += 1
+        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                        # names for picture labelling
+        X0 = np.array([[5.0, 0, 0, 0],
+                       [0, 0.05, 0, 0],
+                       [0, 0, 0.5, 0],
+                       [0, 0, 0, 0.5]])                                                      # initial conditions for symmetric flight
+        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+        k = 0
+        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
+            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
+            em.append(df3)                                                                   # append DataFrame to individual list
+            k += 1
 
-        # eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+
+        # ==============================================================================================
+        # Plot experimental data and numerical model for forced_response
+        # ==============================================================================================
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
+            ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
+            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0 and tstop
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+
+        ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
+        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0 and tstop
+        ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')                 # save figure
+        eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False)  # write eigenmotion to csv-file
+        flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False)   # write eigenmotion to csv-file
+
+        # # ==============================================================================================
+        # # Plot numerical model for disturbance input of initial_response
+        # # ==============================================================================================
+        # i = 0
+        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
+        #     for j in range(0, 4):
+        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
+        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
+        #         ax2[j,0].minorticks_on()                                                     # set minor ticks
+        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+        #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
+        #     i += 1
+
+        plt.cla()           # clear the current axes
+        plt.clf()           # clear the current figure.
+        plt.close('all')    # closes all the figure windows.
+        gc.collect()        # clear memory to avoid overload
 
         if motion == 'phugoid':
+            # ==============================================================================================
+            # Calculate analytical eigenvalues of phugoid motion
+            # ==============================================================================================
             Atilde = ( 2 * muc * CZa * Cmq - (CZq + 2 * muc) * Cma * 2 * muc )
 
             Btilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) \
@@ -609,51 +672,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
                 f = open('eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))    # write eigenvalues
 
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 120)                                                    # set xmin at 0 and tstop
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-
-            ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-            ax1[3,0].set_xlim(0, 120)                                                        # set xmin at 0 and tstop
-            ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
-
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/phugoid.png', dpi=300, bbox_inches='tight')                 # save figure
-            eigenmotion.to_csv('eigenmotions/phugoidNM.csv', encoding='utf-8', index=False)  # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/phugoidED.csv', encoding='utf-8', index=False)   # write eigenmotion to csv-file
-
-            # fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
-            # j = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/phugoidInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
-
-            # fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            # fig2.savefig('images/phugoidInitial.png', dpi=300, bbox_inches='tight')          # save figure
-
         elif motion == 'shortperiod':
+            # ==============================================================================================
+            # Compute analytical eigenvalues for short period eigenmotion
+            # ==============================================================================================
             Atilde = -1 * (CZadot - 2 * muc) * 2 * muc * KY2**2
 
             Btilde = ( -1 * CZa * 2 * muc * KY2**2 + (CZadot - 2 * muc) * Cmq + (CZq + 2 * muc) * Cmadot )
@@ -668,57 +690,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
                 f = open('eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))# write eigenvalues
 
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                        # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C21', label='Numerical Model')    # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 10)                                                     # set xmin at 0 and tstp
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-
-            ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-            ax1[3,0].set_xlim(0, 10)                                                         # set xmin at 0
-            ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
-
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/shortperiod.png', dpi=300, bbox_inches='tight')             # save figure
-            eigenmotion.to_csv('eigenmotions/shortperiodNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/shortperiodED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-
-            # i = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/shortperiodInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-            gc.collect()        # clear memory to avoid overload
-
     # ==============================================================================================
     # Calculates responses to asymmetric eigenmotions from state-space system
     # ==============================================================================================
-    if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
-
+    if motion in ['aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         # ==============================================================================================
         # Calculate analytical eigenvalues for each eigenmotion
         # ==============================================================================================
@@ -746,9 +721,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
             f = open('eigenvalues_analytical.txt', 'a+')                                                # append lines to existing .txt-file
             f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
-
         # ==============================================================================================
-        # Calculate asymmetric eigenmotions
+        # Calculate state space system for each eigenmotion
         # ==============================================================================================
         sysa = ctl.StateSpace(A_a, B_a, C, D)                                                # create state-space system for symmetric eigenmotions
         evals, evecs = eig(A_a)                                                              # compute eigenvalues and eigenvectors
@@ -768,7 +742,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         eigenmotion = []                                                                     # initialise empty list 1
         eigenmotion2 = []                                                                    # initialise empty list 2
 
-        flightdata = pd.DataFrame({'time': data.time, 'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), 'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), 'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
+        flightdata = pd.DataFrame({'time': data.time, \
+                                   'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
+                                   'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), \
+                                   'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
 
         t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -776,224 +753,78 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         eigenmotion = pd.concat(eigenmotion, axis=1)                                         # concatenate list into panda dataframe along axis 1
         u = np.negative(u)                                                                   # [rad] flip input sign; input deflections seems to have wrong sign
 
-        # outputnames = ['beta', 'phi', 'p', 'r']                                              # names for picture labelling
-        # X0 = np.array([[0.1, 0, 0, 0],
-        #                [0, 0.1, 0, 0],
-        #                [0, 0, 0.5, 0],
-        #                [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
-        # eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
-        # k = 0
-        # for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
-        #     df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
-        #     em.append(df3)                                                                   # append DataFrame to individual list
-        #     k += 1
+        # ==============================================================================================
+        # Calculate initial response for eigenmotion with disturbance input
+        # ==============================================================================================
+        outputnames = ['beta', 'phi', 'p', 'r']                                              # names for picture labelling
+        X0 = np.array([[0.1, 0, 0, 0],
+                       [0, 0.1, 0, 0],
+                       [0, 0, 0.5, 0],
+                       [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
+        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []              # initialise empty lists
+        k = 0
+        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                 # calculate initial response
+            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                         # convert forced response to DataFrame
+            em.append(df3)                                                                   # append DataFrame to individual list
+            k += 1
 
-        # eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
-        # eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                       # concatenate list into panda dataframe along axis 1
+        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                       # concatenate list into panda dataframe along axis 1
 
-        if motion == 'aperroll':
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 13)                                                     # set xmin at 0
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+        # ==============================================================================================
+        # Plot experimental data and numerical model for forced_response
+        # ==============================================================================================
+        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
+        for i in range(0,3):
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
+            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+            ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
+            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0
+            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+            ax1[i,0].minorticks_on()                                                     # set minor ticks
+            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
 
-            ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
-            ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-            ax1[3,0].set_xlim(0, 13)                                                         # set xmin at 0
-            ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
+        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0
+        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+        ax1[3,0].minorticks_on()                                                         # set minor ticks
+        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/aperiodicroll.png', dpi=300, bbox_inches='tight')           # save figure
-            eigenmotion.to_csv('eigenmotions/aperiodicrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/aperiodicrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
+        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')           # save figure
+        eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
+        flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
 
-            # i = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/aperiodicrollInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
+        # ==============================================================================================
+        # Plot numerical model for disturbance input of initial_response
+        # ==============================================================================================
+        # i = 0
+        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
+        #     for j in range(0, 4):
+        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
+        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
+        #         ax2[j,0].minorticks_on()                                                     # set minor ticks
+        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+        #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+        #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
+        #     i += 1
 
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
+        plt.cla()           # clear the current axes
+        plt.clf()           # clear the current figure.
+        plt.close('all')    # closes all the figure windows.
+        gc.collect()        # clear memory to avoid overload
 
-        if motion == 'dutchroll':
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 20)                                                     # set xmin at 0 and tstop
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-
-            ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
-            ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-            ax1[3,0].set_xlim(0, 20)                                                         # set xmin at 0 and tstop
-            ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
-
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/dutchroll.png', dpi=300, bbox_inches='tight')               # save figure
-            eigenmotion.to_csv('eigenmotions/dutchrollNM.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/dutchrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-
-            # i = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/dutchrollInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-            gc.collect()        # clear memory to avoid overload
-
-        if motion == 'dutchrollYD':
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 15)                                                     # set xmin at 0
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-
-            ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
-            ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
-            ax1[3,0].set_xlim(0, 15)                                                         # set xmin at 0
-            ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
-
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/dutchrollYD.png', dpi=300, bbox_inches='tight')             # save figure
-            eigenmotion.to_csv('eigenmotions/dutchrollYDNM.csv', encoding='utf-8', index=False)# write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/dutchrollYDED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-
-            # i = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/dutchrollYDInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-
-        if motion == 'spiral':
-            fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            for i in range(0,3):
-                ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-                ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-                ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-                ax1[i,0].set_xlim(0, 110)                                                    # set xmin at 0
-                ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-                ax1[i,0].minorticks_on()                                                     # set minor ticks
-                ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-                ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-                ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-
-            ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
-            ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
-            ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of y-axis
-            ax1[3,0].set_xlim(0, 110)                                                        # set xmin at 0
-            ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
-            ax1[3,0].minorticks_on()                                                         # set minor ticks
-            ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-            ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-            ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
-
-            fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
-            eigenmotion.to_csv('eigenmotions/spiralrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/spiralrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-
-            # i = 0
-            # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-            #     for j in range(0, 4):
-            #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-            #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-            #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-            #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-            #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-            #     fig2.savefig('images/spiralrollInitial{}.png'.format(outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-            #     i += 1
-
-            plt.cla()           # clear the current axes
-            plt.clf()           # clear the current figure.
-            plt.close('all')    # closes all the figure windows.
-            gc.collect()        # clear memory to avoid overload
-
-# # plt.show()
+# plt.show()
