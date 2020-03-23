@@ -21,15 +21,29 @@ import matplotlib
 
 ####### Data for Thrust.exe ########
 # excel data
-time_config1 = [16*60+32, 18*60+20, 20*60+6, 22*60, 24*60+48, 26*60+24] # [s]
-IAS_config1 = np.array([248, 221, 188, 162, 140, 120]) * 0.514444 # [m/s]
-pressure_alt = np.array([7000, 7000, 6980, 7000, 7000, 6980]) * 0.3048 # [m]
-TAT_measured = np.array([1.7, 2.5, 3.7, 5.5, 7.7, 10.6])[::-1] + 273.15 # [Kelvin]
+# time_config1 = [16*60+32, 18*60+20, 20*60+6, 22*60, 24*60+48, 26*60+24] # [s]
+# IAS_config1 = np.array([248, 221, 188, 162, 140, 120]) * 0.514444 # [m/s]
+# pressure_alt = np.array([7000, 7000, 6980, 7000, 7000, 6980]) * 0.3048 # [m]
+# AOA = np.array([1.7, 2.5, 3.7, 5.5, 7.7, 10.6])  
 
-fuelflow_left = np.array([745, 641, 548, 456, 438, 456]) * 0.453592/60/60 # [kg/s]
-fuelflow_right = np.array([803, 687, 593, 502, 472, 507]) * 0.453592/60/60 # [kg/s]
+# fuelflow_left = np.array([745, 641, 548, 456, 438, 456]) * 0.453592/60/60 # [kg/s]
+# fuelflow_right = np.array([803, 687, 593, 502, 472, 507]) * 0.453592/60/60 # [kg/s]
+# fuelused = np.array([367, 400, 430, 470, 497, 515]) * 0.453592 # [kg]
 
-AOA = np.array([13.8, 11.8, 9.2, 7.8, 6.8, 5.8])[::-1]
+# TAT_measured = np.array([13.8, 11.8, 9.2, 7.8, 6.8, 5.8])+ 273.15 # [Kelvin]
+
+time_config1 = np.array([19*60+17, 21*60+37, 23*60+46, 26*60+4, 29*60+47, 32*60])
+IAS_config1 = np.array([249, 221, 192, 163, 130, 118]) * 0.514444 # [m/s]
+pressure_alt = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # [m]
+AOA = np.array([1.7, 2.4, 3.6, 5.4, 8.7, 10.6])
+fuelflow_left = np.array([798, 673, 561, 463, 443, 474]) * 0.453592/60/60 # [kg/s]
+fuelflow_right = np.array([813, 682, 579, 484, 467, 499]) * 0.453592/60/60 # [kg/s]
+fuelused = np.array([360, 412, 447, 478, 532, 570]) * 0.453592 # [kg]
+
+TAT_measured = np.array([12.5, 10.5, 8.8, 7.2, 6, 5.2])+ 273.15 # [Kelvin]
+
+
+
 AOA_rad = np.radians(AOA)
 
 _lambda = -0.0065
@@ -70,7 +84,7 @@ for line in lines:
 Thrust = np.array(Thrust)        
 V_TAS = Mach * 343
 rho = 101325 / p0overp(pressure_alt) / 287 / TAT_corrected
-Weight = (m - (fuelflow_left + fuelflow_right) * time_config1) * 9.80665
+Weight = (m - fuelused) * 9.80665
 
 def Reynolds():
     # bulk_viscosity
@@ -100,12 +114,25 @@ def CLCD_plot_stationary():
     def func(CL, CD0, k):
         return CD0 + CL**2 * k
     
-    cl_least = np.linspace(np.min(CL)-0.2, np.max(CL)+0.05,100)
+    cl_least = np.linspace(np.min(CL)-0.23, np.max(CL)+0.1,100)
     popt, pcov = sp.optimize.curve_fit(func, CL, CD)
     CD0 = popt[0]
     oswald = 1/ popt[1] / np.pi / AR
     
-    # print(popt[0], popt[1])
+    print('a = ', popt[1])
+    print('b or CD0 = ', CD0)
+    print('oswald = ', oswald)
+    
+    ## Error derivation
+    CD_leastsq = CD0 + CL**2 * popt[1]
+    max_error = max(np.abs(CD-CD_leastsq))
+    L2_error = np.sqrt( np.sum((CD-CD_leastsq)**2))
+    error = max_error / L2_error * 100
+    print('CD-CL')
+    print('max error = ', max_error)
+    print('L2 error =', L2_error)
+    print('error =', error, '%')
+    
     ## Graphing Parameters
     SMALL_SIZE  = texpsize[0]
     MEDIUM_SIZE = texpsize[1]
@@ -128,7 +155,7 @@ def CLCD_plot_stationary():
     ## Graph
     fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
     ax[0,0].scatter(x, y, label = 'Experimental data')
-    ax[0,0].plot(func(cl_least, *popt), cl_least , label = 'Least Square regression $aCL^2 + b$')
+    ax[0,0].plot(func(cl_least, *popt), cl_least , label = r'Least Square regression $C_D = aC_L^2 + b$')
     # ax[0,0].plot(label='Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
     # ax[0,0].plot(x, y, label='(%f, %f)$ \n Reynolds (%f, %f)$ '%(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
     # ax[0,0].set_title(r"Aircraft configuration: clean")
@@ -144,13 +171,13 @@ def CLCD_plot_stationary():
     ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
     ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
     # ax[0,0].figtext(.8, .8, 'Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$' %(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
-    fig.savefig("CL-CD_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+    # fig.savefig("CL-CD_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
     
     ## If you want to see the figure, else disable last two lines.
     fig.tight_layout()
     plt.show()
     
-    return CD0, oswald
+    return 0
     
 def CLalpha_plot_stationary():
     
@@ -170,8 +197,20 @@ def CLalpha_plot_stationary():
     popt, pcov = sp.optimize.curve_fit(func, AOA, CL)
     CLalpha = popt[0]
     y_intercept = popt[1]
-    aoa_least= np.linspace(np.min(AOA)-0.05, np.max(AOA)+0.1, 100)
-    print(popt[0], popt[1])
+    aoa_least= np.linspace(np.min(AOA)-2, np.max(AOA)+0.1, 100)
+    print('a / CLalpha = ', CLalpha)
+    print('b = ', y_intercept)
+    
+    ## Error derivation
+    CL_leastsq = y_intercept + AOA * CLalpha
+    max_error = max(np.abs(CL-CL_leastsq))
+    L2_error = np.sqrt( np.sum((CL-CL_leastsq)**2))
+    error = max_error / L2_error * 100
+    print('CD-alpha')
+    print('max error = ', max_error)
+    print('L2 error =', L2_error)
+    print('error =', error, '%')
+    
     ## Graphing Parameters
     SMALL_SIZE  = texpsize[0]
     MEDIUM_SIZE = texpsize[1]
@@ -194,7 +233,7 @@ def CLalpha_plot_stationary():
     ## Graph
     fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
     ax[0,0].scatter(x, y, label = 'Experimental data')
-    ax[0,0].plot(aoa_least, func(aoa_least, *popt), label = 'Least Square regression $C_L = a\alpha + b$')
+    ax[0,0].plot(aoa_least, func(aoa_least, *popt), label = r'Least Square regression $C_L = a \alpha + b$')
     # ax[0,0].set_title(r"Aircraft configuration: clean")
     # ax[0,0].plot(x,x*0.077-0.26, label="test2", linestyle="dashed")
     # ax[0,0].plot(x,x*0.07955175608200933-0.27201100205949574, label="test2", linestyle="dashed")
@@ -208,7 +247,7 @@ def CLalpha_plot_stationary():
     ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
     ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
     ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
-    fig.savefig("CL-alpha_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+    # fig.savefig("CL-alpha_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
     
     ## If you want to see the figure, else disable last two lines.
     fig.tight_layout()
@@ -216,63 +255,63 @@ def CLalpha_plot_stationary():
     
     return 0
 
-CLCD_plot_stationary()
-CLalpha_plot_stationary()
-
 
 # Theoretical plot
-def CL2CD_plot():
-    CL  = np.linspace(0,1.0,100)
-    CD = CLCD_plot_stationary()[0] + CL**2 / (np.pi * AR * CLCD_plot_stationary()[1])
+# def CL2CD_plot():
+#     CL  = np.linspace(0,1.0,100)
+#     CD = CLCD_plot_stationary()[0] + CL**2 / (np.pi * AR * CLCD_plot_stationary()[1])
     
-    ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
-    texpsize= [26,28,30]
+#     ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
+#     texpsize= [26,28,30]
     
-    ## Input Arrays
-    x = np.linspace(1,10,10)
-    y = np.ones((10))*2
+#     ## Input Arrays
+#     x = np.linspace(1,10,10)
+#     y = np.ones((10))*2
     
-    ## Graphing Parameters
-    SMALL_SIZE  = texpsize[0]
-    MEDIUM_SIZE = texpsize[1]
-    BIGGER_SIZE = texpsize[2]
+#     ## Graphing Parameters
+#     SMALL_SIZE  = texpsize[0]
+#     MEDIUM_SIZE = texpsize[1]
+#     BIGGER_SIZE = texpsize[2]
     
-    plt.style.use('grayscale')
-    plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
-    plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
-    plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
-    plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
-    plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
-    plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
-    plt.rc('text', usetex=False)
-    matplotlib.rcParams['lines.linewidth']  = 1.5
-    matplotlib.rcParams['figure.facecolor'] = 'white'
-    matplotlib.rcParams['axes.facecolor']   = 'white'
-    matplotlib.rcParams["legend.fancybox"]  = False
+#     plt.style.use('grayscale')
+#     plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
+#     plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
+#     plt.rc('axes', labelsize=SMALL_SIZE)                ## fontsize of the x and y labels
+#     plt.rc('xtick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+#     plt.rc('ytick', labelsize=SMALL_SIZE)               ## fontsize of the tick labels
+#     plt.rc('legend', fontsize=SMALL_SIZE)               ## legend fontsize
+#     plt.rc('figure', titlesize=BIGGER_SIZE)             ## fontsize of the figure title
+#     plt.rc('text', usetex=False)
+#     matplotlib.rcParams['lines.linewidth']  = 1.5
+#     matplotlib.rcParams['figure.facecolor'] = 'white'
+#     matplotlib.rcParams['axes.facecolor']   = 'white'
+#     matplotlib.rcParams["legend.fancybox"]  = False
     
-    ## Graph
-    fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
-    ax[0,0].plot(CD, CL)
-    # ax[0,0].plot(x+x, y+y, label="test2", linestyle="dashed")
-    #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
-    ax[0,0].set_ylabel(r"$C_D$")          ## String is treatable as latex code
-    ax[0,0].set_xlabel(r"$C_L$")
-    #ax[0,0].set_xlim(0,x[-1])
-    ax[0,0].grid(True,which="major",color="#999999")
-    ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
-    ax[0,0].minorticks_on()
-    ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
-    ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
-    # ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
-    fig.savefig("CLCD-theoretical.png", bbox_inches='tight')                                    ## Insert save destination
+#     ## Graph
+#     fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
+#     ax[0,0].plot(CD, CL)
+#     # ax[0,0].plot(x+x, y+y, label="test2", linestyle="dashed")
+#     #ax[0,0].loglog(x, y, marker = "s", color='black', markerfacecolor='none', markeredgewidth=2, markersize=6, label="test")
+#     ax[0,0].set_ylabel(r"$C_D$")          ## String is treatable as latex code
+#     ax[0,0].set_xlabel(r"$C_L$")
+#     #ax[0,0].set_xlim(0,x[-1])
+#     ax[0,0].grid(True,which="major",color="#999999")
+#     ax[0,0].grid(True,which="minor",color="#DDDDDD",ls="--")
+#     ax[0,0].minorticks_on()
+#     ax[0,0].tick_params(which='major', length=10, width=2, direction='inout')
+#     ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
+#     # ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
+#     fig.savefig("CLCD-theoretical.png", bbox_inches='tight')                                    ## Insert save destination
     
-    ## If you want to see the figure, else disable last two lines.
-    fig.tight_layout()
-    plt.show()            
+#     ## If you want to see the figure, else disable last two lines.
+#     fig.tight_layout()
+#     plt.show()            
 
+#     return 0
 
-CL2CD_plot()
+CLCD_plot_stationary()
+CLalpha_plot_stationary()
+# CL2CD_plot()
     
 
 
