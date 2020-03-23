@@ -235,43 +235,43 @@ cgshift = manouvre(data, 'cgshift')                                             
 # ==============================================================================================
 momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
 
-LEMAC   = 261.56*0.0254                                                                  # [m] leading edge position of mean aerodynamic chord
-BEM     = 9165                                                                           # [lbs] basic empty mass, taken from weight measurements
-cgBEM   = 291.647954                                                                     # [in] centre of gravity position of BEM
+LEMAC   = 261.56*0.0254                                                                      # [m] leading edge position of mean aerodynamic chord
+BEM     = 9165                                                                               # [lbs] basic empty mass, taken from weight measurements
+cgBEM   = 291.647954                                                                         # [in] centre of gravity position of BEM
 
-xseats  = [131,131,214,214,251,251,288,288,170]                                          # [in] x-position of each seat for passenger / pilot
+xseats  = [131,131,214,214,251,251,288,288,170]                                              # [in] x-position of each seat for passenger / pilot
 Mseats  = [90*2.20462,102*2.20462,83*2.20462,94*2.20462,84*2.20462, \
-           74*2.20462,79*2.20462,103*2.20462,80*2.20462]                                 # [lbs] weight of each passenger on each seat
+           74*2.20462,79*2.20462,103*2.20462,80*2.20462]                                     # [lbs] weight of each passenger on each seat
 
-xbag    = [74, 321, 338]                                                                 # [in]
-Mbag    = [0, 0, 0]                                                                      # [lbs]
+xbag    = [74, 321, 338]                                                                     # [in]
+Mbag    = [0, 0, 0]                                                                          # [lbs]
 
-mPL     = sum(Mseats) + sum(Mbag)                                                        # [lbs] payload mass
+mPL     = sum(Mseats) + sum(Mbag)                                                            # [lbs] payload mass
 
 momentPL = sum([xseats[i]*Mseats[i] for i in range(len(xseats))]) \
            + sum([xbag[j]*Mbag[j] for j in range(len(xbag))])
 
-ZFM = BEM + mPL                                                                          # [lbs] zero fuel mass
-cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)                                             # [] centre of gravity position of zero fuel mass
+ZFM = BEM + mPL                                                                              # [lbs] zero fuel mass
+cgZFM  = cgshift1(BEM, cgBEM, ZFM, momentPL)                                                 # [] centre of gravity position of zero fuel mass
 
-mf_init = 4100                                                                           # [lbs] initial fuel mass
+mf_init = 4100                                                                               # [lbs] initial fuel mass
 momentmf_init = fuelinterpolation(mf_init, momentfuel)*100
 
-mRW    = ZFM + mf_init                                                                   # [lbs] ramp weight
-cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)                                           # [] centre of gravity of ramp weight
+mRW    = ZFM + mf_init                                                                       # [lbs] ramp weight
+cgmRW  = cgshift1(ZFM, cgZFM, mRW, momentfuel)                                               # [] centre of gravity of ramp weight
 
-cg     = []                                                                              # initialise empty list for centre of gravity
-temp   = np.zeros((len(data.time)-1, 2))                                                 # initialise empty numpy array for time and mass
+cg     = []                                                                                  # initialise empty list for centre of gravity
+temp   = np.zeros((len(data.time)-1, 2))                                                     # initialise empty numpy array for time and mass
 fused  = fuelused(data.time, data.rh_engine_FMF, data.lh_engine_FMF)
 i = 0
 for t in data.time[:len(data.time) - 1]:
     tempcg, tempm = cgtime(t, mf_init, ZFM, cgZFM, fused, momentfuel)
-    cg.append(tempcg)                                                                    # append invidual cg position to cg list
-    temp[i][0], temp[i][1] = t, lbstokg(tempm)                                           # population of numpy array with time and mass
+    cg.append(tempcg)                                                                        # append invidual cg position to cg list
+    temp[i][0], temp[i][1] = t, lbstokg(tempm)                                               # population of numpy array with time and mass
     i += 1
 
-cg     = np.array(cg)                                                                    # convert list to numpy array
-df1    = pd.DataFrame(temp, columns=['time', 'mass'])                                    # [s, kg] dataframe with specific mass at time t
+cg     = np.array(cg)                                                                        # convert list to numpy array
+df1    = pd.DataFrame(temp, columns=['time', 'mass'])                                        # [s, kg] dataframe with specific mass at time t
 # ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
@@ -507,19 +507,19 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         syss = ctl.StateSpace(A_s, B_s, C, D)                                                 # create state-space system for symmetric eigenmotions
         evals, evecs = eig(A_s)                                                               # compute eigenvalues and eigenvectors
 
-    #     for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
-    #         f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-    #         f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
 
-    #     tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
-    #     dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
+        tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
+        dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
-    #     units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
-    #     u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
-    #     columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
-    #     eigenmotion = []                                                                     # initialise empty list
+        units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
+        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
+        columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
+        eigenmotion = []                                                                     # initialise empty list
 
-    #     flightdata = [np.radians(data.vane_AOA), np.radians(data.Ahrs1_Pitch), np.radians(data.Ahrs1_bPitchRate)]
+        flightdata = [np.radians(data.vane_AOA), np.radians(data.Ahrs1_Pitch), np.radians(data.Ahrs1_bPitchRate)]
 
         t, y, x = ctl.forced_response(syss, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -583,15 +583,15 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # Calculates responses to asymmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
-        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_a)                                                              # compute eigenvalues and eigenvectors
+        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                  # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_a)                                                               # compute eigenvalues and eigenvectors
 
-    #     for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
-    #         f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-    #         f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
 
-    #     tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
-    #     dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
+        tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
+        dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
         units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                     # list with units of columns for plotting
         u = [np.radians(data.delta_a), np.radians(data.delta_r)]                             # [rad] input array given input at each time for [da, dr]
@@ -599,7 +599,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         columns = [r'\beta', r'\phi', r'p', r'r']                                            # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list
 
-    #     flightdata = [np.radians(data.Ahrs1_Roll), np.radians(data.Ahrs1_bRollRate), np.radians(data.Ahrs1_bYawRate)]
+        flightdata = [np.radians(data.Ahrs1_Roll), np.radians(data.Ahrs1_bRollRate), np.radians(data.Ahrs1_bYawRate)]
 
         t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -715,8 +715,4 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1.savefig('images/spiralroll.png', dpi=300, bbox_inches='tight')              # save figure
             eigenmotion.to_csv('eigenmotions/spiralroll.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
-# plt.show()
-
-
-
-
+# # plt.show()
