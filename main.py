@@ -67,13 +67,25 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "phugoid":
-        tstep        = 120
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # # Flight data
+        tstep       = 120
         time_start  = 2675
         time_stop   = 2675 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
 
     if flightmanouvre == "shortperiod":
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # # Flight data
         tstep       = 15
         time_start  = 2645
         time_stop   = 2645 + tstep
@@ -81,6 +93,12 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "aperiodicroll":
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # # Flight data
         tstep       = 13
         time_start  = 2899
         time_stop   = 2899 + tstep
@@ -88,12 +106,24 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "dutchroll":
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # # Flight data
         tstep        = 25
         time_start  = 3020
         time_stop   = 3020 + tstep
         data        = data[(data['time'] >= time_start) & (data['time'] <= time_stop)]
         return data
     if flightmanouvre == "dutchrollYD":
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # Flight data
         tstep       = 20
         time_start  = 3090
         time_stop   = 3090 + tstep
@@ -101,6 +131,12 @@ def manouvre(data, flightmanouvre):
         return data
 
     if flightmanouvre == "spiral":
+        # # Reference data
+        # tstep       =
+        # time_start  =
+        # time_stop   =
+
+        # Flight data
         tstep       = 110
         time_start  = 3290
         time_stop   = 3290 + tstep
@@ -228,7 +264,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Set global plotting parameters
 # ==============================================================================================
-texpsize= [16,18,20]
+texpsize= [18,20,22]
 
 ## Graphing Parameters
 SMALL_SIZE  = texpsize[0]
@@ -236,13 +272,13 @@ MEDIUM_SIZE = texpsize[1]
 BIGGER_SIZE = texpsize[2]
 
 # plt.style.use('grayscale')
-plt.rc('font', size=texpsize[1], family='serif')    ## controls default text sizes
-plt.rc('axes', titlesize=texpsize[0])               ## fontsize of the axes title
-plt.rc('axes', labelsize=texpsize[0])               ## fontsize of the x and y labels
-plt.rc('xtick', labelsize=texpsize[0])              ## fontsize of the tick labels
-plt.rc('ytick', labelsize=texpsize[0])              ## fontsize of the tick labels
-plt.rc('legend', fontsize=texpsize[0])              ## legend fontsize
-plt.rc('figure', titlesize=texpsize[2])             ## fontsize of the figure title
+plt.rc('font', size=texpsize[1], family='serif')    # controls default text sizes
+plt.rc('axes', titlesize=texpsize[0])               # fontsize of the axes title
+plt.rc('axes', labelsize=texpsize[0])               # fontsize of the x and y labels
+plt.rc('xtick', labelsize=texpsize[0])              # fontsize of the tick labels
+plt.rc('ytick', labelsize=texpsize[0])              # fontsize of the tick labels
+plt.rc('legend', fontsize=texpsize[0])              # legend fontsize
+plt.rc('figure', titlesize=texpsize[2])             # fontsize of the figure title
 plt.rc('text', usetex=False)
 # matplotlib.rcParams['lines.linewidth']  = 1.5
 # matplotlib.rcParams['figure.facecolor'] = 'white'
@@ -521,318 +557,318 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     C = np.identity(4)
     D = np.zeros((4,2))
 
-    # ==============================================================================================
-    # Calculates responses to symmetric eigenmotions from state-space system
-    # ==============================================================================================
-    if motion in ['phugoid', 'shortperiod']:
+    # # ==============================================================================================
+    # # Calculates responses to symmetric eigenmotions from state-space system
+    # # ==============================================================================================
+    # if motion in ['phugoid', 'shortperiod']:
 
-        # ==============================================================================================
-        # Calculate analytical eigenvalues
-        # ==============================================================================================
-        Atilde = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2**2)
+    #     # ==============================================================================================
+    #     # Calculate analytical eigenvalues
+    #     # ==============================================================================================
+    #     Atilde = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2**2)
 
-        Btilde = ( CXu * (CZadot - 2 * muc) * 2 * muc * KY2**2 - 2 * muc * CZa * 2 * muc * KY2 \
-            + 2 * muc * (CZadot - 2 * muc) * Cmq - (CZq + 2 * muc) * Cmadot * 2 * muc )
+    #     Btilde = ( CXu * (CZadot - 2 * muc) * 2 * muc * KY2**2 - 2 * muc * CZa * 2 * muc * KY2 \
+    #         + 2 * muc * (CZadot - 2 * muc) * Cmq - (CZq + 2 * muc) * Cmadot * 2 * muc )
 
-        Ctilde = ( CXu * CZa * (2 * muc * KY2) - CXu * (CZadot - 2 * muc) * Cmq + 2 * muc * CZa * Cmq \
-            - CZu * Cmadot * CXq + CXq * (CZadot - 2 * muc) * Cmu - (CZq + 2 * muc) * Cma * 2 * muc \
-            + (CZq + 2 * muc) * Cmadot * CXu - 2 * muc * KY2**2 * CXa * CZu+ CX0 * Cmadot * 2 * muc)
+    #     Ctilde = ( CXu * CZa * (2 * muc * KY2) - CXu * (CZadot - 2 * muc) * Cmq + 2 * muc * CZa * Cmq \
+    #         - CZu * Cmadot * CXq + CXq * (CZadot - 2 * muc) * Cmu - (CZq + 2 * muc) * Cma * 2 * muc \
+    #         + (CZq + 2 * muc) * Cmadot * CXu - 2 * muc * KY2**2 * CXa * CZu+ CX0 * Cmadot * 2 * muc)
 
-        Dtilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) + CXq * CZa * Cmu \
-            + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu - CZu * Cmadot * CZ0 + CZ0 * (CZadot - 2 * muc) * Cmu \
-            + CX0 * Cma * 2 * muc - CX0 * Cmadot * CXu )
+    #     Dtilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) + CXq * CZa * Cmu \
+    #         + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu - CZu * Cmadot * CZ0 + CZ0 * (CZadot - 2 * muc) * Cmu \
+    #         + CX0 * Cma * 2 * muc - CX0 * Cmadot * CXu )
 
-        Etilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
+    #     Etilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
 
-        evals_symmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde])
+    #     evals_symmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde])
 
-        for i in range(0, len(evals_symmetric)):                                                            # write eigenvalues to textfile
-            f = open('eigenvalues_analytical.txt', 'a+')                                                    # append lines to existing .txt-file
-            f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))         # write eigenvalues
+    #     for i in range(0, len(evals_symmetric)):                                                            # write eigenvalues to textfile
+    #         f = open('eigenvalues_analytical.txt', 'a+')                                                    # append lines to existing .txt-file
+    #         f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))         # write eigenvalues
 
-        # ==============================================================================================
-        # Calculate state space system for each eigenmotion
-        # ==============================================================================================
-        syss = ctl.StateSpace(A_s, B_s, C, D)                                               # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_s)                                                             # compute eigenvalues and eigenvectors
+    #     # ==============================================================================================
+    #     # Calculate state space system for each eigenmotion
+    #     # ==============================================================================================
+    #     syss = ctl.StateSpace(A_s, B_s, C, D)                                               # create state-space system for symmetric eigenmotions
+    #     evals, evecs = eig(A_s)                                                             # compute eigenvalues and eigenvectors
 
-        for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
-            f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
+    #     for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
+    #         f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
+    #         f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
 
-        tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
-        dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
+    #     tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
+    #     dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
 
-        units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                      # list with units of columns for plotting
-        u = [np.radians(data.delta_e), np.zeros(len(data.index))]                           # [rad] input array given input at each time for [de, dt]
-        x0 = np.array([[ktstoms(data.Dadc1_tas.iloc[0]) - V0],
-                       [np.radians(data.vane_AOA.iloc[0])],
-                       [np.radians(data.Ahrs1_Pitch.iloc[0])],
-                       [np.radians(data.Ahrs1_bPitchRate.iloc[0])]])                        # initial condition for forced response
+    #     units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                      # list with units of columns for plotting
+    #     u = [np.radians(data.delta_e), np.zeros(len(data.index))]                           # [rad] input array given input at each time for [de, dt]
+    #     x0 = np.array([[ktstoms(data.Dadc1_tas.iloc[0]) - V0],
+    #                    [np.radians(data.vane_AOA.iloc[0])],
+    #                    [np.radians(data.Ahrs1_Pitch.iloc[0])],
+    #                    [np.radians(data.Ahrs1_bPitchRate.iloc[0])]])                        # initial condition for forced response
 
-        columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                  # names of invidiual columns for DataFrame
-        eigenmotion = []                                                                    # initialise empty list 1
+    #     columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                  # names of invidiual columns for DataFrame
+    #     eigenmotion = []                                                                    # initialise empty list 1
 
-        flightdata = pd.DataFrame({'time': data.time, \
-                                   'vane_AoA': np.radians(data.vane_AOA), \
-                                   'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), \
-                                   'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
+    #     flightdata = pd.DataFrame({'time': data.time, \
+    #                                'vane_AoA': np.radians(data.vane_AOA), \
+    #                                'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), \
+    #                                'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
 
-        # ==============================================================================================
-        # Calculate forced response of eigenmotion to delta_i input
-        # ==============================================================================================
-        t, y, x = ctl.forced_response(syss, dt, U=u, X0=x0)                                 # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                             # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
+    #     # ==============================================================================================
+    #     # Calculate forced response of eigenmotion to delta_i input
+    #     # ==============================================================================================
+    #     t, y, x = ctl.forced_response(syss, dt, U=u, X0=x0)                                 # calculate forced response
+    #     df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
+    #     eigenmotion.append(df2)                                                             # append DataFrame to individual list
+    #     eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
 
-        # ==============================================================================================
-        # Calculate initial response for eigenmotion with disturbance input
-        # ==============================================================================================
-        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                       # names for picture labelling
-        X0 = np.array([[5.0, 0, 0, 0],
-                       [0, 0.05, 0, 0],
-                       [0, 0, 0.5, 0],
-                       [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
-        k = 0
-        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
-            em.append(df3)                                                                  # append DataFrame to individual list
-            k += 1
+    #     # ==============================================================================================
+    #     # Calculate initial response for eigenmotion with disturbance input
+    #     # ==============================================================================================
+    #     outputnames = ['VTAS', 'alpha', 'theta', 'q']                                       # names for picture labelling
+    #     X0 = np.array([[5.0, 0, 0, 0],
+    #                    [0, 0.05, 0, 0],
+    #                    [0, 0, 0.5, 0],
+    #                    [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
+    #     eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
+    #     k = 0
+    #     for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+    #         t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
+    #         df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
+    #         em.append(df3)                                                                  # append DataFrame to individual list
+    #         k += 1
 
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
 
-        # ==============================================================================================
-        # Plot experimental data and numerical model for forced_response
-        # ==============================================================================================
-        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
-        for i in range(0,3):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-            ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0 and tstop
-            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-            ax1[i,0].minorticks_on()                                                     # set minor ticks
-            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+    #     # ==============================================================================================
+    #     # Plot experimental data and numerical model for forced_response
+    #     # ==============================================================================================
+    #     fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
+    #     for i in range(0,3):
+    #         ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+    #         ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
+    #         ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
+    #         ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0 and tstop
+    #         ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+    #         ax1[i,0].minorticks_on()                                                     # set minor ticks
+    #         ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+    #         ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+    #         ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
 
-        ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
-        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0 and tstop
-        ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
-        ax1[3,0].minorticks_on()                                                         # set minor ticks
-        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+    #     ax1[3,0].plot(t, u[0], c='k', label='Elevator Deflection')                       # plot input variable
+    #     ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
+    #     ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0 and tstop
+    #     ax1[3,0].set_ylabel('$\delta_e$ [rad]')                                          # set label of y-axis
+    #     ax1[3,0].minorticks_on()                                                         # set minor ticks
+    #     ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+    #     ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+    #     ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')                 # save figure
-        eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False)  # write eigenmotion to csv-file
-        flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False)   # write eigenmotion to csv-file
+    #     fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+    #     fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')                 # save figure
+    #     eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False)  # write eigenmotion to csv-file
+    #     flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False)   # write eigenmotion to csv-file
 
-        # # ==============================================================================================
-        # # Plot numerical model for disturbance input of initial_response
-        # # ==============================================================================================
-        # i = 0
-        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-        #     for j in range(0, 4):
-        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-        #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-        #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-        #     i += 1
+    #     # # ==============================================================================================
+    #     # # Plot numerical model for disturbance input of initial_response
+    #     # # ==============================================================================================
+    #     # i = 0
+    #     # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+    #     #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
+    #     #     for j in range(0, 4):
+    #     #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
+    #     #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
+    #     #         ax2[j,0].minorticks_on()                                                     # set minor ticks
+    #     #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+    #     #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+    #     #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+    #     #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+    #     #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
+    #     #     i += 1
 
-        plt.cla()           # clear the current axes
-        plt.clf()           # clear the current figure.
-        plt.close('all')    # closes all the figure windows.
-        gc.collect()        # clear memory to avoid overload
+    #     plt.cla()           # clear the current axes
+    #     plt.clf()           # clear the current figure.
+    #     plt.close('all')    # closes all the figure windows.
+    #     gc.collect()        # clear memory to avoid overload
 
-        if motion == 'phugoid':
-            # ==============================================================================================
-            # Calculate analytical eigenvalues of phugoid motion
-            # ==============================================================================================
-            Atilde = ( 2 * muc * CZa * Cmq - (CZq + 2 * muc) * Cma * 2 * muc )
+    #     if motion == 'phugoid':
+    #         # ==============================================================================================
+    #         # Calculate analytical eigenvalues of phugoid motion
+    #         # ==============================================================================================
+    #         Atilde = ( 2 * muc * CZa * Cmq - (CZq + 2 * muc) * Cma * 2 * muc )
 
-            Btilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) \
-                 + CXq * CZa * Cmu + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu \
-                 + CX0 * Cma * 2 * muc )
+    #         Btilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) \
+    #              + CXq * CZa * Cmu + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu \
+    #              + CX0 * Cma * 2 * muc )
 
-            Ctilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
+    #         Ctilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
 
-            evals_phugoid = np.roots([Atilde, Btilde, Ctilde])
+    #         evals_phugoid = np.roots([Atilde, Btilde, Ctilde])
 
-            for i in range(0, len(evals_phugoid)):                                           # write eigenvalues to textfile
-                f = open('eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))    # write eigenvalues
+    #         for i in range(0, len(evals_phugoid)):                                           # write eigenvalues to textfile
+    #             f = open('eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
+    #             f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))    # write eigenvalues
 
-        elif motion == 'shortperiod':
-            # ==============================================================================================
-            # Compute analytical eigenvalues for short period eigenmotion
-            # ==============================================================================================
-            Atilde = -1 * (CZadot - 2 * muc) * 2 * muc * KY2**2
+    #     elif motion == 'shortperiod':
+    #         # ==============================================================================================
+    #         # Compute analytical eigenvalues for short period eigenmotion
+    #         # ==============================================================================================
+    #         Atilde = -1 * (CZadot - 2 * muc) * 2 * muc * KY2**2
 
-            Btilde = ( -1 * CZa * 2 * muc * KY2**2 + (CZadot - 2 * muc) * Cmq + (CZq + 2 * muc) * Cmadot )
+    #         Btilde = ( -1 * CZa * 2 * muc * KY2**2 + (CZadot - 2 * muc) * Cmq + (CZq + 2 * muc) * Cmadot )
 
-            Ctilde = ( -1 * CZa * Cmq - CX0 * Cmadot+ (CZq + 2 * muc) * Cma )
+    #         Ctilde = ( -1 * CZa * Cmq - CX0 * Cmadot+ (CZq + 2 * muc) * Cma )
 
-            Dtilde = -1 * CX0 * Cma
+    #         Dtilde = -1 * CX0 * Cma
 
-            evals_shortperiod = np.roots([Atilde, Btilde, Ctilde, Dtilde])
+    #         evals_shortperiod = np.roots([Atilde, Btilde, Ctilde, Dtilde])
 
-            for i in range(0, len(evals_shortperiod)):                                           # write eigenvalues to textfile
-                f = open('eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))# write eigenvalues
+    #         for i in range(0, len(evals_shortperiod)):                                           # write eigenvalues to textfile
+    #             f = open('eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
+    #             f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))# write eigenvalues
 
-    # ==============================================================================================
-    # Calculates responses to asymmetric eigenmotions from state-space system
-    # ==============================================================================================
-    if motion in ['aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
-        # ==============================================================================================
-        # Calculate analytical eigenvalues for each eigenmotion
-        # ==============================================================================================
-        Atilde = 0.5 * ( -1 * (CYbdot - 2 * mub) * 4 * mub * KX2**2 * 4 * mub * KZ2**2 \
-            + (4 * mub * KXZ)**2 * (CYbdot - 2 * mub) )
+    # # ==============================================================================================
+    # # Calculates responses to asymmetric eigenmotions from state-space system
+    # # ==============================================================================================
+    # if motion in ['aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
+    #     # ==============================================================================================
+    #     # Calculate analytical eigenvalues for each eigenmotion
+    #     # ==============================================================================================
+    #     Atilde = 0.5 * ( -1 * (CYbdot - 2 * mub) * 4 * mub * KX2**2 * 4 * mub * KZ2**2 \
+    #         + (4 * mub * KXZ)**2 * (CYbdot - 2 * mub) )
 
-        Btilde = 0.5 * ( -1 * CYb * 4 * mub * KX2**2 * 4 * mub * KZ2**2 + (CYbdot - 2 * mub) * Clp * 4 * mub  * KZ2**2 \
-               + (CYbdot - 2 * mub) * 4 * mub * KX2 **2 * Cnr - Cnbdot * CYp * 4 * mub * KXZ \
-               - (CYr - 4 * mub) * 4 * mub * KX2**2 * Cnbdot + Clr * 4 * mub * KXZ * (CYbdot - 2 * mub)
-               + 4 * mub * KXZ * Cnp * (CYbdot - 2 * mub) + (4 * mub * KXZ)**2 * CYb )
+    #     Btilde = 0.5 * ( -1 * CYb * 4 * mub * KX2**2 * 4 * mub * KZ2**2 + (CYbdot - 2 * mub) * Clp * 4 * mub  * KZ2**2 \
+    #            + (CYbdot - 2 * mub) * 4 * mub * KX2 **2 * Cnr - Cnbdot * CYp * 4 * mub * KXZ \
+    #            - (CYr - 4 * mub) * 4 * mub * KX2**2 * Cnbdot + Clr * 4 * mub * KXZ * (CYbdot - 2 * mub)
+    #            + 4 * mub * KXZ * Cnp * (CYbdot - 2 * mub) + (4 * mub * KXZ)**2 * CYb )
 
-        Ctilde = ( 0.5 * ( CYb * Clp * 4 * mub * KZ2 ** 2 + CYb * 4 * mub * KX2**2 * Cnr - (CYbdot - 2 * mub) * Clp * Cnr \
-                - Clb * 4 * mub * KXZ * (CYr - 4 * mub) - Cnb * CYp * 4 * mub * KXZ - Cnbdot * CYp * Clr \
-                + (CYr - 4 * mub) * Clp * Cnbdot - (CYr - 4 * mub) * 4 * mub * KX2**2 * Cnb + Clr * Cnp * (CYbdot - 2 * mub) \
-                + Clr * 4 * mub * KXZ * CYb + 4 * mub * KXZ * Cnp * CYb - 4 * mub * KZ2**2 * CYp * Clb ) \
-                - Cnbdot * CL * 4 * mub * KXZ )
+    #     Ctilde = ( 0.5 * ( CYb * Clp * 4 * mub * KZ2 ** 2 + CYb * 4 * mub * KX2**2 * Cnr - (CYbdot - 2 * mub) * Clp * Cnr \
+    #             - Clb * 4 * mub * KXZ * (CYr - 4 * mub) - Cnb * CYp * 4 * mub * KXZ - Cnbdot * CYp * Clr \
+    #             + (CYr - 4 * mub) * Clp * Cnbdot - (CYr - 4 * mub) * 4 * mub * KX2**2 * Cnb + Clr * Cnp * (CYbdot - 2 * mub) \
+    #             + Clr * 4 * mub * KXZ * CYb + 4 * mub * KXZ * Cnp * CYb - 4 * mub * KZ2**2 * CYp * Clb ) \
+    #             - Cnbdot * CL * 4 * mub * KXZ )
 
-        Dtilde = ( -0.5 * ( -1 * CYb * Clp * Cnr - Clb * Cnp * (CYr - 4 * mub) - Cnb * CYp * Clr + (CYr - 4 * mub) * Clp * Cnb \
-                + Clr * Cnp * CYb + Cnr * CYp * Clb) - ( Cnb * CL * 4 * mub * KXZ + Cnbdot * CL * Clr + 4 * mub * KZ2**2 * CL * Clb ) )
+    #     Dtilde = ( -0.5 * ( -1 * CYb * Clp * Cnr - Clb * Cnp * (CYr - 4 * mub) - Cnb * CYp * Clr + (CYr - 4 * mub) * Clp * Cnb \
+    #             + Clr * Cnp * CYb + Cnr * CYp * Clb) - ( Cnb * CL * 4 * mub * KXZ + Cnbdot * CL * Clr + 4 * mub * KZ2**2 * CL * Clb ) )
 
-        Etilde = (-1 * Cnb * CL * Clr + Cnr * CL * Clb)
+    #     Etilde = (-1 * Cnb * CL * Clr + Cnr * CL * Clb)
 
-        evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde])
+    #     evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde])
 
-        for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
-            f = open('eigenvalues_analytical.txt', 'a+')                                                # append lines to existing .txt-file
-            f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
-        # ==============================================================================================
-        # Calculate state space system for each eigenmotion
-        # ==============================================================================================
-        sysa = ctl.StateSpace(A_a, B_a, C, D)                                               # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_a)                                                             # compute eigenvalues and eigenvectors
+    #     for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
+    #         f = open('eigenvalues_analytical.txt', 'a+')                                                # append lines to existing .txt-file
+    #         f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
+    #     # ==============================================================================================
+    #     # Calculate state space system for each eigenmotion
+    #     # ==============================================================================================
+    #     sysa = ctl.StateSpace(A_a, B_a, C, D)                                               # create state-space system for symmetric eigenmotions
+    #     evals, evecs = eig(A_a)                                                             # compute eigenvalues and eigenvectors
 
-        for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
-            f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
+    #     for i in range(0, len(evals)):                                                      # write eigenvalues to textfile
+    #         f = open('eigenvalues.txt', 'a+')                                               # append lines to existing .txt-file
+    #         f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                  # write eigenvalues
 
-        tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
-        dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
+    #     tstop = data.time.iloc[-1] - data.time.iloc[0]                                      # normalise final time value for manouvre
+    #     dt  = np.arange(0, tstop + 0.1, 0.1)                                                # create time vector with 0.1s step size
 
-        units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                    # list with units of columns for plotting
-        u = [np.radians(data.delta_a), np.radians(data.delta_r)]                            # [rad] input array given input at each time for [da, dr]
-        u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
-        x0 = np.array([[0],
-                       [np.radians(data.Ahrs1_Roll.iloc[0])],
-                       [np.radians(data.Ahrs1_bRollRate.iloc[0])],
-                       [np.radians(data.Ahrs1_bYawRate.iloc[0])]])                          # initial condition for forced response
+    #     units = ['[rad]', '[rad]', '[rad/s]', '[rad/s]']                                    # list with units of columns for plotting
+    #     u = [np.radians(data.delta_a), np.radians(data.delta_r)]                            # [rad] input array given input at each time for [da, dr]
+    #     u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
+    #     x0 = np.array([[0],
+    #                    [np.radians(data.Ahrs1_Roll.iloc[0])],
+    #                    [np.radians(data.Ahrs1_bRollRate.iloc[0])],
+    #                    [np.radians(data.Ahrs1_bYawRate.iloc[0])]])                          # initial condition for forced response
 
-        columns = [r'\beta', r'\phi', r'p', r'r']                                           # names of invidiual columns for DataFrame
-        eigenmotion = []                                                                    # initialise empty list 1
-        eigenmotion2 = []                                                                   # initialise empty list 2
+    #     columns = [r'\beta', r'\phi', r'p', r'r']                                           # names of invidiual columns for DataFrame
+    #     eigenmotion = []                                                                    # initialise empty list 1
+    #     eigenmotion2 = []                                                                   # initialise empty list 2
 
-        flightdata = pd.DataFrame({'time': data.time, \
-                                   'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
-                                   'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), \
-                                   'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
+    #     flightdata = pd.DataFrame({'time': data.time, \
+    #                                'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
+    #                                'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), \
+    #                                'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
 
-        t, y, x = ctl.forced_response(sysa, dt, U=u, X0=x0)                                 # calculate forced response
-        df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
-        eigenmotion.append(df2)                                                             # append DataFrame to individual list
-        eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
-        u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
+    #     t, y, x = ctl.forced_response(sysa, dt, U=u, X0=x0)                                 # calculate forced response
+    #     df2 = pd.DataFrame(np.transpose(y), columns=columns)                                # convert forced response to DataFrame
+    #     eigenmotion.append(df2)                                                             # append DataFrame to individual list
+    #     eigenmotion = pd.concat(eigenmotion, axis=1)                                        # concatenate list into panda dataframe along axis 1
+    #     u = np.negative(u)                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
 
-        # ==============================================================================================
-        # Calculate initial response for eigenmotion with disturbance input
-        # ==============================================================================================
-        outputnames = ['beta', 'phi', 'p', 'r']                                             # names for picture labelling
-        X0 = np.array([[0.1, 0, 0, 0],
-                       [0, 0.1, 0, 0],
-                       [0, 0, 0.5, 0],
-                       [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
-        k = 0
-        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
-            em.append(df3)                                                                  # append DataFrame to individual list
-            k += 1
+    #     # ==============================================================================================
+    #     # Calculate initial response for eigenmotion with disturbance input
+    #     # ==============================================================================================
+    #     outputnames = ['beta', 'phi', 'p', 'r']                                             # names for picture labelling
+    #     X0 = np.array([[0.1, 0, 0, 0],
+    #                    [0, 0.1, 0, 0],
+    #                    [0, 0, 0.5, 0],
+    #                    [0, 0, 0, 0.5]])                                                     # initial conditions for symmetric flight
+    #     eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []             # initialise empty lists
+    #     k = 0
+    #     for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+    #         t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                # calculate initial response
+    #         df3    = pd.DataFrame(np.transpose(y2), columns=columns)                        # convert forced response to DataFrame
+    #         em.append(df3)                                                                  # append DataFrame to individual list
+    #         k += 1
 
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                      # concatenate list into panda dataframe along axis 1
+    #     eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                      # concatenate list into panda dataframe along axis 1
 
-        # ==============================================================================================
-        # Plot experimental data and numerical model for forced_response
-        # ==============================================================================================
-        fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
-        for i in range(0,3):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
-            ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
-            ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
-            ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0
-            ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
-            ax1[i,0].minorticks_on()                                                     # set minor ticks
-            ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-            ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-            ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+    #     # ==============================================================================================
+    #     # Plot experimental data and numerical model for forced_response
+    #     # ==============================================================================================
+    #     fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                    # initialise figure with 4 rows and 1 column
+    #     for i in range(0,3):
+    #         ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
+    #         ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
+    #         ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
+    #         ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
+    #         ax1[i,0].set_xlim(0, tstep)                                                  # set xmin at 0
+    #         ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
+    #         ax1[i,0].minorticks_on()                                                     # set minor ticks
+    #         ax1[i,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+    #         ax1[i,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+    #         ax1[i,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
 
-        ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
-        ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
-        ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
-        ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0
-        ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
-        ax1[3,0].minorticks_on()                                                         # set minor ticks
-        ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
-        ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
-        ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
+    #     ax1[3,0].plot(t, u[0], c='k', linestyle='--', label='Aileron Deflection')        # plot input variable delta_a
+    #     ax1[3,0].plot(t, u[1], c='k', linestyle='-',label='Rudder Deflection')           # plot input variable delta_r
+    #     ax1[3,0].set_xlabel('$t$ [s]')                                                   # set label of x-axis
+    #     ax1[3,0].set_xlim(0, tstep)                                                      # set xmin at 0
+    #     ax1[3,0].set_ylabel('$\delta_a, \delta_r$ [rad]')                                # set label of y-axis
+    #     ax1[3,0].minorticks_on()                                                         # set minor ticks
+    #     ax1[3,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')      # customise major grid
+    #     ax1[3,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')       # customise minor grid
+    #     ax1[3,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')            # set legend
 
-        fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')           # save figure
-        eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
-        flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
+    #     fig1.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+    #     fig1.savefig('images/{}.png'.format(motion), dpi=300, bbox_inches='tight')           # save figure
+    #     eigenmotion.to_csv('eigenmotions/{}NM.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
+    #     flightdata.to_csv('eigenmotions/{}ED.csv'.format(motion), encoding='utf-8', index=False) # write eigenmotion to csv-file
 
-        # ==============================================================================================
-        # Plot numerical model for disturbance input of initial_response
-        # ==============================================================================================
-        # i = 0
-        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
-        #     for j in range(0, 4):
-        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
-        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
-        #         ax2[j,0].minorticks_on()                                                     # set minor ticks
-        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
-        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
-        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
-        #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
-        #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
-        #     i += 1
+    #     # ==============================================================================================
+    #     # Plot numerical model for disturbance input of initial_response
+    #     # ==============================================================================================
+    #     # i = 0
+    #     # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+    #     #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                     # initialise figure with 4 rows and 1 column
+    #     #     for j in range(0, 4):
+    #     #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')               # plot each variable from output vector
+    #     #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))              # set label of y-axis
+    #     #         ax2[j,0].minorticks_on()                                                     # set minor ticks
+    #     #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')  # customise major grid
+    #     #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')   # customise minor grid
+    #     #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')        # set legend for subplot
+    #     #     fig2.tight_layout(pad=1.0)                                                       # increase spacing between subplots
+    #     #     fig2.savefig('images/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')          # save figure
+    #     #     i += 1
 
-        plt.cla()           # clear the current axes
-        plt.clf()           # clear the current figure.
-        plt.close('all')    # closes all the figure windows.
-        gc.collect()        # clear memory to avoid overload
+    #     plt.cla()           # clear the current axes
+    #     plt.clf()           # clear the current figure.
+    #     plt.close('all')    # closes all the figure windows.
+    #     gc.collect()        # clear memory to avoid overload
 
 # plt.show()
