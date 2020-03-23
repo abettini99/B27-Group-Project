@@ -19,7 +19,6 @@ from numpy.linalg import inv, eig                       # inv computes the inver
 import matplotlib                                       # comprehensive library for creating static, animated, and interactive visualizations in Python.
 import gc
 
-
 # ==============================================================================================
 # Function Definitions
 # ==============================================================================================
@@ -306,20 +305,11 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     m      = m.mass.iloc[0]                                                                  # [kg] takeoff weight of Cessna Citation II
 
-<<<<<<< HEAD
     e      = 0.5949711666751891                                                              # [-] Oswald factor
     # e      = 0.8                                                                             # [-] Oswald factor reference data
     CD0    = 0.01976539072252899                                                              # [-] Zero lift drag coefficient
     # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
     CLa    = 3.8926163611249893                                                               # [1/rad] Slope of CL-alpha curve
-=======
-    from CLCD_and_CLalpha_plotter import CD0, oswald, CLalpha, y_intercept
-    e      = oswald                                                              # [-] Oswald factor
-    # e      = 0.8                                                                             # [-] Oswald factor reference data
-    # CD0    = CD0                                                              # [-] Zero lift drag coefficient
-    # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
-    CLa    = CLalpha                                                              # [1/rad] Slope of CL-alpha curve
->>>>>>> origin/master
     # CLa    = 5.084                                                                           # [1/rad] Slope of CL-alpha curve reference data
 
     Cma    = -0.582128                                                                       # [-] longitudinal stabilty
@@ -359,7 +349,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     depsda = 4 / (AR + 2)                                                                    # [-] Downw sh gradient
 
     CL     = 2 * W / (rho * V0 ** 2 * S)                                                     # [-] Lift coefficient
-    CD     = CD0 + (CLa * alpha0 + y_intercept) ** 2 / (pi * AR * e)                                       # [-] Drag coefficient
+    CD     = CD0 + (CLa * alpha0) ** 2 / (pi * AR * e)                                       # [-] Drag coefficient
 
     CX0    = W * sin(theta0) / (0.5 * rho * V0 ** 2 * S)
     CXu    = -0.095
@@ -514,18 +504,11 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
         units = ['[m/s]', '[rad]', '[rad]', '[rad/s]']                                       # list with units of columns for plotting
         u = [np.radians(data.delta_e), np.zeros(len(data.index))]                            # [rad] input array given input at each time for [de, dt]
-<<<<<<< HEAD
 
         columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
         eigenmotion = []                                                                     # initialise empty list 1
 
         flightdata = pd.DataFrame({'time': data.time, 'vane_AoA': np.radians(data.vane_AOA), 'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), 'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
-=======
-        columns = [r'V_{TAS}', r'\alpha', r'\theta', r'q']                                   # names of invidiual columns for DataFrame
-        eigenmotion = []                                                                     # initialise empty list
-
-        flightdata = pd.DataFrame({'vane_AoA': np.radians(data.vane_AOA), 'Ahrs1_Pitch': np.radians(data.Ahrs1_Pitch), 'Ahrs1_bPitchRate': np.radians(data.Ahrs1_bPitchRate)})
->>>>>>> origin/master
 
         t, y, x = ctl.forced_response(syss, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -646,8 +629,8 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
     # Calculates responses to asymmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['aperroll', 'dutchroll', 'dutchrollYD', 'spiral']:
-        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                  # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_a)                                                               # compute eigenvalues and eigenvectors
+        sysa = ctl.StateSpace(A_a, B_a, C, D)                                                # create state-space system for symmetric eigenmotions
+        evals, evecs = eig(A_a)                                                              # compute eigenvalues and eigenvectors
 
         for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
             f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
@@ -664,11 +647,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         eigenmotion = []                                                                     # initialise empty list 1
         eigenmotion2 = []                                                                    # initialise empty list 2
 
-<<<<<<< HEAD
         flightdata = pd.DataFrame({'time': data.time, 'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), 'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), 'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
-=======
-        flightdata = pd.DataFrame({'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), 'Ahrs1_bRollRate': np.radians(data.Ahrs1_bRollRate), 'Ahrs1_bYawRate': np.radians(data.Ahrs1_bYawRate)})
->>>>>>> origin/master
 
         t, y, x = ctl.forced_response(sysa, dt, U=u)                                         # calculate forced response
         df2 = pd.DataFrame(np.transpose(y), columns=columns)                                 # convert forced response to DataFrame
@@ -873,7 +852,6 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             eigenmotion.to_csv('eigenmotions/spiralrollNM.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/spiralrollED.csv', encoding='utf-8', index=False) # write eigenmotion to csv-file
 
-<<<<<<< HEAD
             plt.cla()           # clear the current axes
             plt.clf()           # clear the current figure.
             plt.close('all')    # closes all the figure windows.
@@ -898,6 +876,3 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             gc.collect()        # clear memory to avoid overload
 
 # plt.show()
-=======
-# # plt.show()
->>>>>>> origin/master
