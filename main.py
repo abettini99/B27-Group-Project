@@ -304,11 +304,11 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
 
     m      = m.mass.iloc[0]                                                                  # [kg] takeoff weight of Cessna Citation II
 
-    e      = 0.5662173213929709                                                              # [-] Oswald factor
+    e      = 0.5949711666751891                                                              # [-] Oswald factor
     # e      = 0.8                                                                             # [-] Oswald factor reference data
-    CD0    = 0.0255504796766271                                                              # [-] Zero lift drag coefficient
+    CD0    = 0.01976539072252899                                                              # [-] Zero lift drag coefficient
     # CD0    = 0.04                                                                            # [-] Zero lift drag coefficient reference data
-    CLa    = 4.557979876353312                                                               # [1/rad] Slope of CL-alpha curve
+    CLa    = 3.8926163611249893                                                               # [1/rad] Slope of CL-alpha curve
     # CLa    = 5.084                                                                           # [1/rad] Slope of CL-alpha curve reference data
 
     Cma    = -0.582128                                                                       # [-] longitudinal stabilty
@@ -494,6 +494,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         syss = ctl.StateSpace(A_s, B_s, C, D)                                                 # create state-space system for symmetric eigenmotions
         evals, evecs = eig(A_s)                                                               # compute eigenvalues and eigenvectors
 
+        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+
         tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
         dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
@@ -532,7 +536,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 120)                                                    # set xmin at 0 and tstop
                 ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))  # set label of y-axis
@@ -573,7 +577,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C21', label='Numerical Model')    # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 10)                                                     # set xmin at 0 and tstp
@@ -604,6 +608,10 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
         sysa = ctl.StateSpace(A_a, B_a, C, D)                                                # create state-space system for symmetric eigenmotions
         evals, evecs = eig(A_a)                                                              # compute eigenvalues and eigenvectors
 
+        for i in range(0, len(evals)):                                                       # write eigenvalues to textfile
+            f = open('eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                   # write eigenvalues
+
         tstop = data.time.iloc[-1] - data.time.iloc[0]                                       # normalise final time value for manouvre
         dt  = np.arange(0, tstop + 0.1, 0.1)                                                 # create time vector with 0.1s step size
 
@@ -627,7 +635,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 13)                                                     # set xmin at 0
@@ -656,7 +664,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 20)                                                     # set xmin at 0 and tstop
@@ -685,7 +693,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 15)                                                     # set xmin at 0
@@ -714,7 +722,7 @@ for motion in ['phugoid', 'shortperiod', 'aperroll', 'dutchroll', 'dutchrollYD',
             fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,9))                     # initialise figure with 4 rows and 1 column
             for i in range(0,3):
                 ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')     # plot each variable from output vector
-                ax1[i,0].plot(t, flightdata.iloc[:,i], c='k', label='Experimental Data')     # plot each variable from test flight data
+                ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')   # plot each variable from test flight data
                 ax1[i,0].set_xlabel('$t$ [s]')                                               # set label of x-axis
                 ax1[i,0].set_xticklabels([])                                                 # remove values on x-axis
                 ax1[i,0].set_xlim(0, 110)                                                    # set xmin at 0
