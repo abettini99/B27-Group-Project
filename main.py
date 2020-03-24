@@ -848,6 +848,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #     for j in range(0, 4):
         #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                              # plot each variable from output vector
         #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                             # set label of y-axis
+        #         ax2[i,0].set_xticklabels([])                                                                # remove values on x-axis
+        #         ax2[i,0].set_xlim(0, tstep)                                                                 # set xmin at 0
         #         ax2[j,0].minorticks_on()                                                                    # set minor ticks
         #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                 # customise major grid
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                  # customise minor grid
