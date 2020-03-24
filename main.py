@@ -335,6 +335,29 @@ cg     = np.array(cg)                                                   # conver
 df1    = pd.DataFrame(temp, columns=['time', 'mass'])                   # [s, kg] dataframe with specific mass at time t
 
 # ==============================================================================================
+# Set global plotting parameters
+# ==============================================================================================
+# texpsize= [18,20,22]
+
+# ## Graphing Parameters
+# SMALL_SIZE  = texpsize[0]
+# MEDIUM_SIZE = texpsize[1]
+# BIGGER_SIZE = texpsize[2]
+
+# plt.rc('font', size=texpsize[1], family='serif')    # controls default text sizes
+# plt.rc('axes', titlesize=texpsize[0])               # fontsize of the axes title
+# plt.rc('axes', labelsize=texpsize[0])               # fontsize of the x and y labels
+# plt.rc('xtick', labelsize=texpsize[0])              # fontsize of the tick labels
+# plt.rc('ytick', labelsize=texpsize[0])              # fontsize of the tick labels
+# plt.rc('legend', fontsize=texpsize[0])              # legend fontsize
+# plt.rc('figure', titlesize=texpsize[2])             # fontsize of the figure title
+# plt.rc('text', usetex=False)
+# # matplotlib.rcParams['lines.linewidth']  = 1.5
+# # matplotlib.rcParams['figure.facecolor'] = 'white'
+# # matplotlib.rcParams['axes.facecolor']   = 'white'
+# # matplotlib.rcParams["legend.fancybox"]  = False
+
+# ==============================================================================================
 # Eigenmotion analysis
 # ==============================================================================================
 for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
