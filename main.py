@@ -357,10 +357,11 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     # # ==============================================================================================
     # # Model fitting - tweaking of stability parameters
     # # ==============================================================================================
-    # CXu    = -0.095 * 1.2
-    # CZu    = -0.37616 * 1.7
-    # Cmq    = -8.79415 * 0.8
-    # CZa    = -5.74340 * 0.9
+    # CXu    = -0.095 * 1.1
+    # CZu    = -0.37616 * 1.6
+    # Cnb = +0.1348 * 0.76
+    # Clp = -0.71085 * 1.45
+    # Cnr = -0.2061 * 0.79
 
     # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
@@ -549,28 +550,6 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             # eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
             # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
 
-        # ==============================================================================================
-        # Plot numerical model for disturbance input of initial_response
-        # ==============================================================================================
-        # i = 0
-        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                    # initialise figure with 4 rows and 1 column
-        #     for j in range(0, 4):
-        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                               # plot each variable from output vector
-        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                              # set label of y-axis
-        #         ax2[j,0].minorticks_on()                                                                     # set minor ticks
-        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                  # customise major grid
-        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                   # customise minor grid
-        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                        # set legend for subplot
-        #     fig2.tight_layout(pad=1.0)                                                                       # increase spacing between subplots
-        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')   # save figure
-        #     i += 1
-
-        plt.cla()                                                                                           # clear the current axes
-        plt.clf()                                                                                           # clear the current figure.
-        plt.close('all')                                                                                    # closes all the figure windows.
-        gc.collect()                                                                                        # clear memory to avoid overload
-
         if motion == 'phugoid':
             # ==============================================================================================
             # Calculate analytical eigenvalues of phugoid motion
@@ -616,6 +595,32 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
                 for i in range(0, len(evals_shortperiod)):                                                  # write eigenvalues to textfile
                     f = open('refdata_eigenvalues_analytical.txt', 'a+')                                    # append lines to existing .txt-file
                     f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))       # write eigenvalues
+
+        # ==============================================================================================
+        # Plot numerical model for disturbance input of initial_response
+        # ==============================================================================================
+        # i = 0
+        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
+        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                    # initialise figure with 4 rows and 1 column
+        #     for j in range(0, 4):
+        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                               # plot each variable from output vector
+        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                              # set label of y-axis
+        #         ax2[i,0].set_xticklabels([])                                                                 # remove values on x-axis
+        #         ax2[i,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
+        #         ax2[j,0].minorticks_on()                                                                     # set minor ticks
+        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                  # customise major grid
+        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                   # customise minor grid
+        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                        # set legend for subplot
+        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                   # set label of x-axis
+        #     ax2[3,0].set_xlim(0, tstep)                                                                      # set xmin at 0 and tstop
+        #     fig2.tight_layout(pad=1.0)                                                                       # increase spacing between subplots
+        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')   # save figure
+        #     i += 1
+
+        plt.cla()                                                                                           # clear the current axes
+        plt.clf()                                                                                           # clear the current figure.
+        plt.close('all')                                                                                    # closes all the figure windows.
+        gc.collect()                                                                                        # clear memory to avoid overload
 
     # ==============================================================================================
     # Calculates responses to asymmetric eigenmotions from state-space system
@@ -848,12 +853,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #     for j in range(0, 4):
         #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                              # plot each variable from output vector
         #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                             # set label of y-axis
-        #         ax2[i,0].set_xticklabels([])                                                                # remove values on x-axis
-        #         ax2[i,0].set_xlim(0, tstep)                                                                 # set xmin at 0
+        #         ax2[i,0].set_xticklabels([])                                                                 # remove values on x-axis
+        #         ax2[i,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
         #         ax2[j,0].minorticks_on()                                                                    # set minor ticks
         #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                 # customise major grid
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                  # customise minor grid
         #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                       # set legend for subplot
+        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                   # set label of x-axis
+        #     ax2[3,0].set_xlim(0, tstep)                                                                      # set xmin at 0 and tstop
         #     fig2.tight_layout(pad=1.0)                                                                      # increase spacing between subplots
         #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')       # save figure
         #     i += 1
