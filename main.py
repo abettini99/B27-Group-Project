@@ -229,7 +229,7 @@ def fuelused(time, ff_le, ff_re):
 def cgtime(t, fuel_i, ZFM, CG_ZFM, fuelused, fuel_moment):
     """
         Function description
-        :t:
+        :t: time [s]
         :fuel_i:
         :ZFM: zero fuel mass [UNIT]
         :CG_ZFM:
@@ -270,7 +270,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import flight test or reference data from matlab file
 # ==============================================================================================
-dataset = 0                                                             # set 0 for flight test data
+dataset = 1                                                             # set 0 for flight test data
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
@@ -464,108 +464,65 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     Cndr   =  -0.0939
 
     # ==============================================================================================
-    # Declaration of matrices and column vectors
-    # ==============================================================================================
-    As      = np.zeros((4,4))                                            # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
-    Aa      = np.zeros((4,4))                                            # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
-    Bs      = np.zeros((4,4))                                            # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
-    Ba      = np.zeros((4,4))                                            # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
-    Cs      = np.zeros((4,2))                                            # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
-    Ca      = np.zeros((4,2))                                            # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
-    A_s     = np.zeros((4,4))                                            # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
-    A_a     = np.zeros((4,4))                                            # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
-    B_s     = np.zeros((4,4))                                            # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
-    B_a     = np.zeros((4,4))                                            # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
-    # ==============================================================================================
-    # Population of symmetric EOM matrices with variables for state-space representation
-    # ==============================================================================================
-    As[0,0] = - 2 * muc * c / V0**2
-
-    As[1,1] = (CZadot - 2 * muc) * c / V0
-
-    As[2,2] = -c / V0
-
-    As[3,1] = Cmadot * c / V0
-    As[3,3] = -2 * muc * KY2 * (c / V0)**2
-
-    Bs[0,0] = -CXu / V0
-    Bs[0,1] = -CXa
-    Bs[0,2] = -CZ0
-    Bs[0,3] = -CXq * c / V0
-
-    Bs[1,0] = -CZu / V0
-    Bs[1,1] = -CZa
-    Bs[1,2] = +CX0
-    Bs[1,3] = -(CZq + 2 * muc) * c / V0
-
-    Bs[2,3] = -c / V0
-
-    Bs[3,0] = -Cmu / V0
-    Bs[3,1] = -Cma
-    Bs[3,3] = -Cmq * c / V0
-
-    Cs[0,0] = -CXde
-
-    Cs[1,0] = -CZde
-
-    Cs[3,0] = -Cmde
-
-    # ==============================================================================================
-    # Population of asymmetric EOM matrices with variables for state-space representation
-    # ==============================================================================================
-    Aa[0,0] = (CYbdot - 2 * mub) * b / V0
-
-    Aa[1,1] = -0.5 * b / V0
-
-    Aa[2,2] = -4 * mub * KX2 * b**2 / (2 * V0**2)
-    Aa[2,3] = 4 * mub * KXZ * b**2 / (2 * V0**2)
-
-    Aa[3,0] = Cnbdot * b / V0
-    Aa[3,2] = 4 * mub * KXZ * b**2 / (2 * V0**2)
-    Aa[3,3] = -4 * mub * KZ2 * b**2 / (2 * V0**2)
-
-    Ba[0,0] = -CYb
-    Ba[0,1] = -CL
-    Ba[0,2] = -CYp * b / (2 * V0)
-    Ba[0,3] = -(CYr - 4 * mub) * b / (2 * V0)
-
-    Ba[1,2] = -b / (2 * V0)
-
-    Ba[2,0] = -Clb
-    Ba[2,2] = -Clp * b / (2 * V0)
-    Ba[2,3] = -Clr * b / (2 * V0)
-
-    Ba[3,0] = -Cnb
-    Ba[3,2] = -Cnp * b / (2 * V0)
-    Ba[3,3] = -Cnr * b / (2 * V0)
-
-    Ca[0,0] = -CYda
-    Ca[0,1] = -CYdr
-
-    Ca[2,0] = -Clda
-    Ca[2,1] = -Cldr
-
-    Ca[3,0] = -Cnda
-    Ca[3,1] = -Cndr
-
-    # ==============================================================================================
-    # Population of matrices As and Aa
-    # ==============================================================================================
-    A_s = np.dot(inv(As), Bs)
-    B_s = np.dot(inv(As), Cs)
-
-    A_a = np.dot(inv(Aa), Ba)
-    B_a = np.dot(inv(Aa), Ca)
-
-    # Output of state-space representation should be equal to the relevant aircraft states
-    # --> matrix C is the identity matrix and D is a zero array
-    C = np.identity(4)
-    D = np.zeros((4,2))
-
-    # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['phugoid', 'shortperiod']:
+        # ==============================================================================================
+        # Declaration of matrices and column vectors
+        # ==============================================================================================
+        As      = np.zeros((4,4))                                            # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
+        Bs      = np.zeros((4,4))                                            # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
+        Cs      = np.zeros((4,2))                                            # Declaration of matrix Cs with dimensions [4 x 2] for symmetric EOM
+        A_s     = np.zeros((4,4))                                            # Declaration of matrix As with dimensions [4 x 4] for symmetric EOM
+        B_s     = np.zeros((4,4))                                            # Declaration of matrix Bs with dimensions [4 x 2] for symmetric EOM
+
+        # ==============================================================================================
+        # Population of symmetric EOM matrices with variables for state-space representation
+        # ==============================================================================================
+        As[0,0] = - 2 * muc * c / V0**2
+
+        As[1,1] = (CZadot - 2 * muc) * c / V0
+
+        As[2,2] = -c / V0
+
+        As[3,1] = Cmadot * c / V0
+        As[3,3] = -2 * muc * KY2 * (c / V0)**2
+
+        Bs[0,0] = -CXu / V0
+        Bs[0,1] = -CXa
+        Bs[0,2] = -CZ0
+        Bs[0,3] = -CXq * c / V0
+
+        Bs[1,0] = -CZu / V0
+        Bs[1,1] = -CZa
+        Bs[1,2] = +CX0
+        Bs[1,3] = -(CZq + 2 * muc) * c / V0
+
+        Bs[2,3] = -c / V0
+
+        Bs[3,0] = -Cmu / V0
+        Bs[3,1] = -Cma
+        Bs[3,3] = -Cmq * c / V0
+
+        Cs[0,0] = -CXde
+
+        Cs[1,0] = -CZde
+
+        Cs[3,0] = -Cmde
+
+        # ==============================================================================================
+        # Population of matrices As and Aa
+        # ==============================================================================================
+        A_s = np.dot(inv(As), Bs)
+        B_s = np.dot(inv(As), Cs)
+
+        C = np.identity(4)                                                                                  # output equal to relevant aircraft states
+        D = np.zeros((4,2))                                                                                 # no input outputted from state-space matrix
+
+        # ==============================================================================================
+        # Export symmetric and asymmetric matrix to .txt-file
+        # ==============================================================================================
+        np.savetxt('matrices/symmetric_{}'.format(motion), A_s, delimiter=',')                              # save symmetric matrix to file
 
         # ==============================================================================================
         # Calculate analytical eigenvalues
@@ -750,6 +707,67 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     # ==============================================================================================
     if motion in ['aperiodicroll', 'dutchroll', 'dutchrollYD', 'spiral']:
         # ==============================================================================================
+        # Declaration of matrices and column vectors
+        # ==============================================================================================
+        Aa      = np.zeros((4,4))                                            # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
+        Ba      = np.zeros((4,4))                                            # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
+        Ca      = np.zeros((4,2))                                            # Declaration of matrix Ca with dimensions [4 x 2] for asymmetric EOM
+        A_a     = np.zeros((4,4))                                            # Declaration of matrix Aa with dimensions [4 x 4] for asymmetric EOM
+        B_a     = np.zeros((4,4))                                            # Declaration of matrix Ba with dimensions [4 x 2] for asymmetric EOM
+
+        # ==============================================================================================
+        # Population of asymmetric EOM matrices with variables for state-space representation
+        # ==============================================================================================
+        Aa[0,0] = (CYbdot - 2 * mub) * b / V0
+
+        Aa[1,1] = -0.5 * b / V0
+
+        Aa[2,2] = -4 * mub * KX2 * b**2 / (2 * V0**2)
+        Aa[2,3] = 4 * mub * KXZ * b**2 / (2 * V0**2)
+
+        Aa[3,0] = Cnbdot * b / V0
+        Aa[3,2] = 4 * mub * KXZ * b**2 / (2 * V0**2)
+        Aa[3,3] = -4 * mub * KZ2 * b**2 / (2 * V0**2)
+
+        Ba[0,0] = -CYb
+        Ba[0,1] = -CL
+        Ba[0,2] = -CYp * b / (2 * V0)
+        Ba[0,3] = -(CYr - 4 * mub) * b / (2 * V0)
+
+        Ba[1,2] = -b / (2 * V0)
+
+        Ba[2,0] = -Clb
+        Ba[2,2] = -Clp * b / (2 * V0)
+        Ba[2,3] = -Clr * b / (2 * V0)
+
+        Ba[3,0] = -Cnb
+        Ba[3,2] = -Cnp * b / (2 * V0)
+        Ba[3,3] = -Cnr * b / (2 * V0)
+
+        Ca[0,0] = -CYda
+        Ca[0,1] = -CYdr
+
+        Ca[2,0] = -Clda
+        Ca[2,1] = -Cldr
+
+        Ca[3,0] = -Cnda
+        Ca[3,1] = -Cndr
+
+        # ==============================================================================================
+        # Population of matrices As and Aa
+        # ==============================================================================================
+        A_a = np.dot(inv(Aa), Ba)
+        B_a = np.dot(inv(Aa), Ca)
+
+        C = np.identity(4)                                                                                  # output equal to relevant aircraft states
+        D = np.zeros((4,2))                                                                                 # no input outputted from state-space matrix
+
+        # ==============================================================================================
+        # Export symmetric and asymmetric matrix to .txt-file
+        # ==============================================================================================
+        np.savetxt('matrices/asymmetric_{}'.format(motion), A_s, delimiter=',')                             # save asymmetric matrix to file
+
+        # ==============================================================================================
         # Calculate analytical eigenvalues for each eigenmotion
         # ==============================================================================================
         if dataset == 1:
@@ -775,7 +793,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
 
             for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
-                f = open('eigenvalues_analytical.txt', 'a+')                                                # append lines to existing .txt-file
+                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
                 f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
 
         # ==============================================================================================
@@ -878,6 +896,20 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             fig1.savefig('images/refdata_{}.png'.format(motion), dpi=300, bbox_inches='tight')                      # save figure
             eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
+
+        if motion == 'aperiodicroll' and dataset == 1:
+            evals_aperiodicroll = Clp / (4 * mub * KX2)
+
+            f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format('asymmetric', 1, evals_aperiodicroll))                     # write eigenvalues
+
+        if motion == 'spiral' and dataset == 1:
+            evals_spiral = 2 * (Cnr * CL * Clb - Cnb * CL * Clr) / (CYb * Clp * Cnr + Clb * Cnp * \
+                            (CYr - 4 * mub) + Cnb * CYp * Clr) - Clp * Cnb * (CYr - 4 * mub) \
+                            - Clr * Cnp * CYp - Cnr * CYp * Clb
+
+            f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
+            f.write("{}, lambda{}: {} \n".format('asymmetric', 1, evals_spiral))                            # write eigenvalues
 
         # ==============================================================================================
         # Plot numerical model for disturbance input of initial_response
