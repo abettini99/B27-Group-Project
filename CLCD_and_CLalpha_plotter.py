@@ -16,9 +16,15 @@ import matplotlib
 # PressureAltitude = data.Dadc1_alt # [feet]
 # Pressure = ((850 - 1013) / 4813 * PressureAltitude + 1013) * 100 # Conversion from PA to P [Pa]
 b = 15.911
+<<<<<<< HEAD
 S = 30.00
 AR = b**2 / S
 c = 2.0569
+=======
+S = 30.00   
+AR = b**2 / S
+c = 2.0569 
+>>>>>>> origin/master
 
 ####### Data for Thrust.exe ########
 # experimental data
@@ -27,7 +33,11 @@ m = 9165 * 0.453592 + 90 + 102 + 80 + 83 + 94 + 84 + 74 + 79 + 103 + 4100 * 0.45
 time_config1 = [16*60+32, 18*60+20, 20*60+6, 22*60, 24*60+48, 26*60+24] # [s]
 IAS_config1 = (np.array([248, 221, 188, 162, 140, 120]) - 2) * 0.514444 # [m/s]
 pressure_alt = np.array([7000, 7000, 6980, 7000, 7000, 6980]) * 0.3048 # [m]
+<<<<<<< HEAD
 AOA = np.array([1.7, 2.5, 3.7, 5.5, 7.7, 10.6])
+=======
+AOA = np.array([1.7, 2.5, 3.7, 5.5, 7.7, 10.6])  
+>>>>>>> origin/master
 
 fuelflow_left = np.array([745, 641, 548, 456, 438, 456]) * 0.453592/60/60 # [kg/s]
 fuelflow_right = np.array([803, 687, 593, 502, 472, 507]) * 0.453592/60/60 # [kg/s]
@@ -61,7 +71,11 @@ def p0overp(h_p):
     return 1 / (1 + _lambda * h_p / T_0)**(-1 * g0 /_lambda / R)
 
 def Mach(p0p, IAS):
+<<<<<<< HEAD
     subeqn = (1 + (gamma - 1) / 2 / gamma * 1.225 / 101325 * IAS ** 2) ** (gamma / (gamma - 1))
+=======
+    subeqn = (1 + (gamma - 1) / 2 / gamma * 1.225 / 101325 * IAS ** 2) ** (gamma / (gamma - 1)) 
+>>>>>>> origin/master
     Mach = np.sqrt( 2 / (gamma -1) * ( ((1 + p0p * (subeqn - 1)) ** ((gamma - 1) / gamma)) - 1) )
     return Mach
 
@@ -87,7 +101,11 @@ for line in lines:
     thrust_sum = np.sum(separate_thrust)
     Thrust.append(thrust_sum)
 
+<<<<<<< HEAD
 Thrust = np.array(Thrust)
+=======
+Thrust = np.array(Thrust)        
+>>>>>>> origin/master
 V_TAS = Mach * speedsound
 rho = 101325 / p0overp(pressure_alt) / 287.05 / TAT_corrected
 Weight = (m - fuelused) * 9.80665
@@ -95,16 +113,25 @@ Weight = (m - fuelused) * 9.80665
 def Reynolds():
     # bulk_viscosity
     mu_0 = 1.7894e-5
+<<<<<<< HEAD
     T_0 = 273.11
     _S = 110.56
     mu = mu_0 *( TAT_corrected / T_0 ) ** (1.5) * (T_0 + _S) / (TAT_corrected + _S)
 
     return rho * V_TAS * c / mu
+=======
+    T_0 = 273.11 
+    _S = 110.56
+    mu = mu_0 *( TAT_corrected / T_0 ) ** (1.5) * (T_0 + _S) / (TAT_corrected + _S)
+
+    return rho * V_TAS * c / mu 
+>>>>>>> origin/master
 
 Mach_min, Mach_max = np.min(Mach), np.max(Mach)
 Reynolds_min, Reynolds_max = np.min(Reynolds()), np.max(Reynolds())
 
 def CLCD_plot_stationary(plot = 'True'):
+<<<<<<< HEAD
 
     CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
     CD = ( Thrust * np.cos(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
@@ -120,16 +147,42 @@ def CLCD_plot_stationary(plot = 'True'):
     def func(CL, CD0, k):
         return CD0 + CL**2 * k
 
+=======
+    
+    CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
+    CD = ( Thrust * np.cos(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
+    
+    ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
+    texpsize= [26,28,30]
+    
+    ## Input Arrays
+    x = CD
+    y = CL
+    
+    ## Best fit
+    def func(CL, CD0, k):
+        return CD0 + CL**2 * k
+    
+>>>>>>> origin/master
     cl_least = np.linspace(np.min(CL)-0.23, np.max(CL)+0.1,100)
     popt, pcov = spopt.curve_fit(func, CL, CD)
     CD0 = popt[0]
     oswald = 1/ popt[1] / np.pi / AR
+<<<<<<< HEAD
 
     print('a = ', popt[1])
     print('b or CD0 = ', CD0)
     print('oswald = ', oswald)
 
 
+=======
+    
+    print('a = ', popt[1])
+    print('b or CD0 = ', CD0)
+    print('oswald = ', oswald)
+    
+    
+>>>>>>> origin/master
     ## Error derivation
     CD_leastsq = CD0 + CL**2 * popt[1]
     max_error = max(np.abs(CD-CD_leastsq))
@@ -139,20 +192,32 @@ def CLCD_plot_stationary(plot = 'True'):
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
     ## R2 analysis
     CD_avg = 1/np.shape(CD)[0] * np.sum(CD)
     SS_tot = np.sum((CD-CD_avg)**2)
     SS_res = np.sum((CD-CD_leastsq)**2)
     R2_CD = 1-SS_res/SS_tot
     print('R2 of CD = ', R2_CD)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
     if plot == 'True':
         ## Graphing Parameters
         SMALL_SIZE  = texpsize[0]
         MEDIUM_SIZE = texpsize[1]
         BIGGER_SIZE = texpsize[2]
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> origin/master
         plt.style.use('grayscale')
         plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
         plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
@@ -166,7 +231,11 @@ def CLCD_plot_stationary(plot = 'True'):
         matplotlib.rcParams['figure.facecolor'] = 'white'
         matplotlib.rcParams['axes.facecolor']   = 'white'
         matplotlib.rcParams["legend.fancybox"]  = False
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> origin/master
         ## Graph
         fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
         ax[0,0].scatter(x, y, label = 'Experimental data')
@@ -187,6 +256,7 @@ def CLCD_plot_stationary(plot = 'True'):
         ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
         # ax[0,0].figtext(.8, .8, 'Mach $\in (%1.3f, %1.3f)$ \n Reynolds $\in (%s, %s)$' %(Mach_min, Mach_max, Reynolds_min, Reynolds_max))
         fig.savefig("CL-CD_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+<<<<<<< HEAD
 
         ## If you want to see the figure, else disable last two lines.
         fig.tight_layout()
@@ -210,13 +280,42 @@ def CLalpha_plot_stationary(plot='True'):
     def func(AOA, a, b):
         return a*AOA + b
 
+=======
+        
+        ## If you want to see the figure, else disable last two lines.
+        fig.tight_layout()
+        plt.show()
+    
+    return CD0, oswald
+    
+def CLalpha_plot_stationary(plot='True'):
+    
+    CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
+    # CL = ( Weight ) * 2 / (rho * V_TAS**2 * S)
+    
+    ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
+    texpsize= [26,28,30]
+    
+    ## Input Arrays
+    x = AOA
+    y = CL
+    
+    ## best fit
+    def func(AOA, a, b):
+        return a*AOA + b
+        
+>>>>>>> origin/master
     popt, pcov = spopt.curve_fit(func, AOA, CL)
     CLalpha = popt[0]
     y_intercept = popt[1]
     aoa_least= np.linspace(np.min(AOA)-2, np.max(AOA)+0.1, 100)
     print('a / CLalpha = ', CLalpha * 180 / np.pi)
     print('b = ', y_intercept)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
     ## Error derivation
     CL_leastsq = y_intercept + AOA * CLalpha
     max_error = max(np.abs(CL-CL_leastsq))
@@ -226,21 +325,34 @@ def CLalpha_plot_stationary(plot='True'):
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
     ## R2 analysis
     CL_avg = 1/np.shape(CL)[0] * np.sum(CL)
     SS_tot = np.sum((CL-CL_avg)**2)
     SS_res = np.sum((CL-CL_leastsq)**2)
     R2_CL = 1-SS_res/SS_tot
     print('R2 of CL = ', R2_CL)
+<<<<<<< HEAD
 
 
+=======
+    
+    
+>>>>>>> origin/master
     if plot == 'True':
         ## Graphing Parameters
         SMALL_SIZE  = texpsize[0]
         MEDIUM_SIZE = texpsize[1]
         BIGGER_SIZE = texpsize[2]
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> origin/master
         plt.style.use('grayscale')
         plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
         plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
@@ -254,7 +366,11 @@ def CLalpha_plot_stationary(plot='True'):
         matplotlib.rcParams['figure.facecolor'] = 'white'
         matplotlib.rcParams['axes.facecolor']   = 'white'
         matplotlib.rcParams["legend.fancybox"]  = False
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> origin/master
         ## Graph
         fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
         ax[0,0].scatter(x, y, label = 'Experimental data')
@@ -273,11 +389,19 @@ def CLalpha_plot_stationary(plot='True'):
         ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
         ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
         fig.savefig("CL-alpha_cleanconfig.png", bbox_inches='tight')                                    ## Insert save destination
+<<<<<<< HEAD
 
         ## If you want to see the figure, else disable last two lines.
         fig.tight_layout()
         plt.show()
 
+=======
+        
+        ## If you want to see the figure, else disable last two lines.
+        fig.tight_layout()
+        plt.show()   
+    
+>>>>>>> origin/master
     CLalpha_rad = CLalpha * 180 / np.pi
     return CLalpha_rad, y_intercept
 
@@ -286,6 +410,7 @@ def CLalpha_plot_stationary(plot='True'):
 # def CL2CD_plot():
 #     CL  = np.linspace(0,1.0,100)
 #     CD = CLCD_plot_stationary()[0] + CL**2 / (np.pi * AR * CLCD_plot_stationary()[1])
+<<<<<<< HEAD
 
 #     ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
 #     texpsize= [26,28,30]
@@ -294,11 +419,25 @@ def CLalpha_plot_stationary(plot='True'):
 #     x = np.linspace(1,10,10)
 #     y = np.ones((10))*2
 
+=======
+    
+#     ## Define text sizes for **SAVED** pictures (texpsize -- text export size)
+#     texpsize= [26,28,30]
+    
+#     ## Input Arrays
+#     x = np.linspace(1,10,10)
+#     y = np.ones((10))*2
+    
+>>>>>>> origin/master
 #     ## Graphing Parameters
 #     SMALL_SIZE  = texpsize[0]
 #     MEDIUM_SIZE = texpsize[1]
 #     BIGGER_SIZE = texpsize[2]
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
 #     plt.style.use('grayscale')
 #     plt.rc('font', size=MEDIUM_SIZE, family='serif')    ## controls default text sizes
 #     plt.rc('axes', titlesize=SMALL_SIZE)                ## fontsize of the axes title
@@ -312,7 +451,11 @@ def CLalpha_plot_stationary(plot='True'):
 #     matplotlib.rcParams['figure.facecolor'] = 'white'
 #     matplotlib.rcParams['axes.facecolor']   = 'white'
 #     matplotlib.rcParams["legend.fancybox"]  = False
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
 #     ## Graph
 #     fig, ax = plt.subplots(1,1,squeeze=False,figsize=(16,9))
 #     ax[0,0].plot(CD, CL)
@@ -328,17 +471,28 @@ def CLalpha_plot_stationary(plot='True'):
 #     ax[0,0].tick_params(which='minor', length=5, width=2, direction='in')
 #     # ax[0,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')
 #     fig.savefig("CLCD-theoretical.png", bbox_inches='tight')                                    ## Insert save destination
+<<<<<<< HEAD
 
 #     ## If you want to see the figure, else disable last two lines.
 #     fig.tight_layout()
 #     plt.show()
+=======
+    
+#     ## If you want to see the figure, else disable last two lines.
+#     fig.tight_layout()
+#     plt.show()            
+>>>>>>> origin/master
 
 #     return 0
 
 CLCD_plot_stationary()
 CLalpha_plot_stationary()
 # CL2CD_plot()
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> origin/master
 # variables to be exported
 CD0, oswald = CLCD_plot_stationary('False')
 CLalpha, y_intercept = CLalpha_plot_stationary('False')
