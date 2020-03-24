@@ -270,7 +270,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import flight test or reference data from matlab file
 # ==============================================================================================
-dataset = 0                                                             # set 0 for flight test data
+dataset = 1                                                             # set 0 for flight test data
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
@@ -337,11 +337,11 @@ df1    = pd.DataFrame(temp, columns=['time', 'mass'])                   # [s, kg
 # ==============================================================================================
 # Set global plotting parameters
 # ==============================================================================================
-texpsize= [18,20,22]
+texpsize= [20,22,24]
 
 plt.rc('font', size=texpsize[1], family='serif')                        # controls default text sizes
-plt.rc('axes', titlesize=texpsize[0])                                   # fontsize of the axes title
-plt.rc('axes', labelsize=texpsize[0])                                   # fontsize of the x and y labels
+plt.rc('axes', titlesize=texpsize[1])                                   # fontsize of the axes title
+plt.rc('axes', labelsize=texpsize[1])                                   # fontsize of the x and y labels
 plt.rc('xtick', labelsize=texpsize[0])                                  # fontsize of the tick labels
 plt.rc('ytick', labelsize=texpsize[0])                                  # fontsize of the tick labels
 plt.rc('legend', fontsize=texpsize[0])                                  # legend fontsize
@@ -659,8 +659,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         fig1, ax1 = plt.subplots(5,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,4):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i], 'C1', label='Numerical Model')                          # plot each variable from output vector
-            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')                      # plot each variable from test flight data
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i], 'C1', label='Num. Model')                               # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0 and tstop
             ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i], units[i]))                         # set label of y-axis
@@ -849,8 +849,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,3):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Numerical Model')                        # plot each variable from output vector
-            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Experimental Data')                      # plot each variable from test flight data
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Num. Model')                             # plot each variable from output vector
+            ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0
             ax1[i,0].set_ylabel('${}$ {}'.format(eigenmotion.columns[i+1], units[i+1]))                     # set label of y-axis
