@@ -193,13 +193,6 @@ else:
     exit()                                                              # raise SystemExit, interpreter exits
 
 # ==============================================================================================
-# Stationary measurements
-# ==============================================================================================
-# clcd    = pd.DataFrame(manouvre(rawdata, 'clcd'))                     # sliced data for the six CL-CD measurement series
-# etrim   = pd.DataFrame(manouvre(rawdata, 'elevatortrim'))             # sliced data for the seven e-trim measurement series
-# cgshift = pd.DataFrame(manouvre(rawdata, 'cgshift'))                  # sliced data for the two cg-shift measurement series
-
-# ==============================================================================================
 # Centre of gravity calculations
 # ==============================================================================================
 momentfuel = pd.read_excel('FuelCG.xlsx', header=None, sheet_name='Sheet1')
@@ -543,11 +536,11 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1.tight_layout(pad=1.0)                                                                          # increase spacing between subplots
         if dataset == 0:
-            fig1.savefig('images/flighttest_{}.png'.format(motion), dpi=300, bbox_inches='tight')                   # save figure
+            fig1.savefig('images/flighttest_{}.png'.format(motion), bbox_inches='tight')                            # save figure
             eigenmotion.to_csv('eigenmotions/flighttest_{}NM.csv'.format(motion), encoding='utf-8', index=False)    # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
         elif dataset == 1:
-            fig1.savefig('images/refdata_{}.png'.format(motion), dpi=300, bbox_inches='tight')                      # save figure
+            fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
             eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
         # ==============================================================================================
@@ -564,7 +557,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                   # customise minor grid
         #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                        # set legend for subplot
         #     fig2.tight_layout(pad=1.0)                                                                       # increase spacing between subplots
-        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')   # save figure
+        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')   # save figure
         #     i += 1
 
         plt.cla()                                                                                           # clear the current axes
@@ -796,11 +789,11 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1.tight_layout(pad=1.0)                                                                          # increase spacing between subplots
         if dataset == 0:
-            fig1.savefig('images/flighttest_{}.png'.format(motion), dpi=300, bbox_inches='tight')                   # save figure
+            fig1.savefig('images/flighttest_{}.png'.format(motion), bbox_inches='tight')                            # save figure
             eigenmotion.to_csv('eigenmotions/flighttest_{}NM.csv'.format(motion), encoding='utf-8', index=False)    # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
         elif dataset == 1:
-            fig1.savefig('images/refdata_{}.png'.format(motion), dpi=300, bbox_inches='tight')                      # save figure
+            fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
             eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
             flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
 
@@ -832,7 +825,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                  # customise minor grid
         #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                       # set legend for subplot
         #     fig2.tight_layout(pad=1.0)                                                                      # increase spacing between subplots
-        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), dpi=300, bbox_inches='tight')       # save figure
+        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')       # save figure
         #     i += 1
 
         plt.cla()                                                                                           # clear the current axes
