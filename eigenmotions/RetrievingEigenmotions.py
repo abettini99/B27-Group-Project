@@ -11,8 +11,8 @@ import numpy as np
 from math import *
 
 #Reading the csv files
-dataphugoidNMnotime = pd.read_csv('flighttest_phugoidNM.csv', skiprows = 1, sep=',', names= ['dV_TAS','alpha','theta','q']) 
-dataphugoidED = pd.read_csv('flighttest_phugoidED.csv', skiprows = 1, sep=',', names= ['time','vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate']) 
+dataphugoidNMnotime = pd.read_csv('flighttest_phugoidNM.csv', skiprows = 1, sep=',', names= ['dV_TAS','alpha','theta','q']) #V_{TAS} - V_0
+dataphugoidED = pd.read_csv('flighttest_phugoidED.csv', skiprows = 1, sep=',', names= ['time','Dadc1_tas', 'vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate']) #time,Dadc1_tas,vane_AoA,Ahrs1_Pitch,Ahrs1_bPitchRate
 
 datashortperiodNMnotime = pd.read_csv('flighttest_shortperiodNM.csv', skiprows = 1, sep=',', names= ['dV_TAS','alpha','theta','q'])
 datashortperiodED = pd.read_csv('flighttest_shortperiodED.csv', skiprows = 1, sep=',', names= ['time', 'vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate'])
@@ -45,8 +45,15 @@ datadutchrollYDNM = datadutchrollYDNMnotime.join(dutchrollYDtime)
 dataspiralNM = dataspiralNMnotime.join(spiraltime)
 
 
-dataphugoidED.plot(x = 'time', y = 'Ahrs1_Pitch')
+#dataphugoidED.plot(x = 'time', y = #'Dadc1_tas')
 #dataphugoidNM.plot(x = 'time', y = 'theta')
+
+
+#theta and ....
+
+
+dataphugoidED.plot(x = 'time', y = 'Dadc1_tas')
+#dataphugoidNM.plot(x = 'time', y = 'dV_TAS')
 #
 #datadutchrollED.plot(x = 'time', y = 'Ahrs1_bRollRate')
 #datadutchrollNM.plot(x = 'time', y = 'p')
@@ -60,7 +67,7 @@ dataphugoidED.plot(x = 'time', y = 'Ahrs1_Pitch')
 #datadutchrollYDED.plot(x = 'time', y = 'Ahrs1_bYawRate')
 #datadutchrollYDNM.plot(x = 'time', y = 'r')
 
-t = np.array(dataphugoidED['time'])
+t = np.array(dataphugoidED['time'])[::50]
 
 
 func = lambda t, lambda_Re1, lambda_Im1, lambda_Re2, lambda_Im2, a1, b1, a2, b2: np.exp(lambda_Re1 * t) * (a1*np.cos(lambda_Im1 * t) + b1*np.sin(lambda_Im1 * t)) + np.exp(lambda_Re2 * t) * (a2*np.cos(lambda_Im2 * t) + b2*np.sin(lambda_Im2 * t)) #+ np.exp(lambda_Re3 * t) * (a3*np.cos(lambda_Im3 * t) + b3*np.sin(lambda_Im3 * t)) + np.exp(lambda_Re4 * t) * (a4*np.cos(lambda_Im4 * t) + b4*np.sin(lambda_Im4 * t))
