@@ -15,7 +15,7 @@ asymmetric aperiodicroll, lambda1: (-4.24972532591984+0j)
 asymmetric aperiodicroll, lambda2: (-0.3007739332724455+2.0977598406748514j) 
 asymmetric aperiodicroll, lambda3: (-0.3007739332724455-2.0977598406748514j) 
 asymmetric aperiodicroll, lambda4: (0.010920729231032199+0j) 
-asymmetric, lambda1: -0.7235633989370165 
+aperiodicroll, lambda1: -0.7235633989370165 
 asymmetric dutchroll, lambda1: (-4.249783842308257+0j) 
 asymmetric dutchroll, lambda2: (-0.30096804610055433+2.09506812250362j) 
 asymmetric dutchroll, lambda3: (-0.30096804610055433-2.09506812250362j) 
@@ -28,4 +28,4 @@ asymmetric spiral, lambda1: (-3.9861453879388664+0j)
 asymmetric spiral, lambda2: (-0.27660250720454826+2.019177365878791j) 
 asymmetric spiral, lambda3: (-0.27660250720454826-2.019177365878791j) 
 asymmetric spiral, lambda4: (0.011018125693591528+0j) 
-asymmetric, lambda1: -5.127016605579912 
+spiral, lambda1: -5.127016605579912 

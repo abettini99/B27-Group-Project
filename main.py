@@ -182,6 +182,7 @@ dataset = 0                                                             # set 0 
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
     f       = open('flighttest_eigenvalues.txt', 'w+')                  # create .txt-file where EV's are written
+    f       = open('flighttest_eigenvalues_analytical.txt', 'w+')       # create .txt-file where analytical EV's are written
 elif dataset == 1:
     rawdata = importdata('referencedata.mat')                           # import reference data from matlab file
     f       = open('refdata_eigenvalues.txt', 'w+')                     # create .txt-file where EV's are written
@@ -426,24 +427,28 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         # Calculate analytical eigenvalues
         # ==============================================================================================
-        if dataset == 1:
-            Atilde = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2)
+        Atilde = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2)
 
-            Btilde = ( CXu * (CZadot - 2 * muc) * 2 * muc * KY2 - 2 * muc * CZa * 2 * muc * KY2 \
-                + 2 * muc * (CZadot - 2 * muc) * Cmq - (CZq + 2 * muc) * Cmadot * 2 * muc )
+        Btilde = ( CXu * (CZadot - 2 * muc) * 2 * muc * KY2 - 2 * muc * CZa * 2 * muc * KY2 \
+            + 2 * muc * (CZadot - 2 * muc) * Cmq - (CZq + 2 * muc) * Cmadot * 2 * muc )
 
-            Ctilde = ( CXu * CZa * (2 * muc * KY2) - CXu * (CZadot - 2 * muc) * Cmq + 2 * muc * CZa * Cmq \
-                - CZu * Cmadot * CXq + CXq * (CZadot - 2 * muc) * Cmu - (CZq + 2 * muc) * Cma * 2 * muc \
-                + (CZq + 2 * muc) * Cmadot * CXu - 2 * muc * KY2 * CXa * CZu+ CX0 * Cmadot * 2 * muc)
+        Ctilde = ( CXu * CZa * (2 * muc * KY2) - CXu * (CZadot - 2 * muc) * Cmq + 2 * muc * CZa * Cmq \
+            - CZu * Cmadot * CXq + CXq * (CZadot - 2 * muc) * Cmu - (CZq + 2 * muc) * Cma * 2 * muc \
+            + (CZq + 2 * muc) * Cmadot * CXu - 2 * muc * KY2 * CXa * CZu+ CX0 * Cmadot * 2 * muc)
 
-            Dtilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) + CXq * CZa * Cmu \
-                + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu - CZu * Cmadot * CZ0 + CZ0 * (CZadot - 2 * muc) * Cmu \
-                + CX0 * Cma * 2 * muc - CX0 * Cmadot * CXu )
+        Dtilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) + CXq * CZa * Cmu \
+            + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu - CZu * Cmadot * CZ0 + CZ0 * (CZadot - 2 * muc) * Cmu \
+            + CX0 * Cma * 2 * muc - CX0 * Cmadot * CXu )
 
-            Etilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
+        Etilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
 
-            evals_symmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / c
+        evals_symmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / c
 
+        if dataset == 0:
+            for i in range(0, len(evals_symmetric)):                                                        # write eigenvalues to textfile
+                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
+                f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))     # write eigenvalues
+        elif dataset == 1:
             for i in range(0, len(evals_symmetric)):                                                        # write eigenvalues to textfile
                 f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
                 f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))     # write eigenvalues
@@ -541,8 +546,9 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
         elif dataset == 1:
             fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
-            eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
+            # eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
+            # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
+
         # ==============================================================================================
         # Plot numerical model for disturbance input of initial_response
         # ==============================================================================================
@@ -565,7 +571,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         plt.close('all')                                                                                    # closes all the figure windows.
         gc.collect()                                                                                        # clear memory to avoid overload
 
-        if motion == 'phugoid' and dataset == 1:
+        if motion == 'phugoid':
             # ==============================================================================================
             # Calculate analytical eigenvalues of phugoid motion
             # ==============================================================================================
@@ -579,11 +585,16 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
             evals_phugoid = np.roots([Atilde, Btilde, Ctilde]) * V0 / c
 
-            for i in range(0, len(evals_phugoid)):                                                          # write eigenvalues to textfile
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))                   # write eigenvalues
+            if dataset == 0:
+                for i in range(0, len(evals_phugoid)):                                                      # write eigenvalues to textfile
+                    f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
+                    f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))               # write eigenvalues
+            elif dataset == 1:
+                for i in range(0, len(evals_phugoid)):                                                          # write eigenvalues to textfile
+                    f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
+                    f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))                   # write eigenvalues
 
-        elif motion == 'shortperiod' and dataset == 1:
+        elif motion == 'shortperiod':
             # ==============================================================================================
             # Compute analytical eigenvalues for short period eigenmotion
             # ==============================================================================================
@@ -597,9 +608,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
             evals_shortperiod = np.roots([Atilde, Btilde, Ctilde, Dtilde]) * V0 /  c
 
-            for i in range(0, len(evals_shortperiod)):                                                      # write eigenvalues to textfile
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))           # write eigenvalues
+            if dataset == 0:
+                for i in range(0, len(evals_shortperiod)):                                                  # write eigenvalues to textfile
+                    f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
+                    f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))       # write eigenvalues
+            elif dataset == 1:
+                for i in range(0, len(evals_shortperiod)):                                                  # write eigenvalues to textfile
+                    f = open('refdata_eigenvalues_analytical.txt', 'a+')                                    # append lines to existing .txt-file
+                    f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))       # write eigenvalues
 
     # ==============================================================================================
     # Calculates responses to asymmetric eigenmotions from state-space system
@@ -670,28 +686,32 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # ==============================================================================================
         # Calculate analytical eigenvalues for each eigenmotion
         # ==============================================================================================
+        Atilde = 0.5*( -(CYbdot - 2*mub)*4*mub*KX2*4*mub*KZ2 \
+            + (4*mub*KXZ)**2*(CYbdot - 2*mub) )
+
+        Btilde = 0.5*( -CYb*4*mub*KX2*4*mub*KZ2 + (CYbdot - 2*mub)*Clp*4*mub*KZ2 \
+               + (CYbdot - 2*mub)*4*mub*KX2*Cnr - Cnbdot*CYp*4*mub*KXZ \
+               - (CYr - 4*mub)*4*mub*KX2*Cnbdot + Clr*4*mub*KXZ*(CYbdot - 2*mub)
+               + 4*mub*KXZ*Cnp*(CYbdot - 2*mub) + (4*mub*KXZ)**2*CYb )
+
+        Ctilde = 0.5*( CYb*Clp*4*mub*KZ2 + CYb*4*mub*KX2*Cnr - (CYbdot - 2*mub)*Clp*Cnr \
+                - Clb*4*mub*KXZ*(CYr - 4*mub) - Cnb*CYp*4*mub*KXZ - Cnbdot*CYp*Clr \
+                + (CYr - 4*mub)*Clp*Cnbdot - (CYr - 4*mub)*4*mub*KX2*Cnb + Clr*Cnp*(CYbdot - 2*mub) \
+                + Clr*4*mub*KXZ*CYb + 4*mub*KXZ*Cnp*CYb - 4*mub*KZ2*CYp*Clb ) \
+                - Cnbdot*CL*4*mub*KXZ
+
+        Dtilde = ( 0.5*( -1*CYb*Clp*Cnr - Clb*Cnp*(CYr - 4*mub) - Cnb*CYp*Clr + (CYr - 4*mub)*Clp*Cnb \
+                + Clr*Cnp*CYb + Cnr*CYp*Clb) - ( Cnb*CL*4*mub*KXZ + Cnbdot*CL*Clr + 4*mub*KZ2*CL*Clb ) )
+
+        Etilde = (-1*Cnb*CL*Clr + Cnr*CL*Clb)
+
+        evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
+
+        if dataset == 0:
+            for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
+                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
+                f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
         if dataset == 1:
-            Atilde = 0.5*( -(CYbdot - 2*mub)*4*mub*KX2*4*mub*KZ2 \
-                + (4*mub*KXZ)**2*(CYbdot - 2*mub) )
-
-            Btilde = 0.5*( -CYb*4*mub*KX2*4*mub*KZ2 + (CYbdot - 2*mub)*Clp*4*mub*KZ2 \
-                   + (CYbdot - 2*mub)*4*mub*KX2*Cnr - Cnbdot*CYp*4*mub*KXZ \
-                   - (CYr - 4*mub)*4*mub*KX2*Cnbdot + Clr*4*mub*KXZ*(CYbdot - 2*mub)
-                   + 4*mub*KXZ*Cnp*(CYbdot - 2*mub) + (4*mub*KXZ)**2*CYb )
-
-            Ctilde = 0.5*( CYb*Clp*4*mub*KZ2 + CYb*4*mub*KX2*Cnr - (CYbdot - 2*mub)*Clp*Cnr \
-                    - Clb*4*mub*KXZ*(CYr - 4*mub) - Cnb*CYp*4*mub*KXZ - Cnbdot*CYp*Clr \
-                    + (CYr - 4*mub)*Clp*Cnbdot - (CYr - 4*mub)*4*mub*KX2*Cnb + Clr*Cnp*(CYbdot - 2*mub) \
-                    + Clr*4*mub*KXZ*CYb + 4*mub*KXZ*Cnp*CYb - 4*mub*KZ2*CYp*Clb ) \
-                    - Cnbdot*CL*4*mub*KXZ
-
-            Dtilde = ( 0.5*( -1*CYb*Clp*Cnr - Clb*Cnp*(CYr - 4*mub) - Cnb*CYp*Clr + (CYr - 4*mub)*Clp*Cnb \
-                    + Clr*Cnp*CYb + Cnr*CYp*Clb) - ( Cnb*CL*4*mub*KXZ + Cnbdot*CL*Clr + 4*mub*KZ2*CL*Clb ) )
-
-            Etilde = (-1*Cnb*CL*Clr + Cnr*CL*Clb)
-
-            evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
-
             for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
                 f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
                 f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
@@ -794,22 +814,30 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
         elif dataset == 1:
             fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
-            eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
+            # eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
+            # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
 
-        if motion == 'aperiodicroll' and dataset == 1:
+        if motion == 'aperiodicroll':
             evals_aperiodicroll = Clp / (4 * mub * KX2)
 
-            f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format('asymmetric', 1, evals_aperiodicroll))                     # write eigenvalues
+            if dataset == 0:
+                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
+                f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
+            if dataset == 1:
+                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
+                f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
 
-        if motion == 'spiral' and dataset == 1:
+        if motion == 'spiral':
             evals_spiral = 2 * (Cnr * CL * Clb - Cnb * CL * Clr) / (CYb * Clp * Cnr + Clb * Cnp * \
                             (CYr - 4 * mub) + Cnb * CYp * Clr) - Clp * Cnb * (CYr - 4 * mub) \
                             - Clr * Cnp * CYp - Cnr * CYp * Clb
 
-            f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
-            f.write("{}, lambda{}: {} \n".format('asymmetric', 1, evals_spiral))                            # write eigenvalues
+            if dataset == 0:
+                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
+                f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
+            if dataset == 1:
+                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
+                f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
 
         # ==============================================================================================
         # Plot numerical model for disturbance input of initial_response
