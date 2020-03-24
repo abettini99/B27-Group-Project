@@ -270,7 +270,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import flight test or reference data from matlab file
 # ==============================================================================================
-dataset = 1                                                             # set 0 for flight test data
+dataset = 0                                                             # set 0 for flight test data
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
