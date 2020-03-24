@@ -288,9 +288,9 @@ else:
 # ==============================================================================================
 # Stationary measurements
 # ==============================================================================================
-# clcd    = pd.DataFrame(manouvre(data, 'clcd'))                        # sliced data for the six CL-CD measurement series
-# etrim   = pd.DataFrame(manouvre(data, 'elevatortrim'))                # sliced data for the seven e-trim measurement series
-# cgshift = pd.DataFrame(manouvre(data, 'cgshift'))                     # sliced data for the two cg-shift measurement series
+# clcd    = pd.DataFrame(manouvre(rawdata, 'clcd'))                     # sliced data for the six CL-CD measurement series
+# etrim   = pd.DataFrame(manouvre(rawdata, 'elevatortrim'))             # sliced data for the seven e-trim measurement series
+# cgshift = pd.DataFrame(manouvre(rawdata, 'cgshift'))                  # sliced data for the two cg-shift measurement series
 
 # ==============================================================================================
 # Centre of gravity calculations
@@ -360,9 +360,9 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     m      = m.mass.iloc[0]                                             # [kg] takeoff weight of Cessna Citation II
 
     if dataset == 0:
-        e   = 0.5949711666751891                                        # [-] Oswald factor
-        CD0 = 0.01976539072252899                                       # [-] Zero lift drag coefficient
-        CLa = 3.8926163611249893                                        # [1/rad] Slope of CL-alpha curve
+        e   = 0.746                                                     # [-] Oswald factor
+        CD0 = 0.0214                                                    # [-] Zero lift drag coefficient
+        CLa = 4.610                                                     # [1/rad] Slope of CL-alpha curve
     elif dataset == 1:
         e   = 0.8                                                       # [-] Oswald factor reference data
         CD0 = 0.04                                                      # [-] Zero lift drag coefficient reference data
