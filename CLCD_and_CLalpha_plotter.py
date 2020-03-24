@@ -5,6 +5,7 @@ Created on Mon Mar  9 15:03:39 2020
 """
 import numpy as np
 import scipy as sp
+import scipy.optimize as spopt
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
@@ -46,7 +47,6 @@ TAT_measured = np.array([13.8, 11.8, 9.2, 7.8, 6.8, 5.8])+ 273.15 # [Kelvin]
 # fuelused = np.array([360, 412, 447, 478, 532, 570]) * 0.453592 # [kg]
 
 # TAT_measured = np.array([12.5, 10.5, 8.8, 7.2, 6, 5.2])+ 273.15 # [Kelvin]
-
 
 
 AOA_rad = np.radians(AOA)
@@ -121,13 +121,14 @@ def CLCD_plot_stationary(plot = 'True'):
         return CD0 + CL**2 * k
     
     cl_least = np.linspace(np.min(CL)-0.23, np.max(CL)+0.1,100)
-    popt, pcov = sp.optimize.curve_fit(func, CL, CD)
+    popt, pcov = spopt.curve_fit(func, CL, CD)
     CD0 = popt[0]
     oswald = 1/ popt[1] / np.pi / AR
     
     print('a = ', popt[1])
     print('b or CD0 = ', CD0)
     print('oswald = ', oswald)
+    
     
     ## Error derivation
     CD_leastsq = CD0 + CL**2 * popt[1]
@@ -138,6 +139,13 @@ def CLCD_plot_stationary(plot = 'True'):
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
+    
+    ## R2 analysis
+    CD_avg = 1/np.shape(CD)[0] * np.sum(CD)
+    SS_tot = np.sum((CD-CD_avg)**2)
+    SS_res = np.sum((CD-CD_leastsq)**2)
+    R2_CD = 1-SS_res/SS_tot
+    print('R2 of CD = ', R2_CD)
     
     if plot == 'True':
         ## Graphing Parameters
@@ -202,7 +210,7 @@ def CLalpha_plot_stationary(plot='True'):
     def func(AOA, a, b):
         return a*AOA + b
         
-    popt, pcov = sp.optimize.curve_fit(func, AOA, CL)
+    popt, pcov = spopt.curve_fit(func, AOA, CL)
     CLalpha = popt[0]
     y_intercept = popt[1]
     aoa_least= np.linspace(np.min(AOA)-2, np.max(AOA)+0.1, 100)
@@ -218,6 +226,14 @@ def CLalpha_plot_stationary(plot='True'):
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
+    
+    ## R2 analysis
+    CL_avg = 1/np.shape(CL)[0] * np.sum(CL)
+    SS_tot = np.sum((CL-CL_avg)**2)
+    SS_res = np.sum((CL-CL_leastsq)**2)
+    R2_CL = 1-SS_res/SS_tot
+    print('R2 of CL = ', R2_CL)
+    
     
     if plot == 'True':
         ## Graphing Parameters
