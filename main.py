@@ -828,7 +828,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             if dataset == 0:
                 f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
-            if dataset == 1:
+            elif dataset == 1:
                 f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
 
@@ -840,7 +840,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             if dataset == 0:
                 f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
-            if dataset == 1:
+            elif dataset == 1:
                 f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
                 f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
 
