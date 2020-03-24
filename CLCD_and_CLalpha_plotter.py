@@ -323,6 +323,7 @@ CLCD_plot_stationary()
 CLalpha_plot_stationary()
 # CL2CD_plot()
     
+# variables to be exported
 CD0, oswald = CLCD_plot_stationary('False')
 CLalpha, y_intercept = CLalpha_plot_stationary('False')
 CL = ( Weight - Thrust*np.sin(AOA_rad)) * 2 / (rho * V_TAS**2 * S)
