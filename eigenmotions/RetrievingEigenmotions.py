@@ -60,7 +60,7 @@ datadutchrollYDNM.plot(x = 'time', y = 'p')
 datadutchrollYDED.plot(x = 'time', y = 'Ahrs1_bYawRate')
 datadutchrollYDNM.plot(x = 'time', y = 'r')
 
-
+#DataFrame.drop(labels=None, axis=0)
 
 
 
@@ -69,7 +69,7 @@ phugoid: time vs theta
 dutchroll: time vs p & time vs r
 dutchrollYD: time vs p & time vs r
 """
-
+#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
 
 
 
