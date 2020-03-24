@@ -28,4 +28,4 @@ asymmetric spiral, lambda1: (-4.211174915600996+0j)
 asymmetric spiral, lambda2: (-0.2913484824802015+2.1711692295803635j) 
 asymmetric spiral, lambda3: (-0.2913484824802015-2.1711692295803635j) 
 asymmetric spiral, lambda4: (0.010074227946944524+0j) 
-spiral, lambda1: -5.350842239317153 
+spiral, lambda1: 0.0016788287933462032 

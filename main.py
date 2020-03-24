@@ -354,14 +354,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     Cnda   =  -0.0120
     Cndr   =  -0.0939
 
-    # # ==============================================================================================
-    # # Model fitting - tweaking of stability parameters
-    # # ==============================================================================================
-    # CXu    = -0.095 * 1.1
-    # CZu    = -0.37616 * 1.6
-    # Cnb = +0.1348 * 0.76
-    # Clp = -0.71085 * 1.45
-    # Cnr = -0.2061 * 0.79
+    # ==============================================================================================
+    # Model fitting - tweaking of stability parameters
+    # ==============================================================================================
+    # CXu     = -0.095 * 1.1
+    # CZu     = -0.37616 * 1.6
+    # Cnb     = +0.1348 * 0.76
+    # Clp     = -0.71085 * 1.45
+    # Cnr     = -0.2061 * 0.79
 
     # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
@@ -834,8 +834,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         if motion == 'spiral':
             evals_spiral = 2 * (Cnr * CL * Clb - Cnb * CL * Clr) / (CYb * Clp * Cnr + Clb * Cnp * \
-                            (CYr - 4 * mub) + Cnb * CYp * Clr) - Clp * Cnb * (CYr - 4 * mub) \
-                            - Clr * Cnp * CYp - Cnr * CYp * Clb
+                            (CYr - 4 * mub) + Cnb * CYp * Clr - Clp * Cnb * (CYr - 4 * mub) \
+                            - Clr * Cnp * CYp - Cnr * CYp * Clb)
 
             if dataset == 0:
                 f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
