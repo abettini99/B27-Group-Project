@@ -357,11 +357,15 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     # ==============================================================================================
     # Model fitting - tweaking of stability parameters
     # ==============================================================================================
-    # CXu     = -0.095 * 1.1
-    # CZu     = -0.37616 * 1.6
-    # Cnb     = +0.1348 * 0.76
-    # Clp     = -0.71085 * 1.45
-    # Cnr     = -0.2061 * 0.79
+    # CXu     = CXu * 1.1
+    # CZu     = CZu * 1.6
+    # CZa     = CZa * 0.9
+    # Cmq     = Cmq * 0.8
+    # Cnb     = Cnb * 0.76
+    # Clb     = Clb * 1.1
+    # Clp     = Clp * 1.45
+    # Cnb     = Cnb * 2.0
+    # Cnr     = Cnr * 0.79
 
     # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
@@ -605,14 +609,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #     for j in range(0, 4):
         #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                               # plot each variable from output vector
         #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                              # set label of y-axis
-        #         ax2[i,0].set_xticklabels([])                                                                 # remove values on x-axis
-        #         ax2[i,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
+        #         if j != 3:
+        #             ax2[j,0].set_xticklabels([])                                                             # remove values on x-axis
+        #         ax2[j,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
         #         ax2[j,0].minorticks_on()                                                                     # set minor ticks
         #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                  # customise major grid
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                   # customise minor grid
         #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                        # set legend for subplot
         #     ax2[3,0].set_xlabel('$t$ [s]')                                                                   # set label of x-axis
-        #     ax2[3,0].set_xlim(0, tstep)                                                                      # set xmin at 0 and tstop
         #     fig2.tight_layout(pad=1.0)                                                                       # increase spacing between subplots
         #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')   # save figure
         #     i += 1
@@ -710,7 +714,10 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         Etilde = (-1*Cnb*CL*Clr + Cnr*CL*Clb)
 
+        R = Btilde * Ctilde * Dtilde - Atilde * Dtilde**2 - Btilde**2 * Etilde
+
         evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
+
 
         if dataset == 0:
             for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
@@ -853,14 +860,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         #     for j in range(0, 4):
         #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                              # plot each variable from output vector
         #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                             # set label of y-axis
-        #         ax2[i,0].set_xticklabels([])                                                                 # remove values on x-axis
-        #         ax2[i,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
+        #         if j != 3:
+        #             ax2[j,0].set_xticklabels([])                                                            # remove values on x-axis
+        #         ax2[j,0].set_xlim(0, tstep)                                                                 # set xmin at 0 and tstop
         #         ax2[j,0].minorticks_on()                                                                    # set minor ticks
         #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                 # customise major grid
         #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                  # customise minor grid
         #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                       # set legend for subplot
-        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                   # set label of x-axis
-        #     ax2[3,0].set_xlim(0, tstep)                                                                      # set xmin at 0 and tstop
+        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                  # set label of x-axis
         #     fig2.tight_layout(pad=1.0)                                                                      # increase spacing between subplots
         #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')       # save figure
         #     i += 1
