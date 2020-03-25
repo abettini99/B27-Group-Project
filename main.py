@@ -355,19 +355,6 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     Cndr   =  -0.0939
 
     # ==============================================================================================
-    # Model fitting - tweaking of stability parameters
-    # ==============================================================================================
-    # CXu     = CXu * 1.1
-    # CZu     = CZu * 1.6
-    # CZa     = CZa * 0.9
-    # Cmq     = Cmq * 0.8
-    # Cnb     = Cnb * 0.76
-    # Clb     = Clb * 1.1
-    # Clp     = Clp * 1.45
-    # Cnb     = Cnb * 2.0
-    # Cnr     = Cnr * 0.79
-
-    # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['phugoid', 'shortperiod']:
@@ -717,7 +704,6 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         R = Btilde * Ctilde * Dtilde - Atilde * Dtilde**2 - Btilde**2 * Etilde
 
         evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
-
 
         if dataset == 0:
             for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
