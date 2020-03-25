@@ -3,6 +3,8 @@ Institution:    Delft University of Technology
 Authors:        Sebastian Widmann
 Date:           06-03-2020
 Dynamic Analysis of Cessna Citation II
+
+This script is a partial copy of the main.py file, modified to iterate on the model fitting by changing the stability coefficients
 """
 
 # ==============================================================================================
@@ -181,12 +183,8 @@ dataset = 0                                                             # set 0 
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
-    f       = open('flighttest_eigenvalues.txt', 'w+')                  # create .txt-file where EV's are written
-    f       = open('flighttest_eigenvalues_analytical.txt', 'w+')       # create .txt-file where analytical EV's are written
 elif dataset == 1:
     rawdata = importdata('referencedata.mat')                           # import reference data from matlab file
-    f       = open('refdata_eigenvalues.txt', 'w+')                     # create .txt-file where EV's are written
-    f       = open('refdata_eigenvalues_analytical.txt', 'w+')          # create .txt-file where analytical EV's are written
 else:
     print('Incorrect integer set.')                                     # output incorrect user input
     print('0: data set of flight test')                                 # print possible options for dataset
@@ -242,6 +240,16 @@ matplotlib.rcParams['lines.linewidth']  = 1.5
 matplotlib.rcParams['figure.facecolor'] = 'white'
 matplotlib.rcParams['axes.facecolor']   = 'white'
 matplotlib.rcParams["legend.fancybox"]  = False
+
+# ==============================================================================================
+# Import data of numerical model without model fitting
+# ==============================================================================================
+phugoid        = pd.read_csv('eigenmotions/flighttest_phugoidNM.csv', delimiter=',')        # import original numerical model data for phugoid
+shortperiod    = pd.read_csv('eigenmotions/flighttest_shortperiodNM.csv', delimiter=',')    # import original numerical model data for short period oscillation
+aperiodicroll  = pd.read_csv('eigenmotions/flighttest_aperiodicrollNM.csv', delimiter=',')  # import original numerical model data for aperiodic roll
+dutchroll      = pd.read_csv('eigenmotions/flighttest_dutchrollNM.csv', delimiter=',')      # import original numerical model data for dutch roll
+dutchrollYD    = pd.read_csv('eigenmotions/flighttest_dutchrollYDNM.csv', delimiter=',')    # import original numerical model data for dutch roll with yaw damper
+spiral         = pd.read_csv('eigenmotions/flighttest_spiralNM.csv', delimiter=',')         # import original numerical model data for spiral
 
 # ==============================================================================================
 # Eigenmotion analysis
@@ -355,6 +363,21 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     Cndr   =  -0.0939
 
     # ==============================================================================================
+    # Model fitting - tweaking of stability parameters
+    # ==============================================================================================
+    CXu     = CXu * 1.1                                                     # model fitting for symmetric motion
+    CZu     = CZu * 1.6                                                     # model fitting for symmetric motion
+    Cmq     = Cmq * 0.8                                                     # model fitting for symmetric motion
+    CZa     = CZa * 0.9                                                     # model fitting for symmetric motion
+
+    Clb     = Clb * 1.4                                                     # model fitting for asymmetric motion
+    Clp     = Clp * 1.4                                                     # model fitting for asymmetric motion
+
+    Cnb     = Cnb * 0.77                                                    # model fitting for asymmetric motion
+    Cnr     = Cnr * 1.00                                                    # model fitting for asymmetric motion
+    Cndr    = Cndr * 1.5                                                    # model fitting for asymmetric motion
+
+    # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
     if motion in ['phugoid', 'shortperiod']:
@@ -411,53 +434,9 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         D = np.zeros((4,2))                                                                                 # no input outputted from state-space matrix
 
         # ==============================================================================================
-        # Export symmetric and asymmetric matrix to .txt-file
-        # ==============================================================================================
-        if dataset == 0:
-            np.savetxt('matrices/symmetric_{}.txt'.format(motion), A_s, delimiter=',')                          # save symmetric matrix to file
-
-        # ==============================================================================================
-        # Calculate analytical eigenvalues
-        # ==============================================================================================
-        Atilde = -1 * (2 * muc) * (CZadot - 2 * muc) * (2 * muc * KY2)
-
-        Btilde = ( CXu * (CZadot - 2 * muc) * 2 * muc * KY2 - 2 * muc * CZa * 2 * muc * KY2 \
-            + 2 * muc * (CZadot - 2 * muc) * Cmq - (CZq + 2 * muc) * Cmadot * 2 * muc )
-
-        Ctilde = ( CXu * CZa * (2 * muc * KY2) - CXu * (CZadot - 2 * muc) * Cmq + 2 * muc * CZa * Cmq \
-            - CZu * Cmadot * CXq + CXq * (CZadot - 2 * muc) * Cmu - (CZq + 2 * muc) * Cma * 2 * muc \
-            + (CZq + 2 * muc) * Cmadot * CXu - 2 * muc * KY2 * CXa * CZu+ CX0 * Cmadot * 2 * muc)
-
-        Dtilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) + CXq * CZa * Cmu \
-            + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu - CZu * Cmadot * CZ0 + CZ0 * (CZadot - 2 * muc) * Cmu \
-            + CX0 * Cma * 2 * muc - CX0 * Cmadot * CXu )
-
-        Etilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
-
-        evals_symmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / c
-
-        if dataset == 0:
-            for i in range(0, len(evals_symmetric)):                                                        # write eigenvalues to textfile
-                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
-                f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))     # write eigenvalues
-        elif dataset == 1:
-            for i in range(0, len(evals_symmetric)):                                                        # write eigenvalues to textfile
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
-                f.write("{} {}, lambda{}: {} \n".format('symmetric',motion, (i+1), evals_symmetric[i]))     # write eigenvalues
-
-        # ==============================================================================================
         # Calculate state space system for each eigenmotion
         # ==============================================================================================
         syss = ctl.StateSpace(A_s, B_s, C, D)                                                               # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_s)                                                                             # compute eigenvalues and eigenvectors
-
-        for i in range(0, len(evals)):                                                                      # write eigenvalues to textfile
-            if dataset == 0:
-                f = open('flighttest_eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                              # write eigenvalues
-            elif dataset == 1:
-                f = open('refdata_eigenvalues.txt', 'a+')                                                   # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                              # write eigenvalues
 
         tstop = data.time.iloc[-1] - data.time.iloc[0]                                                      # normalise final time value for manouvre
         dt  = np.arange(0, tstop + 0.1, 0.1)                                                                # create time vector with 0.1s step size
@@ -487,32 +466,17 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         eigenmotion = pd.concat(eigenmotion, axis=1)                                                        # concatenate list into panda dataframe along axis 1
 
         # ==============================================================================================
-        # Calculate initial response for eigenmotion with disturbance input
-        # ==============================================================================================
-        outputnames = ['VTAS', 'alpha', 'theta', 'q']                                                       # names for picture labelling
-        X0 = np.array([[5.0, 0, 0, 0],
-                       [0, 0.05, 0, 0],
-                       [0, 0, 0.5, 0],
-                       [0, 0, 0, 0.5]])                                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []                             # initialise empty lists
-        k = 0
-        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                                # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                                        # convert forced response to DataFrame
-            em.append(df3)                                                                                  # append DataFrame to individual list
-            k += 1
-
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-
-        # ==============================================================================================
         # Plot experimental data and numerical model for forced_response
         # ==============================================================================================
+        if motion == 'phugoid':
+            initdata = phugoid
+        elif motion == 'shortperiod':
+            initdata = shortperiod
+
         fig1, ax1 = plt.subplots(5,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,4):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i], 'C1', label='Num. Model')                               # plot each variable from output vector
+            ax1[i,0].plot(t, initdata.iloc[:,i], 'blue', linestyle='--', label='Num. Model')                # plot initial numerical results
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i], 'C1', label='Model Fitting')                            # plot each variable from output vector
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0 and tstop
@@ -533,80 +497,9 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1.tight_layout(pad=1.0)                                                                          # increase spacing between subplots
         if dataset == 0:
-            fig1.savefig('images/flighttest_{}.png'.format(motion), bbox_inches='tight')                            # save figure
-            eigenmotion.to_csv('eigenmotions/flighttest_{}NM.csv'.format(motion), encoding='utf-8', index=False)    # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
+            fig1.savefig('images_modelfitting/modelfit_flighttest_{}.png'.format(motion), bbox_inches='tight')      # save figure
         elif dataset == 1:
-            fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
-            # eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
-            # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
-
-        if motion == 'phugoid':
-            # ==============================================================================================
-            # Calculate analytical eigenvalues of phugoid motion
-            # ==============================================================================================
-            Atilde = ( 2 * muc * CZa * Cmq - (CZq + 2 * muc) * Cma * 2 * muc )
-
-            Btilde = ( -1 * CXu * CZa * Cmq - CZu * Cma * CXq - Cmu * CXa * (CZq + 2 * muc) \
-                 + CXq * CZa * Cmu + (CZq + 2 * muc) * Cma * CXu + Cmq * CXa * CZu \
-                 + CX0 * Cma * 2 * muc )
-
-            Ctilde = ( -1 * CZu * Cma * CZ0 + Cmu * CXa * CX0 + CZ0 * CZa * Cmu - CX0 * Cma * CXu )
-
-            evals_phugoid = np.roots([Atilde, Btilde, Ctilde]) * V0 / c
-
-            if dataset == 0:
-                for i in range(0, len(evals_phugoid)):                                                      # write eigenvalues to textfile
-                    f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
-                    f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))               # write eigenvalues
-            elif dataset == 1:
-                for i in range(0, len(evals_phugoid)):                                                          # write eigenvalues to textfile
-                    f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
-                    f.write("{}, lambda{}: {} \n".format('phugoid', (i+1), evals_phugoid[i]))                   # write eigenvalues
-
-        elif motion == 'shortperiod':
-            # ==============================================================================================
-            # Compute analytical eigenvalues for short period eigenmotion
-            # ==============================================================================================
-            Atilde = (CZadot - 2 * muc) * 2 * muc * KY2
-
-            Btilde = ( CZa * 2 * muc * KY2 - (CZadot - 2 * muc) * Cmq + (CZq + 2 * muc) * Cmadot )
-
-            Ctilde = ( -1 * CZa * Cmq - CX0 * Cmadot+ (CZq + 2 * muc) * Cma )
-
-            Dtilde = -1 * CX0 * Cma
-
-            evals_shortperiod = np.roots([Atilde, Btilde, Ctilde, Dtilde]) * V0 /  c
-
-            if dataset == 0:
-                for i in range(0, len(evals_shortperiod)):                                                  # write eigenvalues to textfile
-                    f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                 # append lines to existing .txt-file
-                    f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))       # write eigenvalues
-            elif dataset == 1:
-                for i in range(0, len(evals_shortperiod)):                                                  # write eigenvalues to textfile
-                    f = open('refdata_eigenvalues_analytical.txt', 'a+')                                    # append lines to existing .txt-file
-                    f.write("{}, lambda{}: {} \n".format('shortperiod', (i+1), evals_shortperiod[i]))       # write eigenvalues
-
-        # ==============================================================================================
-        # Plot numerical model for disturbance input of initial_response
-        # ==============================================================================================
-        # i = 0
-        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                    # initialise figure with 4 rows and 1 column
-        #     for j in range(0, 4):
-        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                               # plot each variable from output vector
-        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                              # set label of y-axis
-        #         if j != 3:
-        #             ax2[j,0].set_xticklabels([])                                                             # remove values on x-axis
-        #         ax2[j,0].set_xlim(0, tstep)                                                                  # set xmin at 0 and tstop
-        #         ax2[j,0].minorticks_on()                                                                     # set minor ticks
-        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                  # customise major grid
-        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                   # customise minor grid
-        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                        # set legend for subplot
-        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                   # set label of x-axis
-        #     fig2.tight_layout(pad=1.0)                                                                       # increase spacing between subplots
-        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')   # save figure
-        #     i += 1
+            fig1.savefig('images_modelfitting/modelfit_refdata_{}.png'.format(motion), bbox_inches='tight')         # save figure
 
         plt.cla()                                                                                           # clear the current axes
         plt.clf()                                                                                           # clear the current figure.
@@ -674,12 +567,6 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         D = np.zeros((4,2))                                                                                 # no input outputted from state-space matrix
 
         # ==============================================================================================
-        # Export symmetric and asymmetric matrix to .txt-file
-        # ==============================================================================================
-        if dataset == 0:
-            np.savetxt('matrices/asymmetric_{}.txt'.format(motion), A_a, delimiter=',')                         # save asymmetric matrix to file
-
-        # ==============================================================================================
         # Calculate analytical eigenvalues for each eigenmotion
         # ==============================================================================================
         Atilde = 0.5*( -(CYbdot - 2*mub)*4*mub*KX2*4*mub*KZ2 \
@@ -703,30 +590,14 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         R = Btilde * Ctilde * Dtilde - Atilde * Dtilde**2 - Btilde**2 * Etilde
 
-        evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
+        # print('asymmetric:', Atilde, Btilde, Ctilde, Dtilde, Etilde, R)                                     print out value of matrix E for dutch roll / spiral stability
 
-        if dataset == 0:
-            for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
-                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                     # append lines to existing .txt-file
-                f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
-        if dataset == 1:
-            for i in range(0, len(evals_asymmetric)):                                                       # write eigenvalues to textfile
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                        # append lines to existing .txt-file
-                f.write("{} {}, lambda{}: {} \n".format('asymmetric', motion, (i+1), evals_asymmetric[i]))  # write eigenvalues
+        evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
 
         # ==============================================================================================
         # Calculate state space system for each eigenmotion
         # ==============================================================================================
         sysa = ctl.StateSpace(A_a, B_a, C, D)                                                               # create state-space system for symmetric eigenmotions
-        evals, evecs = eig(A_a)                                                                             # compute eigenvalues and eigenvectors
-
-        for i in range(0, len(evals)):                                                                      # write eigenvalues to textfile
-            if dataset == 0:
-                f = open('flighttest_eigenvalues.txt', 'a+')                                                # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                              # write eigenvalues
-            elif dataset == 1:
-                f = open('refdata_eigenvalues.txt', 'a+')                                                   # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format(motion, (i+1), evals[i]))                              # write eigenvalues
 
         tstop = data.time.iloc[-1] - data.time.iloc[0]                                                      # normalise final time value for manouvre
         dt  = np.arange(0, tstop + 0.1, 0.1)                                                                # create time vector with 0.1s step size
@@ -746,7 +617,6 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         columns = [r'\beta', r'\phi', r'p', r'r']                                                           # names of invidiual columns for DataFrame
         eigenmotion = []                                                                                    # initialise empty list 1
-        eigenmotion2 = []                                                                                   # initialise empty list 2
 
         flightdata = pd.DataFrame({'time': data.time, \
                                    'Ahrs1_Roll': np.radians(data.Ahrs1_Roll), \
@@ -760,32 +630,21 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         u = np.negative(u)                                                                                  # [rad] flip input sign; input deflections seems to have wrong sign
 
         # ==============================================================================================
-        # Calculate initial response for eigenmotion with disturbance input
-        # ==============================================================================================
-        outputnames = ['beta', 'phi', 'p', 'r']                                                             # names for picture labelling
-        X0 = np.array([[0.1, 0, 0, 0],
-                       [0, 0.1, 0, 0],
-                       [0, 0, 0.5, 0],
-                       [0, 0, 0, 0.5]])                                                                     # initial conditions for symmetric flight
-        eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []                             # initialise empty lists
-        k = 0
-        for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(sysa, dt, X0[:,k])                                                # calculate initial response
-            df3    = pd.DataFrame(np.transpose(y2), columns=columns)                                        # convert forced response to DataFrame
-            em.append(df3)                                                                                  # append DataFrame to individual list
-            k += 1
-
-        eigenmotion1 = pd.concat(eigenmotion1, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion2 = pd.concat(eigenmotion2, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion3 = pd.concat(eigenmotion3, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-        eigenmotion4 = pd.concat(eigenmotion4, axis=1)                                                      # concatenate list into panda dataframe along axis 1
-
-        # ==============================================================================================
         # Plot experimental data and numerical model for forced_response
         # ==============================================================================================
+        if motion == 'aperiodicroll':
+            initdata = aperiodicroll
+        elif motion == 'dutchroll':
+            initdata = dutchroll
+        elif motion == 'dutchrollYD':
+            initdata = dutchrollYD
+        elif motion == 'spiral':
+            initdata = spiral
+
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,3):
-            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Num. Model')                             # plot each variable from output vector
+            ax1[i,0].plot(t, initdata.iloc[:,i+1], 'blue', linestyle='--', label='Num. Model')              # plot initial numerical results
+            ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Model Fitting')                          # plot each variable from output vector
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0
@@ -807,56 +666,9 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1.tight_layout(pad=1.0)                                                                          # increase spacing between subplots
         if dataset == 0:
-            fig1.savefig('images/flighttest_{}.png'.format(motion), bbox_inches='tight')                            # save figure
-            eigenmotion.to_csv('eigenmotions/flighttest_{}NM.csv'.format(motion), encoding='utf-8', index=False)    # write eigenmotion to csv-file
-            flightdata.to_csv('eigenmotions/flighttest_{}ED.csv'.format(motion), encoding='utf-8', index=False)     # write eigenmotion to csv-file
+            fig1.savefig('images_modelfitting/modelfit_flighttest_{}.png'.format(motion), bbox_inches='tight')                 # save figure
         elif dataset == 1:
-            fig1.savefig('images/refdata_{}.png'.format(motion), bbox_inches='tight')                               # save figure
-            # eigenmotion.to_csv('eigenmotions/refdata_{}NM.csv'.format(motion), encoding='utf-8', index=False)       # write eigenmotion to csv-file
-            # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
-
-        if motion == 'aperiodicroll':
-            evals_aperiodicroll = Clp / (4 * mub * KX2) * V0 / b
-
-            if dataset == 0:
-                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
-            elif dataset == 1:
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('aperiodicroll', 1, evals_aperiodicroll))                  # write eigenvalues
-
-        if motion == 'spiral':
-            evals_spiral = 2 * (Cnr * CL * Clb - Cnb * CL * Clr) / (CYb * Clp * Cnr + Clb * Cnp * \
-                            (CYr - 4 * mub) + Cnb * CYp * Clr - Clp * Cnb * (CYr - 4 * mub) \
-                            - Clr * Cnp * CYp - Cnr * CYp * Clb) * V0 / b
-
-            if dataset == 0:
-                f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
-            elif dataset == 1:
-                f = open('refdata_eigenvalues_analytical.txt', 'a+')                                            # append lines to existing .txt-file
-                f.write("{}, lambda{}: {} \n".format('spiral', 1, evals_spiral))                                # write eigenvalues
-
-        # ==============================================================================================
-        # Plot numerical model for disturbance input of initial_response
-        # ==============================================================================================
-        # i = 0
-        # for em2 in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-        #     fig2, ax2 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                   # initialise figure with 4 rows and 1 column
-        #     for j in range(0, 4):
-        #         ax2[j,0].plot(t, em2.iloc[:,j], 'C1', label='Numerical Model')                              # plot each variable from output vector
-        #         ax2[j,0].set_ylabel('${}$ {}'.format(em2.columns[j], units[j]))                             # set label of y-axis
-        #         if j != 3:
-        #             ax2[j,0].set_xticklabels([])                                                            # remove values on x-axis
-        #         ax2[j,0].set_xlim(0, tstep)                                                                 # set xmin at 0 and tstop
-        #         ax2[j,0].minorticks_on()                                                                    # set minor ticks
-        #         ax2[j,0].grid(which='major', linestyle='-', linewidth='0.5', color='black')                 # customise major grid
-        #         ax2[j,0].grid(which='minor', linestyle=':', linewidth='0.5', color='grey')                  # customise minor grid
-        #         ax2[j,0].legend(loc=0, framealpha=1.0).get_frame().set_edgecolor('k')                       # set legend for subplot
-        #     ax2[3,0].set_xlabel('$t$ [s]')                                                                  # set label of x-axis
-        #     fig2.tight_layout(pad=1.0)                                                                      # increase spacing between subplots
-        #     fig2.savefig('images_initial/{}Initial{}.png'.format(motion, outputnames[i]), bbox_inches='tight')       # save figure
-        #     i += 1
+            fig1.savefig('images_modelfitting/modelfit_refdata_{}.png'.format(motion), bbox_inches='tight')                    # save figure
 
         plt.cla()                                                                                           # clear the current axes
         plt.clf()                                                                                           # clear the current figure.
