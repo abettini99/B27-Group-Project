@@ -590,7 +590,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         R = Btilde * Ctilde * Dtilde - Atilde * Dtilde**2 - Btilde**2 * Etilde
 
-        print('asymmetric:', Atilde, Btilde, Ctilde, Dtilde, Etilde, R)
+        # print('asymmetric:', Atilde, Btilde, Ctilde, Dtilde, Etilde, R)                                     print out value of matrix E for dutch roll / spiral stability
 
         evals_asymmetric = np.roots([Atilde, Btilde, Ctilde, Dtilde, Etilde]) * V0 / b
 
