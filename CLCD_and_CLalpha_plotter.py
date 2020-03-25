@@ -125,6 +125,8 @@ def CLCD_plot_stationary(plot = 'True'):
     CD0 = popt[0]
     oswald = 1/ popt[1] / np.pi / AR
 
+
+    print('CD-CL ##################')
     print('a = ', popt[1])
     print('b or CD0 = ', CD0)
     print('oswald = ', oswald)
@@ -135,7 +137,6 @@ def CLCD_plot_stationary(plot = 'True'):
     max_error = max(np.abs(CD-CD_leastsq))
     L2_error = np.sqrt( np.sum((CD-CD_leastsq)**2))
     error = max_error / L2_error * 100
-    print('CD-CL')
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
@@ -214,6 +215,8 @@ def CLalpha_plot_stationary(plot='True'):
     CLalpha = popt[0]
     y_intercept = popt[1]
     aoa_least= np.linspace(np.min(AOA)-2, np.max(AOA)+0.1, 100)
+    
+    print('CD-alpha ################')
     print('a / CLalpha = ', CLalpha * 180 / np.pi)
     print('b = ', y_intercept)
 
@@ -222,7 +225,6 @@ def CLalpha_plot_stationary(plot='True'):
     max_error = max(np.abs(CL-CL_leastsq))
     L2_error = np.sqrt( np.sum((CL-CL_leastsq)**2))
     error = max_error / L2_error * 100
-    print('CD-alpha')
     print('max error = ', max_error)
     print('L2 error =', L2_error)
     print('error =', error, '%')
@@ -335,8 +337,8 @@ def CLalpha_plot_stationary(plot='True'):
 
 #     return 0
 
-CLCD_plot_stationary()
-CLalpha_plot_stationary()
+# CLCD_plot_stationary()
+# CLalpha_plot_stationary()
 # CL2CD_plot()
 
 # variables to be exported

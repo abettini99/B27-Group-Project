@@ -177,7 +177,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import flight test or reference data from matlab file
 # ==============================================================================================
-dataset = 0                                                             # set 0 for flight test data
+dataset = 1                                                             # set 0 for flight test data
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
@@ -823,7 +823,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
             # flightdata.to_csv('eigenmotions/refdata_{}ED.csv'.format(motion), encoding='utf-8', index=False)        # write eigenmotion to csv-file
 
         if motion == 'aperiodicroll':
-            evals_aperiodicroll = Clp / (4 * mub * KX2)
+            evals_aperiodicroll = Clp / (4 * mub * KX2) * V0 / b
 
             if dataset == 0:
                 f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
@@ -835,7 +835,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         if motion == 'spiral':
             evals_spiral = 2 * (Cnr * CL * Clb - Cnb * CL * Clr) / (CYb * Clp * Cnr + Clb * Cnp * \
                             (CYr - 4 * mub) + Cnb * CYp * Clr - Clp * Cnb * (CYr - 4 * mub) \
-                            - Clr * Cnp * CYp - Cnr * CYp * Clb)
+                            - Clr * Cnp * CYp - Cnr * CYp * Clb) * V0 / b
 
             if dataset == 0:
                 f = open('flighttest_eigenvalues_analytical.txt', 'a+')                                         # append lines to existing .txt-file
