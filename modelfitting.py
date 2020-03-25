@@ -475,8 +475,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1, ax1 = plt.subplots(5,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,4):
+            ax1[i,0].plot(t, initdata.iloc[:,i], 'blue', linestyle='--', label='Num. Model')                # plot initial numerical results
             ax1[i,0].plot(t, eigenmotion.iloc[:,i], 'C1', label='Model Fitting')                            # plot each variable from output vector
-            ax1[i,0].plot(t, initdata.iloc[:,i], 'C1', linestyle='--', label='Num. Model')                  # plot initial numerical results
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0 and tstop
@@ -643,8 +643,8 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
 
         fig1, ax1 = plt.subplots(4,1, squeeze=False, figsize=(16,16))                                       # initialise figure with 4 rows and 1 column
         for i in range(0,3):
+            ax1[i,0].plot(t, initdata.iloc[:,i+1], 'blue', linestyle='--', label='Num. Model')              # plot initial numerical results
             ax1[i,0].plot(t, eigenmotion.iloc[:,i+1], 'C1', label='Model Fitting')                          # plot each variable from output vector
-            ax1[i,0].plot(t, initdata.iloc[:,i+1], 'C1', linestyle='--', label='Num. Model')                # plot initial numerical results
             ax1[i,0].plot(t, flightdata.iloc[:,i+1], c='k', label='Exp. Data')                              # plot each variable from test flight data
             ax1[i,0].set_xticklabels([])                                                                    # remove values on x-axis
             ax1[i,0].set_xlim(0, tstep)                                                                     # set xmin at 0
