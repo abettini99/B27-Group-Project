@@ -15,10 +15,10 @@ dataphugoidNMnotime = pd.read_csv('flighttest_phugoidNM.csv', skiprows = 1, sep=
 dataphugoidED = pd.read_csv('flighttest_phugoidED.csv', skiprows = 1, sep=',', names= ['time','Dadc1_tas', 'vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate']) #time,Dadc1_tas,vane_AoA,Ahrs1_Pitch,Ahrs1_bPitchRate
 
 datashortperiodNMnotime = pd.read_csv('flighttest_shortperiodNM.csv', skiprows = 1, sep=',', names= ['dV_TAS','alpha','theta','q'])
-datashortperiodED = pd.read_csv('flighttest_shortperiodED.csv', skiprows = 1, sep=',', names= ['time', 'vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate'])
+datashortperiodED = pd.read_csv('flighttest_shortperiodED.csv', skiprows = 1, sep=',', names= ['time', 'Dadc1_tas', 'vane_AoA','Ahrs1_Pitch','Ahrs1_bPitchRate']) #time,Dadc1_tas,vane_AoA,Ahrs1_Pitch,Ahrs1_bPitchRate
 
 dataaperrollNMnotime = pd.read_csv('flighttest_aperiodicrollNM.csv ', skiprows = 1, sep=',', names= ['beta','phi','p','r'])
-dataaperrollED = pd.read_csv('flighttest_aperiodicrollED.csv ', skiprows = 1, sep=',', names= ['time', 'Ahrs1_Roll','Ahrs1_bRollRate','Ahrs1_bYawRate'])
+dataaperrollED = pd.read_csv('flighttest_aperiodicrollED.csv ', skiprows = 1, sep=',', names= ['time', 'Ahrs1_Roll','Ahrs1_bRollRate','Ahrs1_bYawRate']) 
 
 datadutchrollNMnotime = pd.read_csv('flighttest_dutchrollNM.csv ', skiprows = 1, sep=',', names= ['beta','phi','p','r'])
 datadutchrollED = pd.read_csv('flighttest_dutchrollED.csv ', skiprows = 1, sep=',', names= ['time', 'Ahrs1_Roll','Ahrs1_bRollRate','Ahrs1_bYawRate'])
@@ -45,14 +45,55 @@ datadutchrollYDNM = datadutchrollYDNMnotime.join(dutchrollYDtime)
 dataspiralNM = dataspiralNMnotime.join(spiraltime)
 
 
+
+
+dataphugoidNM.plot(x = 'time', y = 'dV_TAS')
+dataphugoidNM.plot(x = 'time', y = 'alpha')
+dataphugoidNM.plot(x = 'time', y = 'theta')
+dataphugoidNM.plot(x = 'time', y = 'q')
+
+dataphugoidED.plot(x = 'time', y = 'Dadc1_tas')
+dataphugoidED.plot(x = 'time', y = 'vane_AoA')
+dataphugoidED.plot(x = 'time', y = 'Ahrs1_Pitch')
+dataphugoidED.plot(x = 'time', y = 'Ahrs1_bPitchRate')
+
+
+datashortperiodNM.plot(x = 'time', y = 'dV_TAS')
+datashortperiodNM.plot(x = 'time', y = 'alpha')
+datashortperiodNM.plot(x = 'time', y = 'theta')
+datashortperiodNM.plot(x = 'time', y = 'q')
+
+datashortperiodED.plot(x = 'time', y = 'Dadc1_tas')
+datashortperiodED.plot(x = 'time', y = 'vane_AoA')
+datashortperiodED.plot(x = 'time', y = 'Ahrs1_Pitch')
+datashortperiodED.plot(x = 'time', y = 'Ahrs1_bPitchRate')
+
+
+dataaperrollNM.plot(x = 'time', y = 'beta')
+dataaperrollNM.plot(x = 'time', y = 'phi')
+dataaperrollNM.plot(x = 'time', y = 'p')
+dataaperrollNM.plot(x = 'time', y = 'r')
+
+dataaperrollNM.plot(x = 'time', y = 'Ahrs1_Roll')
+dataaperrollNM.plot(x = 'time', y = 'Ahrs1_bRollRate')
+dataaperrollNM.plot(x = 'time', y = '')
+dataaperrollNM.plot(x = 'time', y = 'r')
+
+
+
+
+
+
 #dataphugoidED.plot(x = 'time', y = #'Dadc1_tas')
 #dataphugoidNM.plot(x = 'time', y = 'theta')
 
 
 #theta and ....
 
-
 dataphugoidED.plot(x = 'time', y = 'Dadc1_tas')
+
+
+
 #dataphugoidNM.plot(x = 'time', y = 'dV_TAS')
 #
 #datadutchrollED.plot(x = 'time', y = 'Ahrs1_bRollRate')
@@ -68,7 +109,9 @@ dataphugoidED.plot(x = 'time', y = 'Dadc1_tas')
 #datadutchrollYDNM.plot(x = 'time', y = 'r')
 
 t = np.array(dataphugoidED['time'])[::50]
+y = dataphugoidED['Ahrs1_Pitch']
 
+plt.plot
 
 func = lambda t, lambda_Re1, lambda_Im1, lambda_Re2, lambda_Im2, a1, b1, a2, b2: np.exp(lambda_Re1 * t) * (a1*np.cos(lambda_Im1 * t) + b1*np.sin(lambda_Im1 * t)) + np.exp(lambda_Re2 * t) * (a2*np.cos(lambda_Im2 * t) + b2*np.sin(lambda_Im2 * t)) #+ np.exp(lambda_Re3 * t) * (a3*np.cos(lambda_Im3 * t) + b3*np.sin(lambda_Im3 * t)) + np.exp(lambda_Re4 * t) * (a4*np.cos(lambda_Im4 * t) + b4*np.sin(lambda_Im4 * t))
 
