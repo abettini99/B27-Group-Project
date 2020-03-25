@@ -427,7 +427,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # Export symmetric and asymmetric matrix to .txt-file
         # ==============================================================================================
         if dataset == 0:
-            np.savetxt('matrices/symmetric_{}'.format(motion), A_s, delimiter=',')                          # save symmetric matrix to file
+            np.savetxt('matrices/symmetric_{}.txt'.format(motion), A_s, delimiter=',')                          # save symmetric matrix to file
 
         # ==============================================================================================
         # Calculate analytical eigenvalues
@@ -690,7 +690,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         # Export symmetric and asymmetric matrix to .txt-file
         # ==============================================================================================
         if dataset == 0:
-            np.savetxt('matrices/asymmetric_{}'.format(motion), A_a, delimiter=',')                         # save asymmetric matrix to file
+            np.savetxt('matrices/asymmetric_{}.txt'.format(motion), A_a, delimiter=',')                         # save asymmetric matrix to file
 
         # ==============================================================================================
         # Calculate analytical eigenvalues for each eigenmotion
