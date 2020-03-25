@@ -177,7 +177,7 @@ def lbstokg(mass):
 # ==============================================================================================
 # Import flight test or reference data from matlab file
 # ==============================================================================================
-dataset = 1                                                             # set 0 for flight test data
+dataset = 0                                                             # set 0 for flight test data
                                                                         # set 1 for reference data
 if dataset == 0:
     rawdata = importdata('flightdata.mat')                              # import flight test data from matlab file
@@ -777,7 +777,7 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
         eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4 = [], [], [], []                             # initialise empty lists
         k = 0
         for em in (eigenmotion1, eigenmotion2, eigenmotion3, eigenmotion4):
-            t2, y2 = ctl.initial_response(syss, dt, X0[:,k])                                                # calculate initial response
+            t2, y2 = ctl.initial_response(sysa, dt, X0[:,k])                                                # calculate initial response
             df3    = pd.DataFrame(np.transpose(y2), columns=columns)                                        # convert forced response to DataFrame
             em.append(df3)                                                                                  # append DataFrame to individual list
             k += 1
