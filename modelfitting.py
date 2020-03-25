@@ -244,12 +244,12 @@ matplotlib.rcParams["legend.fancybox"]  = False
 # ==============================================================================================
 # Import data of numerical model without model fitting
 # ==============================================================================================
-phugoid        = pd.read_csv('eigenmotions/flighttest_phugoidNM.csv', delimiter=',')
-shortperiod    = pd.read_csv('eigenmotions/flighttest_shortperiodNM.csv', delimiter=',')
-aperiodicroll  = pd.read_csv('eigenmotions/flighttest_aperiodicrollNM.csv', delimiter=',')
-dutchroll      = pd.read_csv('eigenmotions/flighttest_dutchrollNM.csv', delimiter=',')
-dutchrollYD    = pd.read_csv('eigenmotions/flighttest_dutchrollYDNM.csv', delimiter=',')
-spiral         = pd.read_csv('eigenmotions/flighttest_spiralNM.csv', delimiter=',')
+phugoid        = pd.read_csv('eigenmotions/flighttest_phugoidNM.csv', delimiter=',')        # import original numerical model data for phugoid
+shortperiod    = pd.read_csv('eigenmotions/flighttest_shortperiodNM.csv', delimiter=',')    # import original numerical model data for short period oscillation
+aperiodicroll  = pd.read_csv('eigenmotions/flighttest_aperiodicrollNM.csv', delimiter=',')  # import original numerical model data for aperiodic roll
+dutchroll      = pd.read_csv('eigenmotions/flighttest_dutchrollNM.csv', delimiter=',')      # import original numerical model data for dutch roll
+dutchrollYD    = pd.read_csv('eigenmotions/flighttest_dutchrollYDNM.csv', delimiter=',')    # import original numerical model data for dutch roll with yaw damper
+spiral         = pd.read_csv('eigenmotions/flighttest_spiralNM.csv', delimiter=',')         # import original numerical model data for spiral
 
 # ==============================================================================================
 # Eigenmotion analysis
@@ -370,12 +370,13 @@ for motion in ['phugoid', 'shortperiod', 'aperiodicroll', 'dutchroll', 'dutchrol
     Cmq     = Cmq * 0.8                                                     # model fitting for symmetric motion
     CZa     = CZa * 0.9                                                     # model fitting for symmetric motion
 
-    Clb     = Clb * 1.4
-    Clp     = Clp * 1.4                                                    # model fitting for asymmetric motion
+    Clb     = Clb * 1.4                                                     # model fitting for asymmetric motion
+    Clp     = Clp * 1.4                                                     # model fitting for asymmetric motion
 
     Cnb     = Cnb * 0.77                                                    # model fitting for asymmetric motion
     Cnr     = Cnr * 1.00                                                    # model fitting for asymmetric motion
-    Cndr    = Cndr * 1.5
+    Cndr    = Cndr * 1.5                                                    # model fitting for asymmetric motion
+
     # ==============================================================================================
     # Calculates responses to symmetric eigenmotions from state-space system
     # ==============================================================================================
