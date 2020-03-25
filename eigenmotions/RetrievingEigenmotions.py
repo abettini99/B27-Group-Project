@@ -56,10 +56,10 @@ dataspiralNM = dataspiralNMnotime.join(spiraltime)
 #dataphugoidED.plot(x = 'time', y = 'Ahrs1_bPitchRate')
 #
 #
-datashortperiodNM.plot(x = 'time', y = 'dV_TAS')
-datashortperiodNM.plot(x = 'time', y = 'alpha')
-datashortperiodNM.plot(x = 'time', y = 'theta')
-datashortperiodNM.plot(x = 'time', y = 'q')
+#datashortperiodNM.plot(x = 'time', y = 'dV_TAS')
+#datashortperiodNM.plot(x = 'time', y = 'alpha')
+#datashortperiodNM.plot(x = 'time', y = 'theta')
+#datashortperiodNM.plot(x = 'time', y = 'q')
 #
 #datashortperiodED.plot(x = 'time', y = 'Dadc1_tas')
 #datashortperiodED.plot(x = 'time', y = 'vane_AoA')
@@ -346,6 +346,27 @@ y_spiralED = spiralEDphi[index_endsettime_spiralED]
 lambda_spiralED = np.log(y_spiralED / a_spiralED) / (endsettime_spiralED - beginsettime_spiralED)
 
 # =============================================================================
+
+def compare(eigs1, eigs2):
+    diff_list =[]
+    for i in range(len(eigs1)):
+        
+        realdiff = (eigs2[i][0]-eigs1[i][0])*100/eigs1[i][0]
+        if eigs1[i][1] != 0:
+            imagdiff = (eigs2[i][1]-eigs1[i][1])*100/eigs1[i][1]
+        else: 
+            imagdiff = 0
+        
+        tup = (realdiff, imagdiff)
+        diff_list.append(tup)
+    
+    return diff_list
+
+eigsED = [(lambda_shortperiodED, 0),    (lambda_Re_phugoidED,lambda_Im_phugoidED),    (lambda_aperrollED, 0),   (lambda_Re_dutchrollED,lambda_Im_dutchrollED),   (lambda_Re_dutchrollYDED, lambda_Im_dutchrollYDED),     (lambda_spiralED,0) ]
+
+eigsNM = [(lambda_shortperiodNM, 0),    (lambda_Re_phugoidNM,lambda_Im_phugoidNM),    (lambda_aperrollNM, 0),   (lambda_Re_dutchrollNM, lambda_Im_dutchrollNM),   (lambda_Re_dutchrollYDNM, lambda_Im_dutchrollYDNM),   (lambda_spiralNM, 0)]
+
+
 # t = np.array(dataphugoidED['time'])[::50]
 # y = dataphugoidED['Ahrs1_Pitch']
 # 
